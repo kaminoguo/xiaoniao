@@ -1,0 +1,44 @@
+# 二进制文件
+xiaoniao
+xiaoniao_test
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 测试文件
+*.test
+*.out
+
+# Go缓存
+vendor/
+
+# 编辑器文件
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.log
+*.pid
+
+# 构建目录
+build/
+dist/
+bin/
+node_modules/
+frontend/dist/
+
+# 调试文件
+debug
+debug.test
+*.prof
+*.pprof
