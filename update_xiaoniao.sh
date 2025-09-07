@@ -1,7 +1,7 @@
 #!/bin/bash
 # 自动编译和更新 xiaoniao 到所有位置
 
-cd /home/lyrica/pixel-translator
+cd /home/lyrica/xiaoniao
 
 # 编译
 echo "正在编译..."

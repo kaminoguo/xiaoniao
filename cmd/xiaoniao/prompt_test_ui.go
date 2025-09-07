@@ -6,8 +6,8 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"pixel-translator/internal/i18n"
-	"pixel-translator/internal/translator"
+	"github.com/kaminoguo/xiaoniao/internal/i18n"
+	"github.com/kaminoguo/xiaoniao/internal/translator"
 )
 
 // Prompt测试界面扩展

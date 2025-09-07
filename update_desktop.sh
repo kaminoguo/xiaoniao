@@ -25,18 +25,18 @@ Comment[en]=Smart clipboard translator
 Comment[zh_CN]=智能剪贴板翻译工具
 GenericName=Translation Tool
 GenericName[zh_CN]=翻译工具
-Exec=/home/lyrica/pixel-translator/xiaoniao-launcher.sh
-Icon=/home/lyrica/pixel-translator/assets/icon.png
+Exec=/home/lyrica/xiaoniao/xiaoniao-launcher.sh
+Icon=/home/lyrica/xiaoniao/assets/icon.png
 Terminal=false
 Categories=Utility;Translation;Office;
 Keywords=translate;translation;clipboard;xiaoniao;
 StartupNotify=false
 StartupWMClass=xiaoniao
-Path=/home/lyrica/pixel-translator
+Path=/home/lyrica/xiaoniao
 EOF
 
 # 更新启动脚本，确保使用最新的二进制文件
-cat > /home/lyrica/pixel-translator/xiaoniao-launcher.sh << 'EOF'
+cat > /home/lyrica/xiaoniao/xiaoniao-launcher.sh << 'EOF'
 #!/bin/bash
 # Launch xiaoniao run in background without terminal
 
@@ -63,7 +63,7 @@ nohup ./xiaoniao run >> /tmp/xiaoniao.log 2>&1 &
 # User can control terminal visibility through the tray menu
 EOF
 
-chmod +x /home/lyrica/pixel-translator/xiaoniao-launcher.sh
+chmod +x /home/lyrica/xiaoniao/xiaoniao-launcher.sh
 
 # 刷新桌面数据库
 update-desktop-database ~/.local/share/applications/ 2>/dev/null
@@ -72,5 +72,5 @@ echo "更新完成！"
 echo ""
 echo "你可以："
 echo "1. 从应用程序菜单中启动 xiaoniao"
-echo "2. 或运行: /home/lyrica/pixel-translator/xiaoniao-launcher.sh"
+echo "2. 或运行: /home/lyrica/xiaoniao/xiaoniao-launcher.sh"
 echo "3. 或直接运行: ./xiaoniao run"

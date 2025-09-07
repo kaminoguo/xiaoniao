@@ -7,8 +7,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"pixel-translator/internal/i18n"
-	"pixel-translator/internal/translator"
+	"github.com/kaminoguo/xiaoniao/internal/i18n"
+	"github.com/kaminoguo/xiaoniao/internal/translator"
 )
 
 // 使用主文件中的screen常量，这些只是作为参考

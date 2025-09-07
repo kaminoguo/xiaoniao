@@ -8,7 +8,7 @@ import (
 	"runtime"
 
 	"github.com/getlantern/systray"
-	"pixel-translator/internal/i18n"
+	"github.com/kaminoguo/xiaoniao/internal/i18n"
 )
 
 // Status represents the tray icon status

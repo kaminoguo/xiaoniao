@@ -61,13 +61,15 @@
 
 ## 📦 安装
 
-### 快速安装（推荐）
+### Linux 安装
+
+#### 快速安装（推荐）
 ```bash
 # 下载并安装
-curl -sSL https://github.com/yourusername/pixel-translator/releases/latest/download/install.sh | bash
+curl -sSL https://github.com/kaminoguo/xiaoniao/releases/latest/download/install.sh | bash
 
 # 或者手动下载二进制文件
-wget https://github.com/yourusername/pixel-translator/releases/latest/download/xiaoniao-linux-amd64
+wget https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-linux-amd64
 chmod +x xiaoniao-linux-amd64
 sudo mv xiaoniao-linux-amd64 /usr/local/bin/xiaoniao
 ```
@@ -75,15 +77,39 @@ sudo mv xiaoniao-linux-amd64 /usr/local/bin/xiaoniao
 ### 从源码构建
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/pixel-translator.git
-cd pixel-translator
+git clone https://github.com/kaminoguo/xiaoniao.git
+cd xiaoniao
 
 # 构建小鸟翻译CLI（优化大小）
 go build -ldflags="-s -w" -o xiaoniao ./cmd/xiaoniao
 sudo mv xiaoniao /usr/local/bin/
 
-# 构建GUI版本（需要Wails）
-wails build
+# 构建 Windows 版本
+GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
+```
+
+### Windows 安装
+
+#### 便携版（推荐）
+```powershell
+# 下载压缩包
+Invoke-WebRequest -Uri "https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-windows-amd64.zip" -OutFile "xiaoniao.zip"
+
+# 解压到目标目录
+Expand-Archive -Path "xiaoniao.zip" -DestinationPath "C:\Program Files\xiaoniao"
+
+# 运行程序（需要 Windows Terminal 或支持 ANSI 的终端）
+C:\Program Files\xiaoniao\xiaoniao.exe config
+```
+
+#### 从源码构建
+```powershell
+# 克隆仓库
+git clone https://github.com/kaminoguo/xiaoniao.git
+cd xiaoniao
+
+# 构建 Windows 版本
+go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
 ```
 
 ## 🚀 快速开始
@@ -189,7 +215,7 @@ xiaoniao run   # 启动剪贴板监控（带托盘和快捷键）
 ## 📁 项目结构
 
 ```
-pixel-translator/
+xiaoniao/
 ├── README.md                    # 项目文档
 ├── LICENSE                      # GPL-3.0 开源协议
 ├── go.mod                       # Go依赖管理
@@ -315,8 +341,13 @@ pixel-translator/
    - 尝试手动输入模型名称
 
 3. **剪贴板监控不工作**
-   - 确保有剪贴板访问权限
-   - 某些Wayland环境可能需要额外配置
+   - Linux: 确保有剪贴板访问权限，某些Wayland环境可能需要额外配置
+   - Windows: 确保程序有剪贴板访问权限，杀毒软件可能会阻止
+
+4. **Windows终端显示问题**
+   - 推荐使用 Windows Terminal 或支持 ANSI 的终端
+   - PowerShell 7+ 或 Windows Terminal 能提供最佳体验
+   - 避免使用传统的 cmd.exe
 
 ## 🤝 贡献
 
@@ -329,6 +360,19 @@ pixel-translator/
 5. 提交 Pull Request
 
 ## 📝 更新日志
+
+### v1.5.0 (2025-09-07)
+- 🚀 **跨平台支持**
+  - Windows平台完整支持（Windows 10/11）
+  - Windows剪贴板API实现
+  - Windows系统托盘和热键
+  - 配置路径自动适配（Linux: ~/.config，Windows: %APPDATA%）
+  
+- 🔧 **项目重构**
+  - 项目重命名：pixel-translator → xiaoniao
+  - 模块路径更新为 github.com/kaminoguo/xiaoniao
+  - 使用构建标签(build tags)分离平台特定代码
+  - 单一代码库支持多平台，约80%代码共享
 
 ### v1.4 (2025-09-05)
 - 🔧 **架构优化**

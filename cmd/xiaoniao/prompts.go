@@ -1,7 +1,7 @@
 package main
 
 import (
-	"pixel-translator/internal/translator"
+	"github.com/kaminoguo/xiaoniao/internal/translator"
 )
 
 // Prompt 本地Prompt结构（用于UI显示）

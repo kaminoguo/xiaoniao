@@ -1,4 +1,4 @@
-module pixel-translator
+module github.com/kaminoguo/xiaoniao
 
 go 1.23.0
 

@@ -1,11 +1,11 @@
 # 项目结构说明 (Project Structure)
 
-最后更新: 2025-09-06 | 版本: v1.4.1
+最后更新: 2025-09-07 | 版本: v1.5.0 | GitHub: https://github.com/kaminoguo/xiaoniao
 
 ## 目录树 (Directory Tree)
 
 ```
-pixel-translator/                # 项目根目录 (CLI-Only)
+xiaoniao/                        # 项目根目录 (跨平台CLI)
 ├── README.md                    # 项目主文档 [核心]
 ├── PROJECT_STRUCTURE.md        # 项目结构说明（本文件）[核心]
 ├── PROMPT_SYSTEM.md            # Prompt系统说明 [核心]
@@ -46,20 +46,26 @@ pixel-translator/                # 项目根目录 (CLI-Only)
 │   │
 │   ├── clipboard/              # 剪贴板管理模块 [核心]
 │   │   ├── monitor.go         # 剪贴板监控器（含循环防护）[核心]
-│   │   └── clipboard_linux.go # Linux特定实现（X11/Wayland）[核心]
+│   │   ├── clipboard_linux.go # Linux特定实现（X11/Wayland）[核心]
+│   │   └── clipboard_windows.go # Windows特定实现（Windows API）[核心]
 │   │
 │   ├── hotkey/                 # 全局快捷键 [核心]
-│   │   └── hotkey.go          # 快捷键实现（golang.design/x/hotkey）[核心]
+│   │   ├── hotkey.go          # Linux快捷键实现（golang.design/x/hotkey）[核心]
+│   │   └── hotkey_windows.go  # Windows快捷键实现 [核心]
 │   │
 │   ├── tray/                   # 系统托盘 [核心]
-│   │   └── tray.go            # 托盘实现（使用getlantern/systray）[核心]
+│   │   ├── tray.go            # 托盘通用实现（使用getlantern/systray）[核心]
+│   │   └── tray_windows.go   # Windows托盘特定功能 [核心]
 │   │
 │   ├── sound/                  # 声音提示 [核心]
-│   │   ├── sound.go           # 跨平台音效播放 [核心]
+│   │   ├── sound.go           # Linux音效播放 [核心]
+│   │   ├── sound_windows.go   # Windows音效播放 [核心]
 │   │   └── assets/            # 音效资源文件 [核心]
 │   │
 │   └── config/                 # 配置管理模块 [核心]
-│       └── themes.go          # 主题配置 [核心]
+│       ├── themes.go          # 主题配置 [核心]
+│       ├── config_linux.go    # Linux配置路径 (~/.config/xiaoniao) [核心]
+│       └── config_windows.go  # Windows配置路径 (%APPDATA%\xiaoniao) [核心]
 │
 ├── assets/                      # 资源文件 [核心]
 │   └── icon.png               # 应用图标 [核心]
@@ -211,6 +217,20 @@ GOOS=darwin GOARCH=amd64 go build -o xiaoniao-macos cmd/xiaoniao/*.go
 
 ## 版本历史
 
+### v1.5.0 (2025-09-07) - 跨平台支持
+- 🚀 **Windows平台支持**
+  - 添加Windows剪贴板API实现
+  - Windows系统托盘支持
+  - Windows热键注册
+  - 配置路径自动适配（%APPDATA%）
+- 🔧 **项目重构**
+  - 项目重命名：pixel-translator → xiaoniao
+  - 模块路径更新为 github.com/kaminoguo/xiaoniao
+  - 使用构建标签分离平台特定代码
+- 📝 **文档更新**
+  - 更新项目结构说明
+  - 添加跨平台构建说明
+
 ### v1.4.1 (2025-09-06) - 完整国际化
 - 🌍 **国际化完善**
   - 支持9种语言界面（350+翻译字段）
@@ -354,13 +374,14 @@ GPL-3.0 License - 详见 [LICENSE](LICENSE) 文件
 
 ## 当前状态
 
-- **版本**: v1.4
-- **源码大小**: ~370KB
-- **支持平台**: Linux (X11/Wayland)
+- **版本**: v1.5.0
+- **源码大小**: ~400KB
+- **支持平台**: Linux (X11/Wayland), Windows 10/11
 - **依赖管理**: Go Modules
 - **最小Go版本**: 1.21+
+- **跨平台**: 使用构建标签(build tags)分离平台代码
 
 ---
 
-更新日期: 2025-09-05
+更新日期: 2025-09-07
 作者: Lyrica

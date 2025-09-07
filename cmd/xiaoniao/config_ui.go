@@ -13,8 +13,8 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"pixel-translator/internal/i18n"
-	"pixel-translator/internal/translator"
+	"github.com/kaminoguo/xiaoniao/internal/i18n"
+	"github.com/kaminoguo/xiaoniao/internal/translator"
 )
 
 // 版本号定义
@@ -1753,8 +1753,8 @@ func (m configModel) viewAboutScreen() string {
 	s += successStyle.Render("xiaoniao " + APP_VERSION) + "\n\n"
 	
 	s += normalStyle.Render(t.Author + "：") + mutedStyle.Render("梨梨果") + "\n"
-	s += normalStyle.Render(t.License + "：") + mutedStyle.Render("MIT License") + "\n"
-	s += normalStyle.Render(t.ProjectUrl + "：") + mutedStyle.Render(t.ComingSoon) + "\n\n"
+	s += normalStyle.Render(t.License + "：") + mutedStyle.Render("GPL-3.0 License") + "\n"
+	s += normalStyle.Render(t.ProjectUrl + "：") + mutedStyle.Render("https://github.com/kaminoguo/xiaoniao") + "\n\n"
 	
 	s += warningStyle.Render(t.SupportAuthor) + "\n"
 	s += mutedStyle.Render(t.PriceNote) + "\n"

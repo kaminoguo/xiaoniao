@@ -5,18 +5,17 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/signal"
 	"path/filepath"
-	"pixel-translator/internal/clipboard"
-	"pixel-translator/internal/hotkey"
-	"pixel-translator/internal/i18n"
-	"pixel-translator/internal/tray"
-	"pixel-translator/internal/translator"
 	"runtime"
 	"strconv"
 	"syscall"
 	"time"
 	
+	"github.com/kaminoguo/xiaoniao/internal/clipboard"
+	"github.com/kaminoguo/xiaoniao/internal/hotkey"
+	"github.com/kaminoguo/xiaoniao/internal/i18n"
+	"github.com/kaminoguo/xiaoniao/internal/tray"
+	"github.com/kaminoguo/xiaoniao/internal/translator"
 	"golang.design/x/hotkey/mainthread"
 )
 
@@ -507,16 +506,12 @@ func runDaemonInternal() {
 	// 在goroutine中处理信号
 	go func() {
 		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, 
-			syscall.SIGINT,   // Ctrl+C
-			syscall.SIGTERM,  // 终止信号
-			syscall.SIGUSR1,  // 切换监控
-			syscall.SIGUSR2,  // 切换Prompt
-		)
+		setupSignalHandlers(sigChan)
 		
 		for sig := range sigChan {
-			switch sig {
-			case syscall.SIGUSR1:
+			action := handleSignal(sig)
+			switch action {
+			case "toggle_monitor":
 				// 切换监控状态
 				if monitoring {
 					monitor.Stop()
@@ -530,7 +525,7 @@ func runDaemonInternal() {
 					monitoring = true
 				}
 				
-			case syscall.SIGUSR2:
+			case "toggle_prompt":
 				// 切换到下一个Prompt
 				prompts := loadAllPrompts()
 				if len(prompts) > 0 {
@@ -552,7 +547,7 @@ func runDaemonInternal() {
 					// 只在终端显示，不弹窗
 				}
 				
-			case syscall.SIGINT, syscall.SIGTERM:
+			case "exit":
 				// 退出程序
 				monitor.Stop()
 				trayManager.Quit()
