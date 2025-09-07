@@ -3,8 +3,8 @@
 
 set -e
 
-echo "🐦 xiaoniao 一键卸载"
-echo "===================="
+echo "xiaoniao Uninstall Script"
+echo "========================"
 
 # 检测桌面环境
 detect_desktop_environment() {
@@ -48,16 +48,19 @@ detect_desktop_environment() {
 detect_system_language() {
     local lang="${LANG:-en_US}"
     case "${lang:0:2}" in
-        zh) echo "中文" ;;
+        zh)
+            if [[ "$lang" == *"TW"* ]] || [[ "$lang" == *"HK"* ]]; then
+                echo "繁體中文"
+            else
+                echo "简体中文"
+            fi
+            ;;
         en) echo "English" ;;
         ja) echo "日本語" ;;
         ko) echo "한국어" ;;
         es) echo "Español" ;;
         fr) echo "Français" ;;
-        de) echo "Deutsch" ;;
-        ru) echo "Русский" ;;
-        ar) echo "العربية" ;;
-        *) echo "English" ;;
+        *) echo "English" ;;  # Default to English for unsupported languages
     esac
 }
 
@@ -65,69 +68,69 @@ DESKTOP_ENV=$(detect_desktop_environment)
 SYSTEM_LANG=$(detect_system_language)
 
 echo ""
-echo "📊 系统信息："
-echo "  • 系统语言: $SYSTEM_LANG"
-echo "  • 桌面环境: $DESKTOP_ENV"
+echo "System Information:"
+echo "  Language: $SYSTEM_LANG"
+echo "  Desktop: $DESKTOP_ENV"
 echo ""
 
 # 检查是否安装
 if ! command -v xiaoniao &> /dev/null; then
-    echo "⚠️  xiaoniao 未安装"
+    echo "xiaoniao is not installed"
     exit 0
 fi
 
 # 显示当前版本
-echo "当前版本: $(xiaoniao --version 2>/dev/null || echo '未知')"
+echo "Current version: $(xiaoniao --version 2>/dev/null || echo 'unknown')"
 echo ""
 
 # 确认卸载
-echo "⚠️  即将卸载以下内容:"
-echo "  • 程序文件: /usr/local/bin/xiaoniao"
+echo "Will uninstall the following:"
+echo "  Program file: /usr/local/bin/xiaoniao"
 if [ -d ~/.config/xiaoniao ]; then
-    echo "  • 配置文件: ~/.config/xiaoniao/"
+    echo "  Configuration: ~/.config/xiaoniao/"
 fi
 if [ -f ~/.local/share/applications/xiaoniao.desktop ]; then
-    echo "  • 应用快捷方式: ~/.local/share/applications/xiaoniao.desktop"
+    echo "  Application shortcut: ~/.local/share/applications/xiaoniao.desktop"
 fi
 if [ -f ~/Desktop/xiaoniao.desktop ]; then
-    echo "  • 桌面快捷方式: ~/Desktop/xiaoniao.desktop"
+    echo "  Desktop shortcut: ~/Desktop/xiaoniao.desktop"
 fi
 if [ -f ~/桌面/xiaoniao.desktop ]; then
-    echo "  • 桌面快捷方式: ~/桌面/xiaoniao.desktop"
+    echo "  Desktop shortcut: ~/桌面/xiaoniao.desktop"
 fi
 
 echo ""
-read -p "确认卸载？(y/N): " -n 1 -r
+read -p "Confirm uninstall? (y/N): " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "已取消"
+    echo "Cancelled"
     exit 0
 fi
 
 # 停止运行中的进程
 echo ""
-echo "🛑 停止运行中的进程..."
+echo "Stopping running processes..."
 if pgrep -x "xiaoniao" > /dev/null; then
     pkill -x "xiaoniao" || true
-    echo "  ✓ 已停止 xiaoniao 进程"
+    echo "  Stopped xiaoniao process"
     sleep 1
 else
-    echo "  • 没有运行中的进程"
+    echo "  No running processes"
 fi
 
 # 删除程序文件
-echo "🗑️ 删除程序文件..."
+echo "Removing program files..."
 if [ -f /usr/local/bin/xiaoniao ]; then
     sudo rm -f /usr/local/bin/xiaoniao
-    echo "  ✓ 已删除程序文件"
+    echo "  Program file removed"
 fi
 
 # 删除快捷方式
-echo "🗑️ 删除快捷方式..."
+echo "Removing shortcuts..."
 rm -f ~/.local/share/applications/xiaoniao.desktop 2>/dev/null || true
 rm -f ~/Desktop/xiaoniao.desktop 2>/dev/null || true
 rm -f ~/桌面/xiaoniao.desktop 2>/dev/null || true
-echo "  ✓ 已删除快捷方式"
+echo "  Shortcuts removed"
 
 # 根据桌面环境执行额外清理
 case "$DESKTOP_ENV" in
@@ -144,19 +147,19 @@ esac
 # 询问是否删除配置文件
 if [ -d ~/.config/xiaoniao ]; then
     echo ""
-    read -p "是否删除配置文件？(y/N): " -n 1 -r
+    read -p "Remove configuration files? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         rm -rf ~/.config/xiaoniao
-        echo "  ✓ 已删除配置文件"
+        echo "  Configuration files removed"
     else
-        echo "  • 保留配置文件: ~/.config/xiaoniao"
+        echo "  Configuration files kept: ~/.config/xiaoniao"
     fi
 fi
 
 echo ""
-echo "✅ 卸载完成！"
+echo "Uninstall complete!"
 echo ""
-echo "感谢使用 xiaoniao"
-echo "如需重新安装，请访问: https://github.com/kaminoguo/xiaoniao"
+echo "Thank you for using xiaoniao"
+echo "To reinstall, visit: https://github.com/kaminoguo/xiaoniao"
 echo ""

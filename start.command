@@ -13,17 +13,16 @@ mkdir -p "$CONFIG_DIR"
 
 # 如果没有配置文件，先打开配置界面
 if [ ! -f "$CONFIG_FILE" ]; then
-    echo "🐦 欢迎使用 xiaoniao"
-    echo "===================="
+    echo "xiaoniao - Clipboard Translation Tool"
+    echo "======================================"
     echo ""
-    echo "首次运行，需要配置 API Key"
+    echo "First run detected. Opening configuration..."
     echo ""
     ./xiaoniao config
     echo ""
-    echo "配置完成后，将自动启动..."
+    echo "Starting xiaoniao..."
     sleep 2
 fi
 
 # 启动主程序
-echo "🐦 启动 xiaoniao..."
 ./xiaoniao run
