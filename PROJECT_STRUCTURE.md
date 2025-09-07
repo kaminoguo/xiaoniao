@@ -6,24 +6,25 @@
 
 ```
 xiaoniao/                        # 项目根目录 (跨平台CLI)
-├── README.md                    # 项目主文档 [核心]
-├── PROJECT_STRUCTURE.md        # 项目结构说明（本文件）[核心]
-├── PROMPT_SYSTEM.md            # Prompt系统说明 [核心]
-├── LICENSE                      # GPL-3.0 开源协议 [核心]
-├── go.mod                       # Go模块定义 [核心]
-├── go.sum                       # Go依赖校验和 [核心]
-├── install.sh                   # 安装脚本 [核心]
-├── xiaoniao-launcher.sh        # 桌面启动脚本（后台运行）[核心]
-├── update_xiaoniao.sh          # 二进制文件同步脚本 [工具]
+├── README.md                    # 项目主文档
+├── PROJECT_STRUCTURE.md        # 项目结构说明（本文件）
+├── LICENSE                      # GPL-3.0 开源协议
+├── go.mod                       # Go模块定义
+├── go.sum                       # Go依赖校验和
+├── build.sh                     # 跨平台构建脚本
+├── linux-install.sh            # Linux一键安装脚本
+├── linux-uninstall.sh          # Linux一键卸载脚本
+├── xiaoniao.bat                # Windows启动脚本
 │
-├── cmd/                         # 应用程序入口 [核心]
-│   └── xiaoniao/               # xiaoniao CLI程序 [核心]
-│       ├── main.go             # 程序主入口（v1.4 - 统一run模式，集成快捷键）[核心]
-│       ├── config_ui.go        # TUI配置界面（v1.4 - 修复prompt管理）[核心]
-│       ├── system_hotkey.go    # 系统快捷键集成（v1.3新增）[核心]
-│       ├── api_config_ui.go    # API配置界面（支持副模型选择）[核心]
-│       ├── prompt_test_ui.go   # Prompt测试界面 [核心]
-│       └── prompts.go          # Prompt桥接层（调用translator单）[核心]
+├── cmd/                         # 应用程序入口
+│   └── xiaoniao/               # xiaoniao CLI程序
+│       ├── main.go             # 程序主入口
+│       ├── config_ui.go        # TUI配置界面
+│       ├── api_config_ui.go    # API配置界面
+│       ├── prompt_test_ui.go   # Prompt测试界面
+│       ├── prompts.go          # Prompt桥接层
+│       ├── signals_unix.go     # Unix信号处理
+│       └── signals_windows.go  # Windows信号处理
 │
 ├── internal/                    # 内部包（不对外暴露）[核心]
 │   ├── translator/             # 翻译核心模块 [核心]
@@ -67,10 +68,8 @@ xiaoniao/                        # 项目根目录 (跨平台CLI)
 │       ├── config_linux.go    # Linux配置路径 (~/.config/xiaoniao) [核心]
 │       └── config_windows.go  # Windows配置路径 (%APPDATA%\xiaoniao) [核心]
 │
-├── assets/                      # 资源文件 [核心]
-│   └── icon.png               # 应用图标 [核心]
-│
-└── docs/                        # 文档目录 [可选]
+└── assets/                      # 资源文件
+    └── icon.png               # 应用图标
 ```
 
 ## 核心模块说明
@@ -81,7 +80,7 @@ xiaoniao/                        # 项目根目录 (跨平台CLI)
   - 智能快捷键配置系统
   - 自定义Prompt的创建、编辑、删除
   - 配置持久化保存
-- **system_hotkey.go**: 系统快捷键集成 (v1.3新增)
+- **signals_unix.go/signals_windows.go**: 平台特定信号处理
   - 自动检测桌面环境
   - 智能冲突检查
   - 一键配置系统快捷键
@@ -202,10 +201,7 @@ GOOS=darwin GOARCH=amd64 go build -o xiaoniao-macos cmd/xiaoniao/*.go
 ## 性能指标
 
 - **源码大小**: ~400KB
-- **二进制大小**: ~11MB (含Bubble Tea TUI框架、系统托盘、国际化)
-  - Bubble Tea及Unicode表: ~7MB
-  - Systray CGO绑定: ~0.5MB
-  - 应用代码: ~0.3MB
+- **二进制大小**: ~12MB (含TUI框架、系统托盘、国际化)
 - **启动时间**: < 1秒
 - **内存占用**: < 50MB (空闲时)
 - **CPU使用**: < 1% (监控时)
@@ -271,7 +267,7 @@ GOOS=darwin GOARCH=amd64 go build -o xiaoniao-macos cmd/xiaoniao/*.go
   - 自动清理守护锁文件
 - 🎯 **品牌统一**  
   - 所有语言下统一使用"xiaoniao"名称
-  - 移除所有"Translator"等变体
+  - 统一使用"xiaoniao"名称
 
 ### v1.3.1 (2025-09-04) - 优化更新
 - 🔧 **代码优化**
