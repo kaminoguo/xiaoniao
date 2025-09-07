@@ -268,6 +268,9 @@ func (m configModel) Init() tea.Cmd {
 }
 
 func (m configModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Store original message before type assertion
+	originalMsg := msg
+	
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -276,6 +279,12 @@ func (m configModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	
 	case tea.KeyMsg:
+		// For promptEditScreen, we need to handle it specially
+		if m.screen == promptEditScreen {
+			// Pass the original message to textarea
+			return m.updatePromptEditScreenWithMsg(originalMsg)
+		}
+		
 		switch m.screen {
 		case mainScreen:
 			return m.updateMainScreen(msg)
@@ -283,8 +292,6 @@ func (m configModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateAPIKeyScreen(msg)
 		case promptScreen:
 			return m.updatePromptScreen(msg)
-		case promptEditScreen:
-			return m.updatePromptEditScreen(msg)
 		case testScreen:
 			return m.updateTestScreen(msg)
 		case languageScreen:
@@ -646,77 +653,87 @@ func (m configModel) updatePromptScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m configModel) updatePromptEditScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch {
-	case key.Matches(msg, keys.Back):
-		m.screen = promptScreen
-		return m, nil
-
-	case key.Matches(msg, keys.Tab):
-		if m.promptNameInput.Focused() {
-			m.promptNameInput.Blur()
-			m.promptContentInput.Focus()
-			return m, textinput.Blink
-		} else {
-			m.promptContentInput.Blur()
-			m.promptNameInput.Focus()
-			return m, textinput.Blink
-		}
-
-	case key.Matches(msg, keys.Enter):
-		name := m.promptNameInput.Value()
-		content := m.promptContentInput.Value()
-		
-		if name != "" && content != "" {
-			if m.editingPromptIdx == -1 {
-				// 新建 - 立即保存到文件
-				// 找到下一个可用的ID
-				maxID := -1
-				for _, p := range m.prompts {
-					if strings.HasPrefix(p.ID, "custom_") {
-						idStr := strings.TrimPrefix(p.ID, "custom_")
-						if id, err := strconv.Atoi(idStr); err == nil && id > maxID {
-							maxID = id
-						}
-					}
-				}
-				id := fmt.Sprintf("custom_%d", maxID+1)
-				err := AddPrompt(id, name, content)
-				if err != nil {
-					m.testResult = fmt.Sprintf("保存失败: %v", err)
-				} else {
-					// 重新加载prompts以确保同步
-					m.prompts = loadAllPrompts()
-				}
-			} else if m.editingPromptIdx < len(m.prompts) {
-				// 编辑现有prompt - 立即保存到文件
-				prompt := m.prompts[m.editingPromptIdx]
-				err := UpdatePrompt(prompt.ID, name, content)
-				if err != nil {
-					m.testResult = fmt.Sprintf("更新失败: %v", err)
-				} else {
-					// 重新加载prompts以确保同步
-					m.prompts = loadAllPrompts()
-				}
-			}
-			
+func (m configModel) updatePromptEditScreenWithMsg(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// Handle key messages
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		// Handle special keys first
+		switch {
+		case key.Matches(keyMsg, keys.Back):
 			m.screen = promptScreen
 			return m, nil
-		}
 
-	default:
-		if m.promptNameInput.Focused() {
-			var cmd tea.Cmd
-			m.promptNameInput, cmd = m.promptNameInput.Update(msg)
-			return m, cmd
-		} else if m.promptContentInput.Focused() {
-			var cmd tea.Cmd
-			m.promptContentInput, cmd = m.promptContentInput.Update(msg)
-			return m, cmd
+		case key.Matches(keyMsg, keys.Tab):
+			if m.promptNameInput.Focused() {
+				m.promptNameInput.Blur()
+				m.promptContentInput.Focus()
+				return m, nil
+			} else {
+				m.promptContentInput.Blur()
+				m.promptNameInput.Focus()
+				return m, textinput.Blink
+			}
+
+		case keyMsg.String() == "ctrl+s":
+			// Save with Ctrl+S
+			name := m.promptNameInput.Value()
+			content := m.promptContentInput.Value()
+			
+			if name != "" && content != "" {
+				if m.editingPromptIdx == -1 {
+					// 新建 - 立即保存到文件
+					// 找到下一个可用的ID
+					maxID := -1
+					for _, p := range m.prompts {
+						if strings.HasPrefix(p.ID, "custom_") {
+							idStr := strings.TrimPrefix(p.ID, "custom_")
+							if id, err := strconv.Atoi(idStr); err == nil && id > maxID {
+								maxID = id
+							}
+						}
+					}
+					id := fmt.Sprintf("custom_%d", maxID+1)
+					err := AddPrompt(id, name, content)
+					if err != nil {
+						m.testResult = fmt.Sprintf("保存失败: %v", err)
+					} else {
+						// 重新加载prompts以确保同步
+						m.prompts = loadAllPrompts()
+					}
+				} else if m.editingPromptIdx < len(m.prompts) {
+					// 编辑现有prompt - 立即保存到文件
+					prompt := m.prompts[m.editingPromptIdx]
+					err := UpdatePrompt(prompt.ID, name, content)
+					if err != nil {
+						m.testResult = fmt.Sprintf("更新失败: %v", err)
+					} else {
+						// 重新加载prompts以确保同步
+						m.prompts = loadAllPrompts()
+					}
+				}
+				
+				m.screen = promptScreen
+			}
+			return m, nil
 		}
+	}
+	
+	// Update the focused input with the full message
+	if m.promptNameInput.Focused() {
+		var cmd tea.Cmd
+		m.promptNameInput, cmd = m.promptNameInput.Update(msg)
+		return m, cmd
+	} else if m.promptContentInput.Focused() {
+		var cmd tea.Cmd
+		m.promptContentInput, cmd = m.promptContentInput.Update(msg)
+		return m, cmd
 	}
 
 	return m, nil
+}
+
+// Keep the old function for compatibility
+func (m configModel) updatePromptEditScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	return m.updatePromptEditScreenWithMsg(msg)
 }
 
 func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
