@@ -6,7 +6,7 @@
   
   [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
   [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](go.mod)
-  ![Version](https://img.shields.io/badge/Version-v1.5.0-purple)
+  ![Version](https://img.shields.io/badge/Version-v1.6.0-purple)
   ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-blue)
   ![Providers](https://img.shields.io/badge/Providers-20+-green)
   ![Models](https://img.shields.io/badge/Models-300+-orange)
@@ -320,13 +320,23 @@ xiaoniao/
 
 ## 📝 更新日志
 
-### v1.5.0 (2025-09-07) - 最新版本
-- 🚀 **跨平台支持**
-  - Windows平台完整支持（Windows 10/11）
+### v1.6.0 (2025-09-07) - 最新版本
+- 🍎 **macOS完整支持**
   - macOS平台完整支持（10.15+，Intel/Apple Silicon）
-  - Windows/macOS剪贴板API实现
-  - 跨平台系统托盘和热键
-  - 配置路径自动适配（Linux: ~/.config，Windows: %APPDATA%，macOS: ~/Library/Application Support）
+  - 原生macOS剪贴板、托盘、热键实现
+  - 配置路径：~/Library/Application Support/xiaoniao
+  
+- 🤖 **智能安装体验**
+  - Linux安装脚本自动棆测系统语言和桌面环境
+  - 首次运行自动设置界面语言与系统一致
+  - Windows/macOS提供便携版ZIP包
+  - 解压即用，无需复杂安装
+
+### v1.5.0 (2025-09-07)
+- 🚀 **Windows支持**
+  - Windows平台完整支持（Windows 10/11）
+  - Windows剪贴板API实现
+  - 配置路径自动适配（%APPDATA%）
   
 - 🔧 **项目重构**
   - 项目重命名：pixel-translator → xiaoniao
@@ -352,7 +362,7 @@ xiaoniao/
 
 ---
 
-更新日期: 2025-09-07
+更新日期: 2025-09-07 | 版本: v1.6.0
 
 <div align="center">
   <p>如果觉得好用，请给个 ⭐ Star 支持一下！</p>

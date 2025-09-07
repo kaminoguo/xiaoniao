@@ -1,6 +1,6 @@
 # 项目结构说明 (Project Structure)
 
-最后更新: 2025-09-07 | 版本: v1.5.0 | GitHub: https://github.com/kaminoguo/xiaoniao
+最后更新: 2025-09-07 | 版本: v1.6.0 | GitHub: https://github.com/kaminoguo/xiaoniao
 
 ## 目录树 (Directory Tree)
 
@@ -113,11 +113,17 @@ xiaoniao/                        # 项目根目录 (跨平台CLI)
 ### 3. 剪贴板管理 (`internal/clipboard/`)
 - 实时监控剪贴板变化
 - 自动替换翻译结果
-- 支持X11和Wayland环境
-- 智能内容检测
+- 跨平台支持：
+  - Linux: X11/Wayland (xclip/xsel/wl-clipboard)
+  - Windows: Windows Clipboard API
+  - macOS: pbcopy/pbpaste
+- 智能内容检测和循环防护
 
 ### 4. 配置管理
-- 配置文件位置：`~/.config/xiaoniao/`
+- 配置文件位置：
+  - Linux: `~/.config/xiaoniao/`
+  - Windows: `%APPDATA%\xiaoniao\`
+  - macOS: `~/Library/Application Support/xiaoniao/`
 - 支持热重载
 - 多配置文件：
   - `config.json`: 主配置
@@ -179,12 +185,25 @@ func DetectProviderByKey(apiKey string) string {
 
 ## 构建说明
 
-### CLI版本
+### 快速构建
 ```bash
-# 构建CLI工具（优化大小）
+# 使用自动构建脚本（推荐）
+chmod +x build.sh
+./build.sh
+
+# 构建产物在 dist/ 目录：
+# - xiaoniao-linux-amd64
+# - xiaoniao-windows.zip
+# - xiaoniao-darwin-amd64.zip (Intel Mac)
+# - xiaoniao-darwin-arm64.zip (Apple Silicon)
+```
+
+### 本地开发构建
+```bash
+# 构建当前平台版本
 go build -ldflags="-s -w" -o xiaoniao ./cmd/xiaoniao
 
-# 安装到用户目录（推荐）
+# 安装到用户目录（Linux/macOS）
 cp xiaoniao ~/.local/bin/
 
 # 注意：只保留一个版本，避免混淆
@@ -192,19 +211,84 @@ cp xiaoniao ~/.local/bin/
 # sudo rm -f /usr/local/bin/xiaoniao
 ```
 
-### 跨平台构建
+### 跨平台手动构建
 ```bash
-# Linux
-GOOS=linux GOARCH=amd64 go build -o xiaoniao-linux-amd64 cmd/xiaoniao/*.go
+# Linux AMD64
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao-linux-amd64 cmd/xiaoniao/*.go
 
-# Windows
-GOOS=windows GOARCH=amd64 go build -o xiaoniao.exe cmd/xiaoniao/*.go
+# Windows AMD64
+GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
 
-# macOS (Intel)
-GOOS=darwin GOARCH=amd64 go build -o xiaoniao-darwin-amd64 cmd/xiaoniao/*.go
+# macOS Intel
+GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao-darwin-amd64 cmd/xiaoniao/*.go
 
-# macOS (Apple Silicon)
-GOOS=darwin GOARCH=arm64 go build -o xiaoniao-darwin-arm64 cmd/xiaoniao/*.go
+# macOS Apple Silicon
+GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o xiaoniao-darwin-arm64 cmd/xiaoniao/*.go
+```
+
+## 测试说明
+
+### 功能测试
+```bash
+# 1. 测试配置界面
+xiaoniao config
+
+# 2. 测试剪贴板监控
+xiaoniao run
+# 复制任意文本测试翻译功能
+
+# 3. 测试API连接
+xiaoniao test-api
+
+# 4. 测试Prompt
+xiaoniao test-prompt
+```
+
+### 平台特定测试
+
+#### Linux测试
+```bash
+# 测试剪贴板（X11）
+echo "test" | xclip -selection clipboard
+xiaoniao run
+
+# 测试剪贴板（Wayland）
+echo "test" | wl-copy
+xiaoniao run
+
+# 测试快捷键
+xiaoniao config  # 配置快捷键后测试
+```
+
+#### Windows测试
+```powershell
+# 在 PowerShell 中测试
+Set-Clipboard "test text"
+.\xiaoniao.exe run
+
+# 测试托盘图标
+.\xiaoniao.exe run  # 检查系统托盘
+```
+
+#### macOS测试
+```bash
+# 测试剪贴板
+echo "test" | pbcopy
+./xiaoniao run
+
+# 测试通知
+./xiaoniao run  # 翻译时应显示系统通知
+
+# 测试快捷键（需要辅助功能权限）
+# 系统偏好设置 > 安全性与隐私 > 辅助功能
+```
+
+### 多语言测试
+```bash
+# 测试不同系统语言
+LANG=zh_CN.UTF-8 xiaoniao config  # 中文界面
+LANG=en_US.UTF-8 xiaoniao config  # 英文界面
+LANG=ja_JP.UTF-8 xiaoniao config  # 日文界面
 ```
 
 ## 性能指标
@@ -222,7 +306,24 @@ GOOS=darwin GOARCH=arm64 go build -o xiaoniao-darwin-arm64 cmd/xiaoniao/*.go
 
 ## 版本历史
 
-### v1.5.0 (2025-09-07) - 跨平台支持
+### v1.6.0 (2025-09-07) - macOS支持与智能安装
+- 🍎 **macOS完整支持**
+  - 添加macOS剪贴板实现（pbcopy/pbpaste）
+  - macOS系统托盘和通知中心集成
+  - macOS热键支持（Cmd/Option/Control）
+  - 配置路径：~/Library/Application Support/xiaoniao
+  - 支持Intel和Apple Silicon架构
+- 🔧 **智能安装脚本**
+  - Linux安装脚本自动检测系统语言（9种语言）
+  - 自动检测桌面环境（GNOME/KDE/XFCE/Hyprland等）
+  - 自动检测终端类型优化TUI显示
+  - 首次运行自动设置界面语言与系统一致
+- 📦 **便携版发布**
+  - Windows/macOS提供ZIP便携版
+  - 无需安装，解压即用
+  - 自动检测配置，首次运行打开配置界面
+
+### v1.5.0 (2025-09-07) - Windows支持
 - 🚀 **Windows平台支持**
   - 添加Windows剪贴板API实现
   - Windows系统托盘支持
@@ -232,9 +333,6 @@ GOOS=darwin GOARCH=arm64 go build -o xiaoniao-darwin-arm64 cmd/xiaoniao/*.go
   - 项目重命名：pixel-translator → xiaoniao
   - 模块路径更新为 github.com/kaminoguo/xiaoniao
   - 使用构建标签分离平台特定代码
-- 📝 **文档更新**
-  - 更新项目结构说明
-  - 添加跨平台构建说明
 
 ### v1.4.1 (2025-09-06) - 完整国际化
 - 🌍 **国际化完善**
@@ -379,12 +477,16 @@ GPL-3.0 License - 详见 [LICENSE](LICENSE) 文件
 
 ## 当前状态
 
-- **版本**: v1.5.0
-- **源码大小**: ~400KB
-- **支持平台**: Linux (X11/Wayland), Windows 10/11, macOS 10.15+
+- **版本**: v1.6.0
+- **源码大小**: ~450KB
+- **支持平台**: 
+  - Linux (X11/Wayland) - 所有主流发行版
+  - Windows 10/11
+  - macOS 10.15+ (Intel & Apple Silicon)
 - **依赖管理**: Go Modules
 - **最小Go版本**: 1.21+
 - **跨平台**: 使用构建标签(build tags)分离平台代码
+- **代码共享率**: ~80%（平台特定代码仅20%）
 
 ---
 
