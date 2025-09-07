@@ -169,8 +169,8 @@ var keys = keyMap{
 		key.WithHelp("↓/j", "down"),
 	),
 	Enter: key.NewBinding(
-		key.WithKeys("enter", " "),
-		key.WithHelp("enter/space", "select"),
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "select"),
 	),
 	Back: key.NewBinding(
 		key.WithKeys("esc", "q"),
