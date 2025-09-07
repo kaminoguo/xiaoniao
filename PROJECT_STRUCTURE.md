@@ -17,7 +17,7 @@ xiaoniao/                        # 项目根目录 (跨平台CLI)
 ├── update_xiaoniao.sh          # 二进制文件同步脚本 [工具]
 │
 ├── cmd/                         # 应用程序入口 [核心]
-│   └── xiaoniao/               # 小鸟翻译CLI程序 [核心]
+│   └── xiaoniao/               # xiaoniao CLI程序 [核心]
 │       ├── main.go             # 程序主入口（v1.4 - 统一run模式，集成快捷键）[核心]
 │       ├── config_ui.go        # TUI配置界面（v1.4 - 修复prompt管理）[核心]
 │       ├── system_hotkey.go    # 系统快捷键集成（v1.3新增）[核心]
@@ -271,7 +271,7 @@ GOOS=darwin GOARCH=amd64 go build -o xiaoniao-macos cmd/xiaoniao/*.go
   - 自动清理守护锁文件
 - 🎯 **品牌统一**  
   - 所有语言下统一使用"xiaoniao"名称
-  - 移除所有"小鸟翻译"、"Translator"等变体
+  - 移除所有"Translator"等变体
 
 ### v1.3.1 (2025-09-04) - 优化更新
 - 🔧 **代码优化**

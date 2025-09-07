@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# 小鸟翻译 (xiaoniao) 安装脚本
+# xiaoniao 安装脚本
 
 echo "================================"
-echo "  小鸟翻译 (xiaoniao) 安装脚本"
+echo "  xiaoniao 安装脚本"
 echo "================================"
 
 # 构建程序

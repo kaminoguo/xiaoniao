@@ -61,89 +61,31 @@
 - **AWS Bedrock** - 亚马逊云
 - **以及任何OpenAI兼容API**
 
-## 📦 安装
+## 📦 安装与卸载
 
-### Linux 安装
+### Linux 用户
 
-#### 方法1：下载预编译版本（推荐）
+#### 一键安装：
 ```bash
-# 1. 下载最新版本
-wget https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-v1.5.0-linux-amd64.tar.gz
-
-# 2. 解压
-tar -xzf xiaoniao-v1.5.0-linux-amd64.tar.gz
-
-# 3. 安装到系统目录
-sudo mv xiaoniao-linux-amd64 /usr/local/bin/xiaoniao
-sudo chmod +x /usr/local/bin/xiaoniao
-
-# 4. 创建桌面快捷方式（可选）
-xiaoniao --install-desktop
+# 下载并运行安装脚本
+curl -sSL https://github.com/kaminoguo/xiaoniao/releases/latest/download/linux-install.sh | bash
 ```
 
-#### 方法2：从源码构建
+#### 一键卸载：
 ```bash
-# 克隆仓库
-git clone https://github.com/kaminoguo/xiaoniao.git
-cd xiaoniao
-
-# 构建
-go build -ldflags="-s -w" -o xiaoniao ./cmd/xiaoniao
-sudo mv xiaoniao /usr/local/bin/
+# 下载并运行卸载脚本
+curl -sSL https://github.com/kaminoguo/xiaoniao/releases/latest/download/linux-uninstall.sh | bash
 ```
 
-### Windows 安装
+### Windows 用户
 
-#### 方法1：下载预编译版本（推荐）
-```powershell
-# 1. 下载最新版本
-Invoke-WebRequest -Uri "https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-v1.5.0-windows-amd64.zip" -OutFile "xiaoniao.zip"
+#### 安装（傻瓜式）：
+1. 下载：[xiaoniao-windows.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-windows.zip)
+2. 解压到桌面
+3. 双击 `xiaoniao.exe` 即可使用
 
-# 2. 解压到程序目录
-Expand-Archive -Path "xiaoniao.zip" -DestinationPath "C:\Program Files\xiaoniao"
-
-# 3. 添加到系统PATH（可选，方便命令行使用）
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\xiaoniao", [EnvironmentVariableTarget]::User)
-```
-
-#### 方法2：从源码构建
-```powershell
-# 克隆仓库
-git clone https://github.com/kaminoguo/xiaoniao.git
-cd xiaoniao
-
-# 构建
-go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
-```
-
-### 🗑️ 卸载
-
-#### Linux卸载
-```bash
-# 删除程序
-sudo rm -f /usr/local/bin/xiaoniao
-
-# 删除配置文件（可选）
-rm -rf ~/.config/xiaoniao
-
-# 删除桌面快捷方式（如果有）
-rm -f ~/.local/share/applications/xiaoniao.desktop
-rm -f ~/Desktop/xiaoniao.desktop
-```
-
-#### Windows卸载
-```powershell
-# 删除程序目录
-Remove-Item -Path "C:\Program Files\xiaoniao" -Recurse -Force
-
-# 删除配置文件（可选）
-Remove-Item -Path "$env:APPDATA\xiaoniao" -Recurse -Force
-
-# 从PATH中移除（如果添加过）
-$path = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
-$newPath = ($path.Split(';') | Where-Object { $_ -ne "C:\Program Files\xiaoniao" }) -join ';'
-[Environment]::SetEnvironmentVariable("Path", $newPath, [EnvironmentVariableTarget]::User)
-```
+#### 卸载：
+直接删除解压出来的文件夹即可
 
 ## 🚀 快速开始
 

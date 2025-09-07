@@ -1,8 +1,8 @@
-# Prompt System Architecture - 小鸟翻译 v2.5.0
+# Prompt System Architecture - xiaoniao v2.5.0
 
 ## Overview
 
-小鸟翻译 v2.5.0 introduces a sophisticated dual-layer prompt system designed to achieve maximum translation accuracy while maintaining flexibility for different use cases.
+xiaoniao v2.5.0 introduces a sophisticated dual-layer prompt system designed to achieve maximum translation accuracy while maintaining flexibility for different use cases.
 
 ## Architecture
 

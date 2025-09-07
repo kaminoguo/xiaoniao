@@ -22,6 +22,6 @@ sudo cp xiaoniao_new /usr/local/bin/xiaoniao 2>/dev/null || echo "跳过 /usr/lo
 # 清理
 rm xiaoniao_new
 
-echo "✅ 小鸟翻译已更新到所有位置！"
+echo "✅ xiaoniao已更新到所有位置！"
 echo "   ~/.local/bin/xiaoniao"
 echo "   /usr/local/bin/xiaoniao"
