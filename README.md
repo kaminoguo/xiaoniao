@@ -7,7 +7,7 @@
   [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
   [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](go.mod)
   ![Version](https://img.shields.io/badge/Version-v1.5.0-purple)
-  ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-blue)
+  ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-blue)
   ![Providers](https://img.shields.io/badge/Providers-20+-green)
   ![Models](https://img.shields.io/badge/Models-300+-orange)
   
@@ -29,7 +29,7 @@
 - 🌐 **多语言界面** - 支持9种语言界面切换（中/英/日/韩/西/法/德/俄/阿拉伯）
 - ⌨️ **智能快捷键系统** - 自动检测桌面环境，智能配置系统快捷键
 - 🚀 **轻量运行** - 纯Go实现，内存占用<50MB，二进制约12MB
-- 🖥️ **跨平台支持** - 支持Linux和Windows 10/11
+- 🖥️ **跨平台支持** - 支持Linux、Windows 10/11和macOS 10.15+
 - 🔒 **单实例保护** - 防止多个实例同时运行
 - 🔧 **智能Provider检测** - 根据API Key自动识别服务商
 - 💾 **配置持久化** - 所有设置自动保存，下次启动自动加载
@@ -81,11 +81,25 @@ curl -sSL https://github.com/kaminoguo/xiaoniao/releases/latest/download/linux-u
 
 #### 安装（傻瓜式）：
 1. 下载：[xiaoniao-windows.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-windows.zip)
-2. 解压到桌面
+2. 解压到任意位置
 3. 双击 `xiaoniao.exe` 即可使用
 
 #### 卸载：
 直接删除解压出来的文件夹即可
+
+### macOS 用户
+
+#### 安装（便携版）：
+1. 下载对应架构版本：
+   - Intel芯片：[xiaoniao-darwin-amd64.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-darwin-amd64.zip)
+   - Apple Silicon (M1/M2/M3)：[xiaoniao-darwin-arm64.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-darwin-arm64.zip)
+2. 解压到 Applications 或任意位置
+3. 首次运行需要右键点击选择「打开」（绕过Gatekeeper）
+4. 或在终端运行：`chmod +x xiaoniao && ./xiaoniao config`
+
+#### 卸载：
+1. 删除解压的程序文件夹
+2. 删除配置文件（可选）：`rm -rf ~/Library/Application\ Support/xiaoniao`
 
 ## 🚀 快速开始
 
@@ -198,6 +212,7 @@ xiaoniao/
 ├── linux-install.sh            # Linux一键安装
 ├── linux-uninstall.sh          # Linux一键卸载
 ├── xiaoniao.bat               # Windows启动脚本
+├── start.command              # macOS启动脚本
 │
 ├── cmd/xiaoniao/               # 命令行程序
 │   ├── main.go                # 程序入口
@@ -225,6 +240,7 @@ xiaoniao/
 位置：
 - Linux: `~/.config/xiaoniao/config.json`
 - Windows: `%APPDATA%\xiaoniao\config.json`
+- macOS: `~/Library/Application Support/xiaoniao/config.json`
 
 ```json
 {
@@ -245,6 +261,7 @@ xiaoniao/
 位置：
 - Linux: `~/.config/xiaoniao/prompts.json`
 - Windows: `%APPDATA%\xiaoniao\prompts.json`
+- macOS: `~/Library/Application Support/xiaoniao/prompts.json`
 
 ```json
 [
@@ -284,6 +301,7 @@ xiaoniao/
 3. **剪贴板监控不工作**
    - Linux: 确保有剪贴板访问权限，某些Wayland环境可能需要额外配置
    - Windows: 确保程序有剪贴板访问权限，杀毒软件可能会阻止
+   - macOS: 首次运行需要在「系统偏好设置 > 安全性与隐私 > 辅助功能」中授权
 
 4. **Windows终端显示问题**
    - 推荐使用 Windows Terminal 或支持 ANSI 的终端
@@ -305,9 +323,10 @@ xiaoniao/
 ### v1.5.0 (2025-09-07) - 最新版本
 - 🚀 **跨平台支持**
   - Windows平台完整支持（Windows 10/11）
-  - Windows剪贴板API实现
-  - Windows系统托盘和热键
-  - 配置路径自动适配（Linux: ~/.config，Windows: %APPDATA%）
+  - macOS平台完整支持（10.15+，Intel/Apple Silicon）
+  - Windows/macOS剪贴板API实现
+  - 跨平台系统托盘和热键
+  - 配置路径自动适配（Linux: ~/.config，Windows: %APPDATA%，macOS: ~/Library/Application Support）
   
 - 🔧 **项目重构**
   - 项目重命名：pixel-translator → xiaoniao

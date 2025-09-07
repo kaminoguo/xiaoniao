@@ -15,6 +15,7 @@ xiaoniao/                        # 项目根目录 (跨平台CLI)
 ├── linux-install.sh            # Linux一键安装脚本
 ├── linux-uninstall.sh          # Linux一键卸载脚本
 ├── xiaoniao.bat                # Windows启动脚本
+├── start.command               # macOS启动脚本
 │
 ├── cmd/                         # 应用程序入口
 │   └── xiaoniao/               # xiaoniao CLI程序
@@ -23,7 +24,7 @@ xiaoniao/                        # 项目根目录 (跨平台CLI)
 │       ├── api_config_ui.go    # API配置界面
 │       ├── prompt_test_ui.go   # Prompt测试界面
 │       ├── prompts.go          # Prompt桥接层
-│       ├── signals_unix.go     # Unix信号处理
+│       ├── signals_unix.go     # Unix信号处理（Linux/macOS）
 │       └── signals_windows.go  # Windows信号处理
 │
 ├── internal/                    # 内部包（不对外暴露）[核心]
@@ -48,25 +49,30 @@ xiaoniao/                        # 项目根目录 (跨平台CLI)
 │   ├── clipboard/              # 剪贴板管理模块 [核心]
 │   │   ├── monitor.go         # 剪贴板监控器（含循环防护）[核心]
 │   │   ├── clipboard_linux.go # Linux特定实现（X11/Wayland）[核心]
-│   │   └── clipboard_windows.go # Windows特定实现（Windows API）[核心]
+│   │   ├── clipboard_windows.go # Windows特定实现（Windows API）[核心]
+│   │   └── clipboard_darwin.go # macOS特定实现（pbcopy/pbpaste）[核心]
 │   │
 │   ├── hotkey/                 # 全局快捷键 [核心]
 │   │   ├── hotkey.go          # Linux快捷键实现（golang.design/x/hotkey）[核心]
-│   │   └── hotkey_windows.go  # Windows快捷键实现 [核心]
+│   │   ├── hotkey_windows.go  # Windows快捷键实现 [核心]
+│   │   └── hotkey_darwin.go   # macOS快捷键实现 [核心]
 │   │
 │   ├── tray/                   # 系统托盘 [核心]
 │   │   ├── tray.go            # 托盘通用实现（使用getlantern/systray）[核心]
-│   │   └── tray_windows.go   # Windows托盘特定功能 [核心]
+│   │   ├── tray_windows.go   # Windows托盘特定功能 [核心]
+│   │   └── tray_darwin.go    # macOS托盘特定功能 [核心]
 │   │
 │   ├── sound/                  # 声音提示 [核心]
 │   │   ├── sound.go           # Linux音效播放 [核心]
 │   │   ├── sound_windows.go   # Windows音效播放 [核心]
+│   │   ├── sound_darwin.go    # macOS音效播放 [核心]
 │   │   └── assets/            # 音效资源文件 [核心]
 │   │
 │   └── config/                 # 配置管理模块 [核心]
 │       ├── themes.go          # 主题配置 [核心]
 │       ├── config_linux.go    # Linux配置路径 (~/.config/xiaoniao) [核心]
-│       └── config_windows.go  # Windows配置路径 (%APPDATA%\xiaoniao) [核心]
+│       ├── config_windows.go  # Windows配置路径 (%APPDATA%\xiaoniao) [核心]
+│       └── config_darwin.go   # macOS配置路径 (~/Library/Application Support/xiaoniao) [核心]
 │
 └── assets/                      # 资源文件
     └── icon.png               # 应用图标
@@ -194,8 +200,11 @@ GOOS=linux GOARCH=amd64 go build -o xiaoniao-linux-amd64 cmd/xiaoniao/*.go
 # Windows
 GOOS=windows GOARCH=amd64 go build -o xiaoniao.exe cmd/xiaoniao/*.go
 
-# macOS
-GOOS=darwin GOARCH=amd64 go build -o xiaoniao-macos cmd/xiaoniao/*.go
+# macOS (Intel)
+GOOS=darwin GOARCH=amd64 go build -o xiaoniao-darwin-amd64 cmd/xiaoniao/*.go
+
+# macOS (Apple Silicon)
+GOOS=darwin GOARCH=arm64 go build -o xiaoniao-darwin-arm64 cmd/xiaoniao/*.go
 ```
 
 ## 性能指标
@@ -372,7 +381,7 @@ GPL-3.0 License - 详见 [LICENSE](LICENSE) 文件
 
 - **版本**: v1.5.0
 - **源码大小**: ~400KB
-- **支持平台**: Linux (X11/Wayland), Windows 10/11
+- **支持平台**: Linux (X11/Wayland), Windows 10/11, macOS 10.15+
 - **依赖管理**: Go Modules
 - **最小Go版本**: 1.21+
 - **跨平台**: 使用构建标签(build tags)分离平台代码
