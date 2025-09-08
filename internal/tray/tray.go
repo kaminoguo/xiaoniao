@@ -158,6 +158,7 @@ func (m *Manager) Initialize() error {
 	return nil
 }
 
+
 func (m *Manager) onReady() {
 	// 只显示图标，不显示标题
 	systray.SetTitle("")

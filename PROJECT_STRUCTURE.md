@@ -10,6 +10,10 @@ xiaoniao/
 │   ├── api_config_ui.go        # API configuration
 │   ├── prompt_test_ui.go       # Prompt testing interface
 │   ├── prompts.go              # Prompt management
+│   ├── daemon_unix.go          # Unix/Linux daemon initialization
+│   ├── daemon_windows.go       # Windows daemon initialization
+│   ├── terminal_unix.go        # Unix terminal handling
+│   ├── terminal_windows.go     # Windows terminal handling
 │   ├── signals_unix.go         # Unix signal handling
 │   └── signals_windows.go      # Windows signal handling
 │
@@ -61,13 +65,14 @@ xiaoniao/
 │       └── config_darwin.go    # macOS config paths
 │
 ├── assets/                     # Application resources
-│   └── icon.png               # Application icon
+│   ├── icon.png               # Application icon (PNG format)
+│   └── icon.ico               # Windows icon (ICO format)
 │
 ├── build.sh                    # Build script
 ├── linux-install.sh           # Linux installer
 ├── linux-uninstall.sh         # Linux uninstaller
-├── xiaoniao.bat               # Windows launcher
 ├── start.command              # macOS launcher
+├── versioninfo.json           # Windows version information
 ├── go.mod                     # Go module definition
 ├── go.sum                     # Go module checksums
 ├── LICENSE                    # GPL-3.0 license
@@ -199,6 +204,14 @@ echo "test" | pbcopy
 
 ## Version History
 
+### v1.6.2 (2025-09-08)
+- Fixed Windows system tray initialization issue
+- Implemented platform-specific daemon initialization
+- Windows: System tray now runs correctly in main thread
+- Linux: Maintained existing functionality
+- Removed Linux terminal lookup code from Windows builds
+- Cleaned up unnecessary launcher scripts
+
 ### v1.6.1 (2025-09-08)
 - Fixed Windows/macOS startup behavior
 - System tray now appears even without API configuration
@@ -254,4 +267,4 @@ Lyrica
 
 ---
 
-Last updated: 2025-09-08 | Version: 1.6.1
+Last updated: 2025-09-08 | Version: 1.6.2

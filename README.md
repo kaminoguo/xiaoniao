@@ -207,4 +207,4 @@ Report issues at: https://github.com/kaminoguo/xiaoniao/issues
 
 ---
 
-Version 1.6.1 | Updated: 2025-09-08
+Version 1.6.2 | Updated: 2025-09-08

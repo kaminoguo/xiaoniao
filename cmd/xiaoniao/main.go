@@ -91,9 +91,16 @@ func acquireLock() (bool, func()) {
 }
 
 func main() {
+	// Windows/macOS: 双击运行时默认执行 run
 	if len(os.Args) < 2 {
-		showUsage()
-		return
+		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+			// 无参数时默认运行
+			os.Args = append(os.Args, "run")
+		} else {
+			// Linux 保持原有行为
+			showUsage()
+			return
+		}
 	}
 	
 	command := os.Args[1]
@@ -168,44 +175,15 @@ func showHelp() {
 
 // runDaemonWithHotkey 在主线程运行，支持全局快捷键
 func runDaemonWithHotkey() {
-	// 先执行原有的初始化逻辑
-	runDaemonCore()
-	
-	// 保持主线程运行（mainthread需要）
-	select {}
+	// 使用平台特定的初始化
+	platformRunDaemon()
 }
 
-func runDaemonCore() {
-	// 原runDaemon的全部逻辑，但不包含最后的阻塞
-	runDaemonInternal()
-}
-
-// runDaemon 保留用于兼容（不使用快捷键时调用）
-func runDaemon() {
-	runDaemonInternal()
-	// 阻塞等待
-	select {}
-}
-
-func runDaemonInternal() {
+// runDaemonBusinessLogic 运行守护进程的业务逻辑
+// trayManager 必须已经初始化
+func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	// 检查配置
 	t := i18n.T()
-	
-	// 创建托盘图标（即使没有 API 也要显示托盘）
-	trayManager := tray.NewManager()
-	
-	// 初始化托盘（必须先初始化再使用）
-	trayStarted := make(chan bool)
-	go func() {
-		go func() {
-			time.Sleep(100 * time.Millisecond)
-			trayStarted <- true
-		}()
-		trayManager.Initialize()
-	}()
-	
-	// 等待托盘初始化完成
-	<-trayStarted
 	
 	// 初始化变量
 	var trans *translator.Translator
@@ -247,143 +225,143 @@ func runDaemonInternal() {
 		// return 会导致程序退出
 	} else {
 		// 有 API 配置，执行正常的初始化
-	
-	// 确保加载最新的用户prompts
-	ReloadPrompts()
-	
-	// 初始化翻译器
-	translatorConfig := &translator.Config{
-		APIKey:        config.APIKey,
-		Provider:      config.Provider,
-		Model:         config.Model,
-		FallbackModel: config.FallbackModel,
-		MaxRetries:    3,
-		Timeout:      60,  // 增加到60秒
-	}
-	
-	var err error
-	trans, err = translator.NewTranslator(translatorConfig)
-	if err != nil {
-		fmt.Printf("%s: %v\n", t.InitFailed, err)
-		return
-	}
-	
-	// 预热模型（异步执行，不阻塞启动）
-	go prewarmModel(trans)
-	
-	// 启动刷新信号监控
-	go monitorRefreshSignal(&trans)
-	
-	// 初始化剪贴板监控
-	monitor = clipboard.NewMonitor()
-	
-	// 设置当前 prompt 显示
-	promptName := getPromptName(config.PromptID)
-	trayManager.SetCurrentPrompt(promptName)
-	
-	// 设置托盘回调
-	trayManager.SetOnToggleMonitor(func(enabled bool) {
-		if enabled {
-			monitor.Start()
-			fmt.Println("\n✅ 监控已通过托盘启动")
-		} else {
-			monitor.Stop()
-			fmt.Println("\n⏸️ 监控已通过托盘停止")
-		}
-	})
-	
-	
-	trayManager.SetOnSettings(func() {
-		// 在新终端窗口中打开配置界面
-		openConfigInTerminal()
-		// 启动配置文件监控
-		go watchConfig()
-	})
-	
-	trayManager.SetOnToggleTerminal(func() {
-		// 切换终端窗口显示/隐藏
-		toggleTerminalVisibility()
-	})
-	
-	trayManager.SetOnRefresh(func() {
-		oldModel := config.Model
-		oldProvider := config.Provider
-		oldPrompt := config.PromptID
 		
-		// 重新加载配置
-		loadConfig()
+		// 确保加载最新的用户prompts
+		ReloadPrompts()
 		
-		// 更新 prompt 显示
-		if config.PromptID != oldPrompt {
-			promptName := getPromptName(config.PromptID)
-			trayManager.SetCurrentPrompt(promptName)
-		}
-		
-		// 重新创建 translator
+		// 初始化翻译器
 		translatorConfig := &translator.Config{
 			APIKey:        config.APIKey,
 			Provider:      config.Provider,
 			Model:         config.Model,
 			FallbackModel: config.FallbackModel,
 			MaxRetries:    3,
-			Timeout:      60,
+			Timeout:      60,  // 增加到60秒
 		}
-		
-		newTrans, err := translator.NewTranslator(translatorConfig)
-		if err == nil {
-			trans = newTrans
-			fmt.Printf("\n✅ 配置已刷新: %s | %s | %s\n", 
-				config.Provider, config.Model, getPromptName(config.PromptID))
-			
-			// 如果切换了模型或Provider，进行预热
-			if config.Model != oldModel || config.Provider != oldProvider {
-				go prewarmModel(trans)
-			}
-		} else {
-			fmt.Printf("\n❌ 刷新配置失败: %v\n", err)
-		}
-	})
 	
-	// 设置prompt选择回调
-	trayManager.SetOnSelectPrompt(func(promptID string) {
-		// 更新配置
-		config.PromptID = promptID
-		
-		// 保存配置
-		saveConfig()
-		
-		// 获取prompt名称
-		var promptName string
-		for _, p := range GetAllPrompts() {
-			if p.ID == promptID {
-				promptName = p.Name
-				break
-			}
+		var err error
+		trans, err = translator.NewTranslator(translatorConfig)
+		if err != nil {
+			fmt.Printf("%s: %v\n", t.InitFailed, err)
+			return
 		}
-		
-		// 显示提示
-		fmt.Printf("\n切换到: %s\n", promptName)
+	
+		// 预热模型（异步执行，不阻塞启动）
+		go prewarmModel(trans)
+	
+		// 启动刷新信号监控
+		go monitorRefreshSignal(&trans)
+	
+		// 初始化剪贴板监控
+		monitor = clipboard.NewMonitor()
+	
+		// 设置当前 prompt 显示
+		promptName := getPromptName(config.PromptID)
 		trayManager.SetCurrentPrompt(promptName)
-		// 不显示通知，只在终端显示
-	})
 	
-	trayManager.SetOnQuit(func() {
-		monitor.Stop()
-		fmt.Printf("\n%s %d %s\n", t.TotalCount, translationCount, t.TranslateCount)
-		os.Exit(0)
-	})
+		// 设置托盘回调
+		trayManager.SetOnToggleMonitor(func(enabled bool) {
+			if enabled {
+				monitor.Start()
+				fmt.Println("\n✅ 监控已通过托盘启动")
+			} else {
+				monitor.Stop()
+				fmt.Println("\n⏸️ 监控已通过托盘停止")
+			}
+		})
 	
 	
-	// 更新prompt列表到菜单（托盘初始化后）
-	prompts := GetAllPrompts()
-	promptList := make([]struct{ ID, Name string }, len(prompts))
-	for i, p := range prompts {
-		promptList[i] = struct{ ID, Name string }{ID: p.ID, Name: p.Name}
-	}
-	trayManager.UpdatePromptList(promptList)
+		trayManager.SetOnSettings(func() {
+			// 在新终端窗口中打开配置界面
+			openConfigInTerminal()
+			// 启动配置文件监控
+			go watchConfig()
+		})
 	
-	// 创建快捷键管理器
-	hotkeyManager := hotkey.NewManager()
+		trayManager.SetOnToggleTerminal(func() {
+			// 切换终端窗口显示/隐藏
+			toggleTerminalVisibility()
+		})
+	
+		trayManager.SetOnRefresh(func() {
+			oldModel := config.Model
+			oldProvider := config.Provider
+			oldPrompt := config.PromptID
+		
+			// 重新加载配置
+			loadConfig()
+		
+			// 更新 prompt 显示
+			if config.PromptID != oldPrompt {
+				promptName := getPromptName(config.PromptID)
+				trayManager.SetCurrentPrompt(promptName)
+			}
+		
+			// 重新创建 translator
+			translatorConfig := &translator.Config{
+				APIKey:        config.APIKey,
+				Provider:      config.Provider,
+				Model:         config.Model,
+				FallbackModel: config.FallbackModel,
+				MaxRetries:    3,
+				Timeout:      60,
+			}
+		
+			newTrans, err := translator.NewTranslator(translatorConfig)
+			if err == nil {
+				trans = newTrans
+				fmt.Printf("\n✅ 配置已刷新: %s | %s | %s\n", 
+					config.Provider, config.Model, getPromptName(config.PromptID))
+				
+				// 如果切换了模型或Provider，进行预热
+				if config.Model != oldModel || config.Provider != oldProvider {
+					go prewarmModel(trans)
+				}
+			} else {
+				fmt.Printf("\n❌ 刷新配置失败: %v\n", err)
+			}
+		})
+	
+		// 设置prompt选择回调
+		trayManager.SetOnSelectPrompt(func(promptID string) {
+			// 更新配置
+			config.PromptID = promptID
+			
+			// 保存配置
+			saveConfig()
+		
+			// 获取prompt名称
+			var promptName string
+			for _, p := range GetAllPrompts() {
+				if p.ID == promptID {
+					promptName = p.Name
+					break
+				}
+			}
+		
+			// 显示提示
+			fmt.Printf("\n切换到: %s\n", promptName)
+			trayManager.SetCurrentPrompt(promptName)
+			// 不显示通知，只在终端显示
+		})
+	
+		trayManager.SetOnQuit(func() {
+			monitor.Stop()
+			fmt.Printf("\n%s %d %s\n", t.TotalCount, translationCount, t.TranslateCount)
+			os.Exit(0)
+		})
+	
+	
+		// 更新prompt列表到菜单（托盘初始化后）
+		prompts := GetAllPrompts()
+		promptList := make([]struct{ ID, Name string }, len(prompts))
+		for i, p := range prompts {
+			promptList[i] = struct{ ID, Name string }{ID: p.ID, Name: p.Name}
+		}
+		trayManager.UpdatePromptList(promptList)
+	
+		// 创建快捷键管理器
+		hotkeyManager := hotkey.NewManager()
 	
 	// 注册快捷键（如果配置了）
 	if config.HotkeyToggle != "" {
@@ -405,9 +383,9 @@ func runDaemonInternal() {
 		if err != nil {
 			fmt.Printf("⚠️ 无法注册快捷键 %s: %v\n", config.HotkeyToggle, err)
 		}
-	}
-	
-	if config.HotkeySwitch != "" {
+		}
+		
+		if config.HotkeySwitch != "" {
 		err := hotkeyManager.RegisterFromString("switch", config.HotkeySwitch, func() {
 			// 切换到下一个Prompt
 			prompts := loadAllPrompts()
@@ -773,61 +751,6 @@ func toggleTerminalVisibility() {
 }
 
 
-func openConfigInTerminal() {
-	// 防止创建desktop文件的终极方案
-	
-	// 首先检查并删除任何自动生成的配置desktop文件
-	configDesktopPath := filepath.Join(os.Getenv("HOME"), ".local/share/applications/xiaoniao-config.desktop")
-	os.RemoveAll(configDesktopPath) // 删除文件或目录
-	
-	// 输出调试信息
-	// fmt.Println("Opening configuration...")
-	
-	// 尝试多种方式打开终端
-	// 1. 使用 ptyxis (Fedora 的新默认终端)
-	cmd := exec.Command("ptyxis", "--", "xiaoniao", "config")
-	
-	if err := cmd.Start(); err != nil {
-		
-		// 2. 尝试 gnome-terminal (通用)
-		cmd = exec.Command("gnome-terminal", "--", "xiaoniao", "config")
-		if err := cmd.Start(); err != nil {
-			fmt.Printf("gnome-terminal 失败: %v\n", err)
-			
-			// 3. 尝试 kgx (GNOME Console)
-			cmd = exec.Command("kgx", "--", "xiaoniao", "config")
-			if err := cmd.Start(); err != nil {
-				fmt.Printf("kgx 失败: %v\n", err)
-				
-				// 4. 尝试 xterm 作为最后备用
-				cmd = exec.Command("xterm", "-hold", "-e", "xiaoniao", "config")
-				if err := cmd.Start(); err != nil {
-					fmt.Printf("xterm 也失败: %v\n", err)
-					
-					// 5. 尝试 konsole (KDE)
-					cmd = exec.Command("konsole", "-e", "xiaoniao", "config")
-					if err := cmd.Start(); err != nil {
-						fmt.Printf("所有终端都无法打开\n")
-						// 最后的备用：通知用户手动运行
-						// 不显示通知，直接输出到终端
-						fmt.Println("请手动运行: xiaoniao config")
-					}
-				}
-			}
-		}
-	}
-	
-	// 等待一下让终端有时间启动
-	time.Sleep(1 * time.Second)
-	
-	// 延迟再次清理（防止延迟创建）
-	go func() {
-		time.Sleep(500 * time.Millisecond)
-		os.RemoveAll(configDesktopPath)
-		// 创建一个同名目录阻止文件创建
-		os.MkdirAll(configDesktopPath, 0755)
-	}()
-}
 
 // watchConfig 监控配置文件变化
 func watchConfig() {
