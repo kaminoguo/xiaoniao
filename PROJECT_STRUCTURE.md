@@ -199,8 +199,16 @@ echo "test" | pbcopy
 
 ## Version History
 
+### v1.6.1 (2025-09-08)
+- Fixed Windows/macOS startup behavior
+- System tray now appears even without API configuration
+- Auto-opens configuration UI when no API key is set
+- Fixed nil pointer crash in tray initialization
+- Removed unnecessary .vbs launcher for Windows
+- Simplified Windows distribution package
+
 ### v1.6.0 (2025-09-07)
-- macOS platform support
+- Full Windows and macOS platform support
 - Improved installation scripts
 - Language auto-detection
 
@@ -246,4 +254,4 @@ Lyrica
 
 ---
 
-Last updated: 2025-09-07 | Version: 1.6.0
+Last updated: 2025-09-08 | Version: 1.6.1

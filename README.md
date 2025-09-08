@@ -4,7 +4,7 @@ AI-powered clipboard translation tool with support for 20+ language models.
 
 ## Overview
 
-xiaoniao is a cross-platform clipboard monitor that automatically translates copied text using various AI providers. It runs in the background, monitoring clipboard changes and replacing content with translations.
+xiaoniao is a cross-platform clipboard monitor that automatically translates copied text using various AI providers. It runs in the background with a system tray icon, monitoring clipboard changes and replacing content with translations.
 
 ## Features
 
@@ -34,7 +34,8 @@ curl -sSL https://github.com/kaminoguo/xiaoniao/releases/latest/download/linux-i
 
 1. Download [xiaoniao-windows.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-windows.zip)
 2. Extract to desired location
-3. Run xiaoniao.exe
+3. Double-click xiaoniao.exe
+4. If prompted with security warning, click "More info" → "Run anyway"
 
 ### macOS
 
@@ -76,24 +77,28 @@ Two main configuration files:
 
 ## Usage
 
-### Start Monitoring
+### Start Application
 
-```bash
-xiaoniao run
-```
+- **Linux**: Click desktop icon or run `xiaoniao run`
+- **Windows**: Double-click xiaoniao.exe
+- **macOS**: Double-click xiaoniao app
 
-Once running:
+The application starts with a system tray icon. If no API is configured, the configuration window will open automatically.
+
+### System Tray Features
+
+- **Toggle Monitoring**: Start/stop clipboard monitoring
+- **Switch Translation Style**: Choose between different translation styles
+- **Settings**: Configure API keys and models
+- **Refresh**: Reload configuration
+- **Quit**: Exit application
+
+### How It Works
+
 1. Copy any text to clipboard
-2. Wait for translation (1-3 seconds)
-3. Paste to receive translated text
-
-### Tray Menu Options
-
-- Toggle monitoring on/off
-- Switch translation prompts
-- Open configuration
-- View logs
-- Exit application
+2. xiaoniao automatically detects and translates
+3. Original clipboard content is replaced with translation
+4. Paste (Ctrl+V) to insert translated text
 
 ## Supported AI Providers
 
@@ -202,4 +207,4 @@ Report issues at: https://github.com/kaminoguo/xiaoniao/issues
 
 ---
 
-Version 1.6.0 | Updated: 2025-09-07
+Version 1.6.1 | Updated: 2025-09-08

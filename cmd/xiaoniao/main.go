@@ -19,7 +19,7 @@ import (
 	"golang.design/x/hotkey/mainthread"
 )
 
-const version = "1.4.1"
+const version = "1.6.1"
 
 type Config struct {
 	APIKey        string `json:"api_key"`
@@ -190,17 +190,63 @@ func runDaemon() {
 func runDaemonInternal() {
 	// 检查配置
 	t := i18n.T()
+	
+	// 创建托盘图标（即使没有 API 也要显示托盘）
+	trayManager := tray.NewManager()
+	
+	// 初始化托盘（必须先初始化再使用）
+	trayStarted := make(chan bool)
+	go func() {
+		go func() {
+			time.Sleep(100 * time.Millisecond)
+			trayStarted <- true
+		}()
+		trayManager.Initialize()
+	}()
+	
+	// 等待托盘初始化完成
+	<-trayStarted
+	
+	// 初始化变量
+	var trans *translator.Translator
+	var monitor *clipboard.Monitor
+	translationCount := 0
+	
+	// 如果没有 API 配置
 	if config.APIKey == "" {
 		fmt.Println(t.NoAPIKey)
 		fmt.Println(t.OpeningConfig)
 		
-		// 使用和托盘图标相同的方法打开配置
-		openConfigInTerminal()
+		// 设置托盘为未配置状态
+		trayManager.SetCurrentPrompt("未配置 / Not Configured")
 		
-		// 等待一下，避免程序立即退出
-		time.Sleep(2 * time.Second)
-		return
-	}
+		// 设置托盘回调 - 只允许打开设置
+		trayManager.SetOnSettings(func() {
+			openConfigInTerminal()
+			go watchConfig()
+		})
+		
+		trayManager.SetOnToggleMonitor(func(enabled bool) {
+			fmt.Println("请先配置 API / Please configure API first")
+		})
+		
+		trayManager.SetOnQuit(func() {
+			os.Exit(0)
+		})
+		
+		// Windows/macOS 自动打开配置界面
+		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+			go func() {
+				time.Sleep(500 * time.Millisecond)
+				openConfigInTerminal()
+			}()
+		}
+		
+		// 重要：不要 return，继续运行主循环
+		// 托盘已经初始化，需要保持程序运行
+		// return 会导致程序退出
+	} else {
+		// 有 API 配置，执行正常的初始化
 	
 	// 确保加载最新的用户prompts
 	ReloadPrompts()
@@ -215,7 +261,8 @@ func runDaemonInternal() {
 		Timeout:      60,  // 增加到60秒
 	}
 	
-	trans, err := translator.NewTranslator(translatorConfig)
+	var err error
+	trans, err = translator.NewTranslator(translatorConfig)
 	if err != nil {
 		fmt.Printf("%s: %v\n", t.InitFailed, err)
 		return
@@ -227,12 +274,8 @@ func runDaemonInternal() {
 	// 启动刷新信号监控
 	go monitorRefreshSignal(&trans)
 	
-	// 初始化剪贴板监控（提前创建，供托盘使用）
-	monitor := clipboard.NewMonitor()
-	translationCount := 0
-	
-	// 创建托盘图标
-	trayManager := tray.NewManager()
+	// 初始化剪贴板监控
+	monitor = clipboard.NewMonitor()
 	
 	// 设置当前 prompt 显示
 	promptName := getPromptName(config.PromptID)
@@ -330,18 +373,6 @@ func runDaemonInternal() {
 		os.Exit(0)
 	})
 	
-	// 在后台启动托盘
-	trayStarted := make(chan bool)
-	go func() {
-		go func() {
-			time.Sleep(100 * time.Millisecond)
-			trayStarted <- true
-		}()
-		trayManager.Initialize()
-	}()
-	
-	// 等待托盘初始化
-	<-trayStarted
 	
 	// 更新prompt列表到菜单（托盘初始化后）
 	prompts := GetAllPrompts()
@@ -439,8 +470,10 @@ func runDaemonInternal() {
 	// 不播放启动提示音
 	// sound.PlayStart()
 	
-	// 更新托盘状态
-	trayManager.UpdateMonitorStatus(true)
+	// 更新托盘状态（只有在有 API 配置时才更新）
+	if config.APIKey != "" {
+		trayManager.UpdateMonitorStatus(true)
+	}
 	
 	monitor.SetOnChange(func(text string) {
 		if text == "" {
@@ -557,6 +590,9 @@ func runDaemonInternal() {
 			}
 		}
 	}()
+	
+	} // else 块结束
+	
 }
 
 
