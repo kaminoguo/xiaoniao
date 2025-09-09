@@ -19,7 +19,7 @@ import (
 	"golang.design/x/hotkey/mainthread"
 )
 
-const version = "1.6.1"
+const version = "1.6.3"
 
 type Config struct {
 	APIKey        string `json:"api_key"`

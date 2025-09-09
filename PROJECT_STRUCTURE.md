@@ -50,7 +50,10 @@ xiaoniao/
 │   ├── tray/                   # System tray
 │   │   ├── tray.go             # Common tray implementation
 │   │   ├── tray_windows.go     # Windows-specific tray
-│   │   └── tray_darwin.go      # macOS-specific tray
+│   │   ├── tray_darwin.go      # macOS-specific tray
+│   │   ├── icon_embedded.go    # Embedded icon resources
+│   │   ├── icon_*.png          # Status icons (blue/green/red)
+│   │   └── icon_*.ico          # Windows status icons
 │   │
 │   ├── sound/                  # Sound notifications
 │   │   ├── sound.go            # Linux sound
@@ -204,6 +207,14 @@ echo "test" | pbcopy
 
 ## Version History
 
+### v1.6.3 (2025-09-09)
+- Fixed Windows executable icon embedding using goversioninfo
+- Implemented multi-color system tray icons (blue/green/red) for status indication
+- Added embedded icon resources for both Windows (ICO) and Linux (PNG)
+- Fixed Windows system tray display issues
+- Enhanced Windows terminal handling for configuration UI
+- All icons now embedded in binary, no external files needed
+
 ### v1.6.2 (2025-09-08)
 - Fixed Windows system tray initialization issue
 - Implemented platform-specific daemon initialization
@@ -267,4 +278,4 @@ Lyrica
 
 ---
 
-Last updated: 2025-09-08 | Version: 1.6.2
+Last updated: 2025-09-09 | Version: 1.6.3

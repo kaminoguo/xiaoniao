@@ -93,6 +93,11 @@ The application starts with a system tray icon. If no API is configured, the con
 - **Refresh**: Reload configuration
 - **Quit**: Exit application
 
+#### System Tray Icon States
+- 🔵 **Blue Bird**: Monitoring active (idle)
+- 🟢 **Green Bird**: Translating in progress
+- 🔴 **Red Bird**: Monitoring stopped or error occurred
+
 ### How It Works
 
 1. Copy any text to clipboard
