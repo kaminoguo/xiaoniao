@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"syscall"
 	"time"
@@ -170,11 +169,7 @@ func showHelp() {
 // runDaemonWithHotkey 在主线程运行，支持全局快捷键
 func runDaemonWithHotkey() {
 	// 初始化托盘管理器
-	trayManager, err := tray.NewManager()
-	if err != nil {
-		fmt.Printf("托盘初始化失败: %v\n", err)
-		return
-	}
+	trayManager := tray.NewManager()
 	
 	// 运行守护进程业务逻辑
 	runDaemonBusinessLogic(trayManager)
@@ -772,16 +767,16 @@ func monitorRefreshSignal(trans **translator.Translator) {
 	}
 }
 
-// setupSignalHandlers 设置信号处理器 (Windows版本)
+// setupSignalHandlers 设置信号处理器 (跨平台版本)
 func setupSignalHandlers(sigChan chan os.Signal) {
-	// Windows支持的信号
+	// 跨平台支持的信号
 	signal.Notify(sigChan, 
 		os.Interrupt,    // Ctrl+C
 		syscall.SIGTERM, // 终止信号
 	)
 }
 
-// handleSignal 处理信号 (Windows版本)
+// handleSignal 处理信号 (跨平台版本)
 func handleSignal(sig os.Signal) string {
 	switch sig {
 	case os.Interrupt, syscall.SIGTERM:
@@ -789,4 +784,10 @@ func handleSignal(sig os.Signal) string {
 	default:
 		return ""
 	}
+}
+
+// openConfigInTerminal 在终端中打开配置界面
+func openConfigInTerminal() {
+	// 简单启动配置界面
+	showConfigUI()
 }
