@@ -1,6 +1,8 @@
 //go:build windows
 // +build windows
 
+// Package clipboard provides clipboard monitoring functionality
+
 package clipboard
 
 import (
