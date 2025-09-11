@@ -30,6 +30,7 @@ type Manager struct {
 	isReady           bool  // Whether tray is initialized
 	translationCount  int
 	currentPromptName string
+	businessLogic     func() // Business logic to run after tray is ready
 	onQuit            func()
 	onShow            func()
 	onSettings        func()
@@ -48,12 +49,12 @@ type Manager struct {
 }
 
 // NewManager creates a new tray manager
-func NewManager() *Manager {
+func NewManager() (*Manager, error) {
 	return &Manager{
 		status:       StatusIdle,
 		visible:      true,
 		isMonitoring: false,
-	}
+	}, nil
 }
 
 // SetStatus sets the tray icon status (changes color)
@@ -170,9 +171,16 @@ func (m *Manager) SetOnToggleTerminal(callback func()) {
 	m.onToggleTerminal = callback
 }
 
+// SetBusinessLogic sets the business logic callback to run after tray initialization
+func (m *Manager) SetBusinessLogic(callback func()) {
+	m.businessLogic = callback
+}
+
 // Initialize initializes the system tray
+// On Windows, this must be called from the main thread
 func (m *Manager) Initialize() error {
-	go systray.Run(m.onReady, m.onExit)
+	// Windows: Run directly in main thread (blocking call)
+	systray.Run(m.onReady, m.onExit)
 	return nil
 }
 
@@ -238,6 +246,11 @@ func (m *Manager) onReady() {
 			}
 		}
 	}()
+	
+	// After tray is initialized, run the business logic
+	if m.businessLogic != nil {
+		go m.businessLogic()
+	}
 }
 
 func (m *Manager) onExit() {

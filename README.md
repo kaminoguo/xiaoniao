@@ -119,7 +119,7 @@ xiaoniao.exe config
 ```cmd
 git clone https://github.com/kaminoguo/xiaoniao.git
 cd xiaoniao
-go build -ldflags="-s -w -H=windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
+go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
 构建输出将生成在当前目录。
@@ -128,7 +128,7 @@ go build -ldflags="-s -w -H=windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
 
 ```cmd
 go generate
-go build -ldflags="-s -w -H=windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
+go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
 这将生成带有应用图标的可执行文件。

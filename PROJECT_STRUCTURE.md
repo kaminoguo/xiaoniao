@@ -135,12 +135,12 @@ go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
 
 ```cmd
 go generate
-go build -ldflags="-s -w -H=windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
+go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
 构建标志说明：
-- `-s -w`：减小二进制文件大小
-- 注意：不使用`-H=windowsgui`，因为配置界面需要控制台窗口（TUI）
+- `-s -w`：减小二进制文件大小（strip符号表）
+- **重要**：不使用`-H=windowsgui`，因为配置界面需要控制台窗口（TUI）
 
 ## 测试
 

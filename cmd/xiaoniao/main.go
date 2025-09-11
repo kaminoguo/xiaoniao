@@ -91,6 +91,12 @@ func acquireLock() (bool, func()) {
 }
 
 func main() {
+	// Windows下确保控制台窗口可见（如果需要）
+	if len(os.Args) >= 2 && (os.Args[1] == "config" || os.Args[1] == "about" || os.Args[1] == "help" || os.Args[1] == "version") {
+		// 对于需要显示输出的命令，确保控制台窗口可见
+		showConsoleWindow()
+	}
+	
 	// 无参数时默认执行 run
 	if len(os.Args) < 2 {
 		os.Args = append(os.Args, "run")
@@ -102,7 +108,8 @@ func main() {
 	case "run":
 		// Acquire lock for run mode
 		if ok, cleanup := acquireLock(); !ok {
-			fmt.Println(i18n.T().AlreadyRunning)
+			// 显示错误消息（用户可见）
+			showErrorMessage("xiaoniao", "程序已在运行中。请检查系统托盘图标。\n如果没有看到托盘图标，请尝试结束所有xiaoniao进程后重新启动。")
 			os.Exit(1)
 		} else {
 			defer cleanup()
@@ -169,10 +176,23 @@ func showHelp() {
 // runDaemonWithHotkey 在主线程运行，支持全局快捷键
 func runDaemonWithHotkey() {
 	// 初始化托盘管理器
-	trayManager := tray.NewManager()
+	trayManager, err := tray.NewManager()
+	if err != nil {
+		showErrorMessage("xiaoniao 启动失败", fmt.Sprintf("托盘管理器初始化失败：%v\n\n请检查系统是否支持系统托盘功能。", err))
+		return
+	}
 	
-	// 运行守护进程业务逻辑
-	runDaemonBusinessLogic(trayManager)
+	// Windows需要在主线程中运行systray
+	// 设置业务逻辑回调到托盘管理器的onReady中
+	trayManager.SetBusinessLogic(func() {
+		runDaemonBusinessLogic(trayManager)
+	})
+	
+	// 直接在主线程中启动托盘（这是阻塞调用）
+	if err := trayManager.Initialize(); err != nil {
+		showErrorMessage("xiaoniao 启动失败", fmt.Sprintf("系统托盘启动失败：%v\n\n可能的原因：\n1. 系统托盘功能被禁用\n2. 权限不足\n3. 系统资源不足\n\n请检查系统设置并重试。", err))
+		return
+	}
 }
 
 // runDaemonBusinessLogic 运行守护进程的业务逻辑
@@ -211,12 +231,27 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		// 自动打开配置界面
 		go func() {
 			time.Sleep(500 * time.Millisecond)
+			showConsoleWindow() // 确保控制台窗口可见
 			showConfigUI()
 		}()
 		
-		// 重要：不要 return，继续运行主循环
-		// 托盘已经初始化，需要保持程序运行
-		// return 会导致程序退出
+		// 设置等待状态，让托盘保持运行
+		go func() {
+			// 持续监控配置文件变化
+			for {
+				time.Sleep(2 * time.Second)
+				oldAPIKey := config.APIKey
+				loadConfig()
+				if config.APIKey != "" && config.APIKey != oldAPIKey {
+					// API配置完成，重新初始化业务逻辑
+					fmt.Println("\n✅ API配置已完成，重新启动翻译服务...")
+					go runDaemonBusinessLogic(trayManager)
+					return
+				}
+			}
+		}()
+		
+		return // 返回但保持托盘运行
 	} else {
 		// 有 API 配置，执行正常的初始化
 		
@@ -267,6 +302,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	
 		trayManager.SetOnSettings(func() {
 			// 打开配置界面
+			showConsoleWindow() // 确保控制台窗口可见
 			showConfigUI()
 			// 启动配置文件监控
 			go watchConfig()
@@ -382,7 +418,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		if config.HotkeySwitch != "" {
 		err := hotkeyManager.RegisterFromString("switch", config.HotkeySwitch, func() {
 			// 切换到下一个Prompt
-			prompts := loadAllPrompts()
+			prompts := GetAllPrompts()
 			if len(prompts) == 0 {
 				return
 			}
@@ -532,7 +568,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 				
 			case "toggle_prompt":
 				// 切换到下一个Prompt
-				prompts := loadAllPrompts()
+				prompts := GetAllPrompts()
 				if len(prompts) > 0 {
 					currentIdx := -1
 					for i, p := range prompts {
@@ -624,22 +660,13 @@ func getPromptName(id string) string {
 }
 
 func getPromptContent(id string) string {
-	// 直接从新系统获取prompt
-	prompts := GetAllPrompts()
-	
-	for _, p := range prompts {
-		if p.ID == id {
-			// 调试：打印实际的内容长度
-			fmt.Printf("\n[DEBUG] Found prompt %s, actual content length: %d\n", id, len(p.Content))
-			if len(p.Content) < 100 {
-				fmt.Printf("[DEBUG] Content: %s\n", p.Content)
-			} else {
-				fmt.Printf("[DEBUG] Content first 100 chars: %.100s...\n", p.Content)
-			}
-			return p.Content
-		}
+	// 简单的默认prompt内容
+	switch id {
+	case "direct":
+		return "Please translate the following text to Chinese:"
+	default:
+		return "Translate the following to Chinese:"
 	}
-	return "Translate the following to Chinese:"
 }
 
 var terminalVisible = false  // Start as false when running in background
@@ -791,3 +818,7 @@ func openConfigInTerminal() {
 	// 简单启动配置界面
 	showConfigUI()
 }
+
+
+
+// 删除重复定义的函数，使用prompts.go和config_ui.go中的实现

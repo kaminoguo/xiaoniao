@@ -94,6 +94,14 @@ func (m *Manager) SetOnToggleTerminal(callback func()) {
 	m.onToggleTerminal = callback
 }
 
+// SetBusinessLogic sets the business logic callback (stub)
+func (m *Manager) SetBusinessLogic(callback func()) {
+	// For Linux, immediately call the business logic since there's no tray
+	if callback != nil {
+		go callback()
+	}
+}
+
 // UpdatePromptList updates the prompt list in tray menu (stub)
 func (m *Manager) UpdatePromptList(prompts []struct{ ID, Name string }) {
 	// Stub implementation - just print the prompt list
@@ -110,4 +118,10 @@ func (m *Manager) Quit() {
 // IsReady returns whether the tray is ready (stub)
 func (m *Manager) IsReady() bool {
 	return m.isReady
+}
+
+// Initialize initializes the tray (stub for Linux)
+func (m *Manager) Initialize() error {
+	fmt.Println("Tray initialization skipped (Linux stub)")
+	return nil
 }
