@@ -1,215 +1,190 @@
 # xiaoniao
 
-AI-powered clipboard translation tool with support for 20+ language models.
+Windows专用剪贴板AI翻译工具，支持20+语言模型。
 
-## Overview
+## 概述
 
-xiaoniao is a cross-platform clipboard monitor that automatically translates copied text using various AI providers. It runs in the background with a system tray icon, monitoring clipboard changes and replacing content with translations.
+xiaoniao是一款专为Windows设计的剪贴板监控翻译工具，可自动将复制的文本通过AI进行翻译。它作为后台程序运行，通过系统托盘图标提供控制，实时监控剪贴板变化并替换为翻译后的内容。
 
-## Features
+## 功能特性
 
-- Real-time clipboard monitoring with automatic translation
-- Support for 20+ AI providers including OpenAI, Anthropic, Google, and OpenRouter
-- Customizable translation prompts
-- Terminal-based configuration interface
-- System tray integration
-- Global hotkey support
-- Multi-language interface (Chinese, English, Japanese, Korean, Spanish, French)
+- 实时剪贴板监控与自动翻译
+- 支持20+AI提供商，包括OpenAI、Anthropic、Google和OpenRouter
+- 可自定义翻译提示词
+- 基于终端的配置界面
+- 系统托盘集成
+- 全局热键支持
+- 多语言界面（中文、英语、日语、韩语、西班牙语、法语）
 
-## Supported Platforms
+## 系统要求
 
-- Linux (X11/Wayland)
-- Windows 10/11
-- macOS 10.15+
+- Windows 10 或 Windows 11
+- 64位系统架构
 
-## Installation
+## 安装
 
-### Linux
+### 下载安装
 
-```bash
-curl -sSL https://github.com/kaminoguo/xiaoniao/releases/latest/download/linux-install.sh | bash
+1. 下载 [xiaoniao-windows.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-windows.zip)
+2. 解压到任意目录
+3. 双击运行 xiaoniao.exe
+4. 如遇到安全警告，请点击"更多信息" → "仍要运行"
+
+### 快速开始
+
+首次运行时会自动打开配置界面，按照提示设置API密钥即可开始使用。
+
+## 配置
+
+### 初始设置
+
+```cmd
+xiaoniao.exe config
 ```
 
-### Windows
+配置界面允许您：
+- 设置所选提供商的API密钥
+- 选择翻译模型
+- 选择或创建自定义翻译提示词
+- 配置界面语言和主题
+- 设置全局热键
 
-1. Download [xiaoniao-windows.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-windows.zip)
-2. Extract to desired location
-3. Double-click xiaoniao.exe
-4. If prompted with security warning, click "More info" → "Run anyway"
+### 配置文件位置
 
-### macOS
+配置文件保存在：`%APPDATA%\xiaoniao\`
 
-Download the appropriate version:
-- Intel: [xiaoniao-darwin-amd64.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-darwin-amd64.zip)
-- Apple Silicon: [xiaoniao-darwin-arm64.zip](https://github.com/kaminoguo/xiaoniao/releases/latest/download/xiaoniao-darwin-arm64.zip)
+主要配置文件：
+- `config.json`：主要应用程序设置
+- `prompts.json`：自定义翻译提示词
 
-Extract and run:
-```bash
-chmod +x xiaoniao
-./xiaoniao config
-```
+## 使用方法
 
-## Configuration
+### 启动应用
 
-### Initial Setup
+双击 xiaoniao.exe 启动应用程序。应用程序会在系统托盘显示图标。如果未配置API，配置窗口将自动打开。
 
-```bash
-xiaoniao config
-```
+### 系统托盘功能
 
-The configuration interface allows you to:
-- Set API keys for your chosen provider
-- Select translation model
-- Choose or create custom translation prompts
-- Configure interface language and theme
-- Set up global hotkeys
+- **切换监控**：开始/停止剪贴板监控
+- **切换翻译风格**：选择不同的翻译风格
+- **设置**：配置API密钥和模型
+- **刷新**：重新加载配置
+- **退出**：退出应用程序
 
-### Configuration Files
+#### 系统托盘图标状态
+- 🔵 **蓝色小鸟**：监控中（空闲）
+- 🟢 **绿色小鸟**：正在翻译
+- 🔴 **红色小鸟**：监控已停止或发生错误
 
-Configuration files are stored in platform-specific locations:
-- Linux: `~/.config/xiaoniao/`
-- Windows: `%APPDATA%\xiaoniao\`
-- macOS: `~/Library/Application Support/xiaoniao/`
+### 工作原理
 
-Two main configuration files:
-- `config.json`: Main application settings
-- `prompts.json`: Custom translation prompts
+1. 复制任意文本到剪贴板
+2. xiaoniao自动检测并翻译
+3. 原始剪贴板内容被翻译结果替换
+4. 粘贴（Ctrl+V）插入翻译后的文本
 
-## Usage
+## 支持的AI提供商
 
-### Start Application
+### 主要提供商
 
-- **Linux**: Click desktop icon or run `xiaoniao run`
-- **Windows**: Double-click xiaoniao.exe
-- **macOS**: Double-click xiaoniao app
-
-The application starts with a system tray icon. If no API is configured, the configuration window will open automatically.
-
-### System Tray Features
-
-- **Toggle Monitoring**: Start/stop clipboard monitoring
-- **Switch Translation Style**: Choose between different translation styles
-- **Settings**: Configure API keys and models
-- **Refresh**: Reload configuration
-- **Quit**: Exit application
-
-#### System Tray Icon States
-- 🔵 **Blue Bird**: Monitoring active (idle)
-- 🟢 **Green Bird**: Translating in progress
-- 🔴 **Red Bird**: Monitoring stopped or error occurred
-
-### How It Works
-
-1. Copy any text to clipboard
-2. xiaoniao automatically detects and translates
-3. Original clipboard content is replaced with translation
-4. Paste (Ctrl+V) to insert translated text
-
-## Supported AI Providers
-
-### Primary Providers
-
-| Provider | Models | API Key Format |
-|----------|--------|----------------|
+| 提供商 | 模型 | API密钥格式 |
+|--------|------|-------------|
 | OpenAI | GPT-4, GPT-3.5 | sk-... |
 | Anthropic | Claude 3.5 | sk-ant-... |
 | Google | Gemini Pro/Flash | ... |
-| OpenRouter | 300+ models | sk-or-... |
+| OpenRouter | 300+模型 | sk-or-... |
 
-### Additional Providers
+### 其他提供商
 
 - DeepSeek
-- Groq (high-speed inference)
+- Groq（高速推理）
 - Together AI
 - Perplexity
 - Mistral AI
 - Cohere
 - Azure OpenAI
 - AWS Bedrock
-- And any OpenAI-compatible API
+- 任何兼容OpenAI的API
 
-## Building from Source
+## 从源代码构建
 
-### Prerequisites
+### 前置要求
 
 - Go 1.21+
 - Git
+- Windows开发环境
 
-### Build
+### 构建步骤
 
-```bash
+```cmd
 git clone https://github.com/kaminoguo/xiaoniao.git
 cd xiaoniao
-./build.sh
+go build -ldflags="-s -w -H=windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
-Build artifacts will be created in the `dist/` directory.
+构建输出将生成在当前目录。
 
-### Platform-specific builds
+### 带图标构建（推荐）
 
-```bash
-# Linux
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao cmd/xiaoniao/*.go
-
-# Windows
-GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
-
-# macOS
-GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao cmd/xiaoniao/*.go
+```cmd
+go generate
+go build -ldflags="-s -w -H=windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
-## Development
+这将生成带有应用图标的可执行文件。
 
-### Project Structure
+## 开发
+
+### 项目结构
 
 ```
 xiaoniao/
-├── cmd/xiaoniao/       # Main application entry
-├── internal/           # Core modules
-│   ├── translator/     # Translation engine
-│   ├── clipboard/      # Clipboard monitoring
-│   ├── config/         # Configuration management
-│   ├── hotkey/         # Global hotkeys
-│   ├── tray/          # System tray
-│   └── i18n/          # Internationalization
-└── assets/            # Resources
+├── cmd/xiaoniao/       # 主应用程序入口
+├── internal/           # 核心模块
+│   ├── translator/     # 翻译引擎
+│   ├── clipboard/      # 剪贴板监控
+│   ├── config/         # 配置管理
+│   ├── hotkey/         # 全局热键
+│   ├── tray/          # 系统托盘
+│   └── i18n/          # 国际化
+└── assets/            # 资源文件
 ```
 
-### Testing
+### 测试
 
-Run tests:
-```bash
+运行测试：
+```cmd
 go test ./...
 ```
 
-Test specific functionality:
-```bash
-# Test configuration UI
-xiaoniao config
+测试特定功能：
+```cmd
+# 测试配置界面
+xiaoniao.exe config
 
-# Test clipboard monitoring
-xiaoniao run
+# 测试剪贴板监控
+xiaoniao.exe run
 
-# Test API connection
-xiaoniao test-api
+# 测试API连接
+xiaoniao.exe test-api
 ```
 
-## License
+## 许可证
 
-GPL-3.0 License. See [LICENSE](LICENSE) file for details.
+GPL-3.0许可证。详见[LICENSE](LICENSE)文件。
 
-## Contributing
+## 贡献
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+1. Fork存储库
+2. 创建功能分支
+3. 提交更改
+4. 推送到分支
+5. 创建Pull Request
 
-## Support
+## 支持
 
-Report issues at: https://github.com/kaminoguo/xiaoniao/issues
+报告问题：https://github.com/kaminoguo/xiaoniao/issues
 
 ---
 
-Version 1.6.2 | Updated: 2025-09-08
+版本 1.6.3 | 更新日期：2025-09-09
