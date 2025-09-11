@@ -33,6 +33,13 @@ func PlayError() {
 	playSound.Call(uintptr(unsafe.Pointer(text)), 0, sndAsync)
 }
 
+// PlayStart plays a startup sound on Windows
+func PlayStart() {
+	// Use Windows system sound
+	text, _ := syscall.UTF16PtrFromString("SystemStart")
+	playSound.Call(uintptr(unsafe.Pointer(text)), 0, sndAsync)
+}
+
 // PlayFile plays a sound file on Windows
 func PlayFile(filepath string) error {
 	text, err := syscall.UTF16PtrFromString(filepath)

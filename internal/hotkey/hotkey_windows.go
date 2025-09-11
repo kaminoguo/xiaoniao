@@ -1,6 +1,8 @@
 //go:build windows
 // +build windows
 
+// Package hotkey provides hotkey registration functionality
+
 package hotkey
 
 import (

@@ -2,22 +2,10 @@ package tray
 
 import (
 	_ "embed"
-	"runtime"
 )
 
-// Embed the default icons for different platforms and states
+// Embed the ICO icons for Windows
 
-// PNG icons for Linux/macOS
-//go:embed icon_blue.png
-var iconBluePNG []byte
-
-//go:embed icon_green.png
-var iconGreenPNG []byte
-
-//go:embed icon_red.png
-var iconRedPNG []byte
-
-// ICO icons for Windows
 //go:embed icon_blue.ico
 var iconBlueICO []byte
 
@@ -27,45 +15,28 @@ var iconGreenICO []byte
 //go:embed icon_red.ico
 var iconRedICO []byte
 
-// Fallback icon
-//go:embed icon_default.png
-var defaultIconPNG []byte
-
 //go:embed icon_default.ico
 var defaultIconICO []byte
 
-// GetDefaultIcon returns the embedded default icon appropriate for the platform
+// GetDefaultIcon returns the embedded default icon
 func GetDefaultIcon() []byte {
 	return GetIconForStatus("blue")
 }
 
 // GetIconForStatus returns the embedded icon for specific status
 func GetIconForStatus(status string) []byte {
-	if runtime.GOOS == "windows" {
-		// Windows uses ICO format
-		switch status {
-		case "green":
-			return iconGreenICO
-		case "red":
-			return iconRedICO
-		case "blue":
-			return iconBlueICO
-		default:
-			if len(defaultIconICO) > 0 {
-				return defaultIconICO
-			}
-		}
-	}
-	
-	// Linux/macOS use PNG format
+	// Windows uses ICO format
 	switch status {
 	case "green":
-		return iconGreenPNG
+		return iconGreenICO
 	case "red":
-		return iconRedPNG
+		return iconRedICO
 	case "blue":
-		return iconBluePNG
+		return iconBlueICO
 	default:
-		return defaultIconPNG
+		if len(defaultIconICO) > 0 {
+			return defaultIconICO
+		}
+		return iconBlueICO // fallback to blue icon
 	}
 }

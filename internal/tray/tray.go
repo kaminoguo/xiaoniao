@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 
 	"github.com/getlantern/systray"
 	"github.com/kaminoguo/xiaoniao/internal/i18n"
@@ -263,76 +262,14 @@ func (m *Manager) openSettings() {
 	if m.onSettings != nil {
 		m.onSettings()
 	} else {
-		// 在新终端窗口中打开配置界面
-		switch runtime.GOOS {
-		case "linux":
-			// 尝试不同的终端模拟器
-			terminals := [][]string{
-				{"gnome-terminal", "--", "xiaoniao", "config"},
-				{"konsole", "-e", "xiaoniao", "config"},
-				{"xfce4-terminal", "-e", "xiaoniao config"},
-				{"xterm", "-e", "xiaoniao", "config"},
-				{"kitty", "xiaoniao", "config"},
-				{"alacritty", "-e", "xiaoniao", "config"},
-			}
-			
-			for _, term := range terminals {
-				cmd := exec.Command(term[0], term[1:]...)
-				if err := cmd.Start(); err == nil {
-					return
-				}
-			}
-			
-			// 如果都失败了，尝试通过 x-terminal-emulator（Debian/Ubuntu）
-			exec.Command("x-terminal-emulator", "-e", "xiaoniao", "config").Start()
-			
-		case "darwin":
-			// macOS: 使用 Terminal.app
-			script := `tell application "Terminal" to do script "xiaoniao config"`
-			exec.Command("osascript", "-e", script).Start()
-			
-		case "windows":
-			// Windows: 使用 cmd
-			exec.Command("cmd", "/c", "start", "cmd", "/k", "xiaoniao", "config").Start()
-		}
+		// Windows: 使用 cmd 在新终端窗口中打开配置界面
+		exec.Command("cmd", "/c", "start", "cmd", "/k", "xiaoniao", "config").Start()
 	}
 }
 
 func (m *Manager) showAbout() {
-	// 直接打开关于页面
-	switch runtime.GOOS {
-	case "linux":
-		// 尝试不同的终端模拟器，使用about命令直接打开关于页面
-		terminals := [][]string{
-			// ptyxis 优先（Fedora的新默认终端）
-			{"ptyxis", "-x", "xiaoniao about"},
-			{"gnome-terminal", "--", "xiaoniao", "about"},
-			{"konsole", "-e", "xiaoniao", "about"},
-			{"xfce4-terminal", "-e", "xiaoniao about"},
-			{"xterm", "-e", "xiaoniao", "about"},
-			{"kitty", "xiaoniao", "about"},
-			{"alacritty", "-e", "xiaoniao", "about"},
-		}
-		
-		for _, term := range terminals {
-			cmd := exec.Command(term[0], term[1:]...)
-			if err := cmd.Start(); err == nil {
-				return
-			}
-		}
-		
-		// 如果都失败了，尝试通过 x-terminal-emulator（Debian/Ubuntu）
-		exec.Command("x-terminal-emulator", "-e", "xiaoniao", "about").Start()
-		
-	case "darwin":
-		// macOS: 使用 Terminal.app
-		script := `tell application "Terminal" to do script "xiaoniao about"`
-		exec.Command("osascript", "-e", script).Start()
-		
-	case "windows":
-		// Windows: 使用 cmd
-		exec.Command("cmd", "/c", "start", "cmd", "/k", "xiaoniao", "about").Start()
-	}
+	// Windows: 使用 cmd 直接打开关于页面
+	exec.Command("cmd", "/c", "start", "cmd", "/k", "xiaoniao", "about").Start()
 }
 
 func (m *Manager) refreshConfig() {

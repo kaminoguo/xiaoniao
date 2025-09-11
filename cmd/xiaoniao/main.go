@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -91,16 +92,9 @@ func acquireLock() (bool, func()) {
 }
 
 func main() {
-	// Windows/macOS: 双击运行时默认执行 run
+	// 无参数时默认执行 run
 	if len(os.Args) < 2 {
-		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-			// 无参数时默认运行
-			os.Args = append(os.Args, "run")
-		} else {
-			// Linux 保持原有行为
-			showUsage()
-			return
-		}
+		os.Args = append(os.Args, "run")
 	}
 	
 	command := os.Args[1]
@@ -175,8 +169,15 @@ func showHelp() {
 
 // runDaemonWithHotkey 在主线程运行，支持全局快捷键
 func runDaemonWithHotkey() {
-	// 使用平台特定的初始化
-	platformRunDaemon()
+	// 初始化托盘管理器
+	trayManager, err := tray.NewManager()
+	if err != nil {
+		fmt.Printf("托盘初始化失败: %v\n", err)
+		return
+	}
+	
+	// 运行守护进程业务逻辑
+	runDaemonBusinessLogic(trayManager)
 }
 
 // runDaemonBusinessLogic 运行守护进程的业务逻辑
@@ -212,13 +213,11 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			os.Exit(0)
 		})
 		
-		// Windows/macOS 自动打开配置界面
-		if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-			go func() {
-				time.Sleep(500 * time.Millisecond)
-				openConfigInTerminal()
-			}()
-		}
+		// 自动打开配置界面
+		go func() {
+			time.Sleep(500 * time.Millisecond)
+			showConfigUI()
+		}()
 		
 		// 重要：不要 return，继续运行主循环
 		// 托盘已经初始化，需要保持程序运行
@@ -272,8 +271,8 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	
 	
 		trayManager.SetOnSettings(func() {
-			// 在新终端窗口中打开配置界面
-			openConfigInTerminal()
+			// 打开配置界面
+			showConfigUI()
 			// 启动配置文件监控
 			go watchConfig()
 		})
@@ -580,22 +579,13 @@ func clearScreen() {
 	fmt.Print("\033[H\033[2J")
 }
 
-// simulatePaste 模拟粘贴操作
+// simulatePaste 模拟粘贴操作 (Windows实现)
 func simulatePaste() {
-	switch runtime.GOOS {
-	case "linux":
-		// 尝试使用xdotool
-		if err := exec.Command("xdotool", "key", "ctrl+v").Run(); err != nil {
-			// 如果xdotool不可用，尝试ydotool（Wayland）
-			exec.Command("ydotool", "key", "29:1", "47:1", "47:0", "29:0").Run()
-		}
-	case "darwin":
-		// macOS使用osascript
-		exec.Command("osascript", "-e", `tell application "System Events" to keystroke "v" using command down`).Run()
-	case "windows":
-		// Windows暂不支持自动粘贴
-		// 需要使用Windows API或AutoHotkey
-	}
+	// Windows实现自动粘贴功能
+	// 可以使用PowerShell或Windows API实现
+	// 目前留空，可以在后续添加Windows特定的实现
+	// 例如：使用PowerShell发送Ctrl+V
+	// exec.Command("powershell", "-Command", "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('^v')").Run()
 }
 
 func loadConfig() {
@@ -660,83 +650,31 @@ func getPromptContent(id string) string {
 var terminalVisible = false  // Start as false when running in background
 var terminalPID = 0  // PID of the log viewer terminal
 
-// hideTerminal 隐藏日志查看终端窗口
+// hideTerminal 隐藏日志查看终端窗口 (Windows实现)
 func hideTerminal() {
 	if !terminalVisible || terminalPID == 0 {
 		return
 	}
 	
-	switch runtime.GOOS {
-	case "linux":
-		// Kill the log viewer terminal
-		if terminalPID > 0 {
-			exec.Command("kill", strconv.Itoa(terminalPID)).Run()
-			terminalPID = 0
-		}
-		terminalVisible = false
-		
-	case "darwin":
-		// macOS: Kill the log viewer terminal
-		if terminalPID > 0 {
-			exec.Command("kill", strconv.Itoa(terminalPID)).Run()
-			terminalPID = 0
-		}
-		terminalVisible = false
-		
-	case "windows":
-		// Windows: Kill the log viewer terminal
-		if terminalPID > 0 {
-			exec.Command("taskkill", "/PID", strconv.Itoa(terminalPID)).Run()
-			terminalPID = 0
-		}
-		terminalVisible = false
+	// Windows: Kill the log viewer terminal
+	if terminalPID > 0 {
+		exec.Command("taskkill", "/PID", strconv.Itoa(terminalPID)).Run()
+		terminalPID = 0
 	}
+	terminalVisible = false
 }
 
-// showTerminal 显示日志查看终端窗口
+// showTerminal 显示日志查看终端窗口 (Windows实现)
 func showTerminal() {
 	if terminalVisible {
 		return
 	}
 	
-	switch runtime.GOOS {
-	case "linux":
-		// Open a new terminal to tail the log file
-		var cmd *exec.Cmd
-		
-		// Try different terminal emulators
-		if _, err := exec.LookPath("ptyxis"); err == nil {
-			cmd = exec.Command("ptyxis", "--title", "xiaoniao 日志", "--", "tail", "-f", "/tmp/xiaoniao.log")
-		} else if _, err := exec.LookPath("gnome-terminal"); err == nil {
-			cmd = exec.Command("gnome-terminal", "--title=xiaoniao 日志", "--", "tail", "-f", "/tmp/xiaoniao.log")
-		} else if _, err := exec.LookPath("konsole"); err == nil {
-			cmd = exec.Command("konsole", "-caption", "xiaoniao 日志", "-e", "tail", "-f", "/tmp/xiaoniao.log")
-		} else if _, err := exec.LookPath("xterm"); err == nil {
-			cmd = exec.Command("xterm", "-title", "xiaoniao 日志", "-e", "tail", "-f", "/tmp/xiaoniao.log")
-		}
-		
-		if cmd != nil {
-			if err := cmd.Start(); err == nil {
-				terminalPID = cmd.Process.Pid
-				terminalVisible = true
-			}
-		}
-		
-	case "darwin":
-		// macOS: Open Terminal with tail command
-		cmd := exec.Command("osascript", "-e", `tell application "Terminal" to do script "tail -f /tmp/xiaoniao.log"`)
-		if err := cmd.Start(); err == nil {
-			terminalPID = cmd.Process.Pid
-			terminalVisible = true
-		}
-		
-	case "windows":
-		// Windows: Open Command Prompt with tail equivalent
-		cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", "powershell Get-Content /tmp/xiaoniao.log -Wait")
-		if err := cmd.Start(); err == nil {
-			terminalPID = cmd.Process.Pid
-			terminalVisible = true
-		}
+	// Windows: Open Command Prompt with tail equivalent
+	cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", "powershell Get-Content /tmp/xiaoniao.log -Wait")
+	if err := cmd.Start(); err == nil {
+		terminalPID = cmd.Process.Pid
+		terminalVisible = true
 	}
 }
 
@@ -831,5 +769,24 @@ func monitorRefreshSignal(trans **translator.Translator) {
 				fmt.Printf("\n❌ 翻译器刷新失败: %v\n", err)
 			}
 		}
+	}
+}
+
+// setupSignalHandlers 设置信号处理器 (Windows版本)
+func setupSignalHandlers(sigChan chan os.Signal) {
+	// Windows支持的信号
+	signal.Notify(sigChan, 
+		os.Interrupt,    // Ctrl+C
+		syscall.SIGTERM, // 终止信号
+	)
+}
+
+// handleSignal 处理信号 (Windows版本)
+func handleSignal(sig os.Signal) string {
+	switch sig {
+	case os.Interrupt, syscall.SIGTERM:
+		return "exit"
+	default:
+		return ""
 	}
 }
