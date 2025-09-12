@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/getlantern/systray"
 	"github.com/kaminoguo/xiaoniao/internal/i18n"
@@ -147,7 +148,13 @@ func (m *Manager) SetOnSettings(callback func()) {
 
 // SetOnToggleMonitor sets the monitor toggle callback
 func (m *Manager) SetOnToggleMonitor(callback func(bool)) {
+	fmt.Println("📋 DEBUG: SetOnToggleMonitor被调用，正在设置回调函数")
 	m.onToggleMonitor = callback
+	if callback != nil {
+		fmt.Println("📋 DEBUG: onToggleMonitor回调函数设置成功")
+	} else {
+		fmt.Println("❌ DEBUG: 警告：callback为nil！")
+	}
 }
 
 
@@ -186,26 +193,43 @@ func (m *Manager) Initialize() error {
 
 
 func (m *Manager) onReady() {
+	fmt.Println("🚀 DEBUG: onReady() 开始执行")
+	
 	// Mark as ready before any systray operations
 	m.isReady = true
+	fmt.Println("🚀 DEBUG: isReady标记设置为true")
 	
 	// 只显示图标，不显示标题
 	systray.SetTitle("")
 	systray.SetTooltip("xiaoniao")
+	fmt.Println("🚀 DEBUG: 标题和提示已设置")
 	
 	// Load blue icon initially
 	configDir, _ := os.UserConfigDir()
 	iconPath := filepath.Join(configDir, "xiaoniao", "icon_blue.png")
 	if iconData, err := os.ReadFile(iconPath); err == nil {
 		systray.SetIcon(iconData)
+		fmt.Println("🚀 DEBUG: 从文件加载图标成功")
 	} else {
 		// Use embedded default icon
 		systray.SetIcon(GetDefaultIcon())
+		fmt.Println("🚀 DEBUG: 使用默认内嵌图标")
 	}
 	
 	// Create menu items
 	t := i18n.T()
+	fmt.Printf("🏗️ DEBUG: 创建托盘菜单，TrayToggle文本: '%s'，isMonitoring: %v\n", t.TrayToggle, m.isMonitoring)
 	m.mToggle = systray.AddMenuItemCheckbox(t.TrayToggle, t.TrayToggle, m.isMonitoring)
+	if m.mToggle != nil {
+		fmt.Println("🏗️ DEBUG: mToggle菜单项创建成功")
+		if m.mToggle.ClickedCh != nil {
+			fmt.Println("🏗️ DEBUG: mToggle.ClickedCh通道创建成功")
+		} else {
+			fmt.Println("❌ DEBUG: 警告：mToggle.ClickedCh通道为nil！")
+		}
+	} else {
+		fmt.Println("❌ DEBUG: 错误：mToggle菜单项创建失败！")
+	}
 	
 	// 显示当前 prompt
 	promptLabel := fmt.Sprintf("%s: %s", t.TranslateStyle, m.currentPromptName)
@@ -228,29 +252,48 @@ func (m *Manager) onReady() {
 	
 	// Handle menu events
 	go func() {
+		fmt.Println("✅ DEBUG: 菜单事件监听goroutine已启动")
 		for {
 			select {
 			case <-m.mToggle.ClickedCh:
+				fmt.Println("🔥 DEBUG: 检测到停止/启动监控菜单点击事件")
 				m.toggleMonitor()
 			case <-m.mRefresh.ClickedCh:
+				fmt.Println("🔥 DEBUG: 检测到刷新菜单点击事件")
 				m.refreshConfig()
 			case <-mConfig.ClickedCh:
+				fmt.Println("🔥 DEBUG: 检测到设置菜单点击事件")
 				m.openSettings()
 			case <-mTerminal.ClickedCh:
+				fmt.Println("🔥 DEBUG: 检测到显示/隐藏终端菜单点击事件")
 				m.toggleTerminal()
 			case <-mAbout.ClickedCh:
+				fmt.Println("🔥 DEBUG: 检测到关于菜单点击事件")
 				m.showAbout()
 			case <-mQuit.ClickedCh:
+				fmt.Println("🔥 DEBUG: 检测到退出菜单点击事件")
 				m.quit()
 				return
 			}
 		}
 	}()
 	
-	// After tray is initialized, run the business logic
-	if m.businessLogic != nil {
-		go m.businessLogic()
-	}
+	// 确保菜单事件监听启动后，再启动业务逻辑，避免时序问题
+	go func() {
+		// 给菜单事件监听一点时间启动
+		time.Sleep(100 * time.Millisecond)
+		fmt.Println("🚀 DEBUG: 菜单事件监听应该已经启动，现在启动业务逻辑")
+		
+		// After tray is initialized, run the business logic
+		if m.businessLogic != nil {
+			fmt.Println("🚀 DEBUG: 准备启动业务逻辑goroutine")
+			m.businessLogic() // 直接调用，不再嵌套goroutine
+		} else {
+			fmt.Println("❌ DEBUG: businessLogic为nil，跳过业务逻辑启动")
+		}
+		
+		// 测试机制已移除 - 仅在需要时启用
+	}()
 }
 
 func (m *Manager) onExit() {
@@ -258,18 +301,31 @@ func (m *Manager) onExit() {
 }
 
 func (m *Manager) toggleMonitor() {
+	fmt.Printf("🔧 DEBUG: toggleMonitor() 开始执行，当前监控状态: %v\n", m.isMonitoring)
+	
+	// 切换监控状态
 	m.isMonitoring = !m.isMonitoring
+	fmt.Printf("🔧 DEBUG: 监控状态已切换为: %v\n", m.isMonitoring)
 	
 	if m.isMonitoring {
 		m.mToggle.Check()
+		fmt.Println("🔧 DEBUG: 菜单项已设为选中状态")
 	} else {
 		m.mToggle.Uncheck()
+		fmt.Println("🔧 DEBUG: 菜单项已设为未选中状态")
 	}
+	
 	// 更新图标状态
 	m.SetStatus(StatusIdle)
+	fmt.Println("🔧 DEBUG: 图标状态已更新为StatusIdle")
 	
+	// 检查回调函数是否存在
 	if m.onToggleMonitor != nil {
+		fmt.Printf("🔧 DEBUG: 准备调用onToggleMonitor回调，参数: %v\n", m.isMonitoring)
 		m.onToggleMonitor(m.isMonitoring)
+		fmt.Println("🔧 DEBUG: onToggleMonitor回调执行完毕")
+	} else {
+		fmt.Println("❌ DEBUG: onToggleMonitor回调函数为nil！")
 	}
 }
 
@@ -278,14 +334,54 @@ func (m *Manager) openSettings() {
 	if m.onSettings != nil {
 		m.onSettings()
 	} else {
-		// Windows: 使用 cmd 在新终端窗口中打开配置界面
-		exec.Command("cmd", "/c", "start", "cmd", "/k", "xiaoniao", "config").Start()
+		// Windows: 获取当前程序路径并在新终端窗口中打开配置界面
+		exePath, err := os.Executable()
+		if err != nil {
+			// 如果获取不到程序路径，使用默认的xiaoniao.exe
+			exePath = "xiaoniao.exe"
+		} else {
+			// 确保Windows下的可执行文件有.exe扩展名
+			if filepath.Ext(exePath) == "" {
+				exePath = exePath + ".exe"
+			}
+		}
+		
+		// 创建命令并启动
+		cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", exePath, "config")
+		err = cmd.Start()
+		if err != nil {
+			// 如果启动失败，尝试使用绝对路径
+			if absPath, absErr := filepath.Abs(exePath); absErr == nil {
+				cmd = exec.Command("cmd", "/c", "start", "cmd", "/k", absPath, "config")
+				cmd.Start()
+			}
+		}
 	}
 }
 
 func (m *Manager) showAbout() {
-	// Windows: 使用 cmd 直接打开关于页面
-	exec.Command("cmd", "/c", "start", "cmd", "/k", "xiaoniao", "about").Start()
+	// Windows: 获取当前程序路径并直接打开关于页面
+	exePath, err := os.Executable()
+	if err != nil {
+		// 如果获取不到程序路径，使用默认的xiaoniao.exe
+		exePath = "xiaoniao.exe"
+	} else {
+		// 确保Windows下的可执行文件有.exe扩展名
+		if filepath.Ext(exePath) == "" {
+			exePath = exePath + ".exe"
+		}
+	}
+	
+	// 创建命令并启动
+	cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", exePath, "about")
+	err = cmd.Start()
+	if err != nil {
+		// 如果启动失败，尝试使用绝对路径
+		if absPath, absErr := filepath.Abs(exePath); absErr == nil {
+			cmd = exec.Command("cmd", "/c", "start", "cmd", "/k", absPath, "about")
+			cmd.Start()
+		}
+	}
 }
 
 func (m *Manager) refreshConfig() {

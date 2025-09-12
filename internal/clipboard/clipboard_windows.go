@@ -7,6 +7,8 @@ package clipboard
 
 import (
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 	"unsafe"
@@ -129,82 +131,191 @@ func SetClipboard(text string) error {
 
 // Monitor structure for Windows implementation
 type Monitor struct {
-	enabled       bool
-	onChange      func(string)
-	lastContent   string
-	autoTranslate bool
+	// Use atomic operations for thread-safe access
+	running         int32 // 0 = stopped, 1 = running
+	onChange        func(string)
+	lastContent     string
+	lastTranslation string
+	autoTranslate   bool
+	
+	// Synchronization
+	mu              sync.RWMutex
+	stopCh          chan struct{}
+	doneCh          chan struct{}
+	wg              sync.WaitGroup
 }
 
 // NewMonitor creates a new clipboard monitor (Windows implementation)
 func NewMonitor() *Monitor {
 	return &Monitor{
-		enabled:       false,
+		running:       0,
 		autoTranslate: false,
+		stopCh:        make(chan struct{}),
+		doneCh:        make(chan struct{}),
 	}
 }
 
 // Start starts the clipboard monitoring
 func (m *Monitor) Start() {
-	if m.enabled {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	
+	// Check if already running
+	if atomic.LoadInt32(&m.running) == 1 {
 		return
 	}
-	m.enabled = true
 	
+	// Stop any existing goroutine first (in case of race condition)
+	m.stopInternal()
+	
+	// Create new channels for this session
+	m.stopCh = make(chan struct{})
+	m.doneCh = make(chan struct{})
+	
+	// Set running flag
+	atomic.StoreInt32(&m.running, 1)
+	
+	// Start monitoring goroutine
+	m.wg.Add(1)
 	go func() {
-		for m.enabled {
-			text, err := GetText()
-			if err == nil && text != "" && text != m.lastContent {
-				m.lastContent = text
-				if m.onChange != nil {
-					m.onChange(text)
+		defer func() {
+			m.wg.Done()
+			close(m.doneCh)
+		}()
+		
+		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
+		
+		for {
+			select {
+			case <-m.stopCh:
+				// Stop signal received
+				return
+			case <-ticker.C:
+				// Check if still running (double check)
+				if atomic.LoadInt32(&m.running) == 0 {
+					return
+				}
+				
+				// Monitor clipboard
+				text, err := GetText()
+				if err == nil && text != "" {
+					m.mu.RLock()
+					lastContent := m.lastContent
+					lastTranslation := m.lastTranslation
+					onChange := m.onChange
+					m.mu.RUnlock()
+					
+					if text != lastContent {
+						// Check if the new content is the same as our last translation
+						// If so, skip it to avoid circular translation
+						if text == lastTranslation {
+							m.mu.Lock()
+							m.lastContent = text
+							m.mu.Unlock()
+							continue
+						}
+						
+						m.mu.Lock()
+						m.lastContent = text
+						m.mu.Unlock()
+						
+						if onChange != nil {
+							onChange(text)
+						}
+					}
 				}
 			}
-			time.Sleep(500 * time.Millisecond)
 		}
 	}()
 }
 
+// stopInternal stops monitoring without acquiring lock (internal use)
+func (m *Monitor) stopInternal() {
+	if atomic.LoadInt32(&m.running) == 0 {
+		return
+	}
+	
+	// Set running flag to false
+	atomic.StoreInt32(&m.running, 0)
+	
+	// Signal stop and wait for goroutine to finish
+	select {
+	case <-m.stopCh:
+		// Channel already closed
+	default:
+		close(m.stopCh)
+	}
+	
+	// Wait for goroutine to finish (with timeout to avoid deadlock)
+	done := make(chan struct{})
+	go func() {
+		m.wg.Wait()
+		close(done)
+	}()
+	
+	select {
+	case <-done:
+		// Goroutine finished cleanly
+	case <-time.After(2 * time.Second):
+		// Timeout - goroutine is taking too long, proceed anyway
+		// This shouldn't happen in normal circumstances
+	}
+}
+
 // Stop stops the clipboard monitoring
 func (m *Monitor) Stop() {
-	m.enabled = false
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.stopInternal()
 }
 
-// Enable enables the clipboard monitoring
+// Enable enables the clipboard monitoring (deprecated - use Start instead)
 func (m *Monitor) Enable() {
-	m.enabled = true
+	m.Start()
 }
 
-// Disable disables the clipboard monitoring
+// Disable disables the clipboard monitoring (deprecated - use Stop instead)
 func (m *Monitor) Disable() {
-	m.enabled = false
+	m.Stop()
 }
 
 // IsEnabled returns whether monitoring is enabled
 func (m *Monitor) IsEnabled() bool {
-	return m.enabled
+	return atomic.LoadInt32(&m.running) == 1
 }
 
 // SetAutoTranslate sets auto-translate mode
 func (m *Monitor) SetAutoTranslate(enabled bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.autoTranslate = enabled
 }
 
 // IsAutoTranslate returns whether auto-translate is enabled
 func (m *Monitor) IsAutoTranslate() bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	return m.autoTranslate
 }
 
 // SetOnChange sets the callback function
 func (m *Monitor) SetOnChange(fn func(string)) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.onChange = fn
 }
 
 // GetLastContent returns the last clipboard content
 func (m *Monitor) GetLastContent() string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	return m.lastContent
 }
 
 // SetLastTranslation sets the last translation (for avoiding duplicates)
 func (m *Monitor) SetLastTranslation(translation string) {
-	// Not used in Windows implementation
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.lastTranslation = translation
 }

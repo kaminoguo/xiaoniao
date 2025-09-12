@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="1.6.4"
+VERSION="1.6.5"
 BUILD_DATE=$(date +%Y%m%d)
 
 echo "========================================="
@@ -23,14 +23,19 @@ sed -i "s/\"Major\": 1,/\"Major\": 1,/g; s/\"Minor\": 6,/\"Minor\": 6,/g; s/\"Pa
 sed -i "s/\"FileVersion\": \"1.6.1.0\"/\"FileVersion\": \"$VERSION.0\"/g" versioninfo.json
 sed -i "s/\"ProductVersion\": \"1.6.1\"/\"ProductVersion\": \"$VERSION\"/g" versioninfo.json
 
-# Generate version info resource file (includes icon)
+# Generate Windows resource file with icon
 echo "→ Generating Windows resource file..."
-~/go/bin/goversioninfo -64
 
-# Move resource file to correct location
-if [ -f resource.syso ]; then
-    mv resource.syso cmd/xiaoniao/
-    echo "  ✓ Resource file moved to cmd/xiaoniao/"
+# Use rsrc to generate icon resource (more reliable for icons)
+echo "  → Using rsrc to generate icon resource..."
+~/go/bin/rsrc -ico assets/icon.ico -o cmd/xiaoniao/resource.syso
+
+# Check if resource was created
+if [ -f cmd/xiaoniao/resource.syso ]; then
+    echo "  ✓ Resource file with icon created in cmd/xiaoniao/"
+else
+    echo "  ❌ Failed to generate resource file"
+    exit 1
 fi
 
 # Build Windows 64-bit executable (console app for TUI)

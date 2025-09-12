@@ -1,4 +1,4 @@
-# Project Structure - Windows专用版
+# Project Structure - Windows专用版 v1.6.5
 
 ## 目录结构
 
@@ -6,11 +6,13 @@
 xiaoniao/
 ├── cmd/xiaoniao/               # 应用程序入口点
 │   ├── main.go                 # 主程序
-│   ├── config_ui.go            # 配置界面
+│   ├── config_ui.go            # 配置界面（改进的快捷键录制）
 │   ├── api_config_ui.go        # API配置
-│   ├── prompt_test_ui.go       # 提示词测试界面
 │   ├── prompts.go              # 提示词管理
-│   └── system_hotkey.go        # 系统热键处理
+│   ├── system_hotkey.go        # 系统热键处理
+│   ├── windows.go              # Windows特定功能（窗口控制）
+│   ├── notwindows.go           # 非Windows平台stub
+│   └── paste_windows.go        # Windows自动粘贴实现
 │
 ├── internal/                   # 内部包
 │   ├── translator/             # 翻译引擎
@@ -102,6 +104,8 @@ Windows剪贴板监控：
 - 使用Windows Clipboard API
 - 实时监控剪贴板变化
 - 自动替换翻译内容
+- 防循环翻译机制（v1.6.5改进）
+- 自动粘贴功能（v1.6.5新增）
 
 ### 配置 (internal/config)
 
@@ -110,6 +114,15 @@ Windows配置路径：`%APPDATA%\xiaoniao\`
 配置文件：
 - `config.json`：主要应用设置
 - `prompts.json`：自定义翻译提示词
+
+## v1.6.5 更新内容
+
+- 修复循环翻译问题
+- 添加自动粘贴功能
+- 改进快捷键录制界面（简洁的左右排列）
+- 修复托盘菜单响应问题
+- 完善窗口隐藏机制
+- 修复控制台程序显示问题
 
 ## 构建说明
 

@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
+	"os/exec"
 	
 	"github.com/kaminoguo/xiaoniao/internal/clipboard"
 	"github.com/kaminoguo/xiaoniao/internal/hotkey"
@@ -175,6 +175,9 @@ func showHelp() {
 
 // runDaemonWithHotkey 在主线程运行，支持全局快捷键
 func runDaemonWithHotkey() {
+	// 隐藏控制台窗口但保持控制台功能
+	hideConsoleWindow()
+	
 	// 初始化托盘管理器
 	trayManager, err := tray.NewManager()
 	if err != nil {
@@ -228,11 +231,10 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			os.Exit(0)
 		})
 		
-		// 自动打开配置界面
+		// 自动在新窗口中打开配置界面
 		go func() {
 			time.Sleep(500 * time.Millisecond)
-			showConsoleWindow() // 确保控制台窗口可见
-			showConfigUI()
+			openConfigInTerminal()
 		}()
 		
 		// 设置等待状态，让托盘保持运行
@@ -290,30 +292,48 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	
 		// 设置托盘回调
 		trayManager.SetOnToggleMonitor(func(enabled bool) {
+			fmt.Printf("\n🎯 DEBUG: SetOnToggleMonitor回调被调用，参数enabled=%v\n", enabled)
 			if enabled {
+				fmt.Println("🎯 DEBUG: 准备启动monitor.Start()")
 				monitor.Start()
 				fmt.Println("\n✅ 监控已通过托盘启动")
 			} else {
+				fmt.Println("🎯 DEBUG: 准备停止monitor.Stop()")
 				monitor.Stop()
 				fmt.Println("\n⏸️ 监控已通过托盘停止")
 			}
+			fmt.Println("🎯 DEBUG: SetOnToggleMonitor回调执行完成")
 		})
 	
-	
-		trayManager.SetOnSettings(func() {
-			// 打开配置界面
-			showConsoleWindow() // 确保控制台窗口可见
-			showConfigUI()
-			// 启动配置文件监控
-			go watchConfig()
+	trayManager.SetOnSettings(func() {
+		// 在新窗口中打开配置界面
+		exePath, err := os.Executable()
+		if err != nil {
+			exePath = "xiaoniao.exe"
+		} else {
+			if filepath.Ext(exePath) == "" {
+				exePath = exePath + ".exe"
+			}
+		}
+		
+		cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", exePath, "config")
+		err = cmd.Start()
+		if err != nil {
+			// 如果启动失败，尝试使用绝对路径
+			if absPath, absErr := filepath.Abs(exePath); absErr == nil {
+				cmd = exec.Command("cmd", "/c", "start", "cmd", "/k", absPath, "config")
+				cmd.Start()
+			}
+		}
+		// 启动配置文件监控
+		go watchConfig()
+	})
+	trayManager.SetOnToggleTerminal(func() {
+		// 切换终端窗口显示/隐藏
+		toggleTerminalVisibility()
 		})
 	
-		trayManager.SetOnToggleTerminal(func() {
-			// 切换终端窗口显示/隐藏
-			toggleTerminalVisibility()
-		})
-	
-		trayManager.SetOnRefresh(func() {
+	trayManager.SetOnRefresh(func() {
 			oldModel := config.Model
 			oldProvider := config.Provider
 			oldPrompt := config.PromptID
@@ -610,14 +630,6 @@ func clearScreen() {
 	fmt.Print("\033[H\033[2J")
 }
 
-// simulatePaste 模拟粘贴操作 (Windows实现)
-func simulatePaste() {
-	// Windows实现自动粘贴功能
-	// 可以使用PowerShell或Windows API实现
-	// 目前留空，可以在后续添加Windows特定的实现
-	// 例如：使用PowerShell发送Ctrl+V
-	// exec.Command("powershell", "-Command", "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('^v')").Run()
-}
 
 func loadConfig() {
 	data, err := os.ReadFile(configPath)
@@ -669,45 +681,10 @@ func getPromptContent(id string) string {
 	}
 }
 
-var terminalVisible = false  // Start as false when running in background
-var terminalPID = 0  // PID of the log viewer terminal
-
-// hideTerminal 隐藏日志查看终端窗口 (Windows实现)
-func hideTerminal() {
-	if !terminalVisible || terminalPID == 0 {
-		return
-	}
-	
-	// Windows: Kill the log viewer terminal
-	if terminalPID > 0 {
-		exec.Command("taskkill", "/PID", strconv.Itoa(terminalPID)).Run()
-		terminalPID = 0
-	}
-	terminalVisible = false
-}
-
-// showTerminal 显示日志查看终端窗口 (Windows实现)
-func showTerminal() {
-	if terminalVisible {
-		return
-	}
-	
-	// Windows: Open Command Prompt with tail equivalent
-	cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", "powershell Get-Content /tmp/xiaoniao.log -Wait")
-	if err := cmd.Start(); err == nil {
-		terminalPID = cmd.Process.Pid
-		terminalVisible = true
-	}
-}
-
-// toggleTerminalVisibility 切换日志查看终端的显示/隐藏状态
+// toggleTerminalVisibility 切换终端窗口的显示/隐藏状态
 func toggleTerminalVisibility() {
-	// 切换显示/隐藏日志查看终端
-	if terminalVisible {
-		hideTerminal()
-	} else {
-		showTerminal()
-	}
+	// 使用Windows API切换控制台窗口显示状态
+	toggleConsoleWindow()
 }
 
 
@@ -815,8 +792,25 @@ func handleSignal(sig os.Signal) string {
 
 // openConfigInTerminal 在终端中打开配置界面
 func openConfigInTerminal() {
-	// 简单启动配置界面
-	showConfigUI()
+	// 在新窗口中打开配置界面
+	exePath, err := os.Executable()
+	if err != nil {
+		exePath = "xiaoniao.exe"
+	} else {
+		if filepath.Ext(exePath) == "" {
+			exePath = exePath + ".exe"
+		}
+	}
+	
+	cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", exePath, "config")
+	err = cmd.Start()
+	if err != nil {
+		// 如果启动失败，尝试使用绝对路径
+		if absPath, absErr := filepath.Abs(exePath); absErr == nil {
+			cmd = exec.Command("cmd", "/c", "start", "cmd", "/k", absPath, "config")
+			cmd.Start()
+		}
+	}
 }
 
 
