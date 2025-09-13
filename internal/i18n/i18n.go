@@ -80,7 +80,11 @@ type Translations struct {
 	TotalCount      string `json:"total_count"`
 	Goodbye         string `json:"goodbye"`
 	TranslateCount  string `json:"translate_count"`
-	
+
+	// Tutorial
+	Tutorial        string `json:"tutorial"`
+	TutorialContent string `json:"tutorial_content"`
+
 	// Help documentation
 	HelpTitle       string `json:"help_title"`
 	HelpDesc        string `json:"help_desc"`

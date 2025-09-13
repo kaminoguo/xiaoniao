@@ -84,7 +84,11 @@ func getChineseTraditional() *Translations {
 		Step4:           "自動翻譯並替換剪貼板",
 		Step5:           "聽到提示音後直接粘貼（Ctrl+V）",
 		Warning:         "注意: 翻譯會覆蓋原剪貼板內容！",
-		
+
+		// Tutorial
+		Tutorial:        "使用教程",
+		TutorialContent: "請參考主菜單中的使用教程",
+
 		// Error messages
 		NoAPIKey:        "❌ 未配置API密鑰",
 		RunConfigFirst:  "請先運行: xiaoniao config",
@@ -99,10 +103,10 @@ func getChineseTraditional() *Translations {
 		EnterAPIKey:     "請輸入API Key",
 		EnterNewAPIKey:  "輸入新的API Key",
 		ChangeAPIKey:    "更改API密鑰",
-		SelectMainModel: "選擇主模型",
+		SelectMainModel: "選擇模型",
 		SupportedProviders: "支持的服務商",
 		SearchModel:     "搜索模型...",
-		MainModel:       "主模型",
+		MainModel:       "模型",
 		NoPromptAvailable: "(無可用prompt)",
 		
 		// Usage messages

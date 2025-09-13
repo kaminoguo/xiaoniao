@@ -80,7 +80,7 @@ func (m configModel) viewAPIConfigScreen() string {
 		s += m.apiKeyInput.View() + "\n\n"
 		
 		// 支持的Provider提示
-		s += mutedStyle.Render(t.SupportedProviders + ":\n")
+		s += mutedStyle.Render(t.SupportedProviders + ":") + "\n"
 		providers := translator.GetSupportedProviders()
 		// 显示所有支持的providers，以3列整齐排列
 		cols := 3
@@ -89,7 +89,7 @@ func (m configModel) viewAPIConfigScreen() string {
 			for j := 0; j < cols && i+j < len(providers); j++ {
 				provider := providers[i+j]
 				// 固定宽度20个字符，确保对齐
-				line += fmt.Sprintf("  • %-20s", provider)
+				line += fmt.Sprintf("• %-22s", provider)
 			}
 			s += mutedStyle.Render(line) + "\n"
 		}
@@ -126,7 +126,7 @@ func (m configModel) viewAPIConfigScreen() string {
 		s += m.apiKeyInput.View() + "\n\n"
 		
 		// 支持的Provider提示
-		s += mutedStyle.Render(t.SupportedProviders + ":\n")
+		s += mutedStyle.Render(t.SupportedProviders + ":") + "\n"
 		providers := translator.GetSupportedProviders()
 		// 显示所有支持的providers，以3列整齐排列
 		cols := 3
@@ -135,7 +135,7 @@ func (m configModel) viewAPIConfigScreen() string {
 			for j := 0; j < cols && i+j < len(providers); j++ {
 				provider := providers[i+j]
 				// 固定宽度20个字符，确保对齐
-				line += fmt.Sprintf("  • %-20s", provider)
+				line += fmt.Sprintf("• %-22s", provider)
 			}
 			s += mutedStyle.Render(line) + "\n"
 		}
@@ -164,7 +164,7 @@ func (m configModel) viewModelSelectScreen() string {
 	t := i18n.T()
 	// 导入版本号
 	const VERSION = "v1.4"
-	title := "🤖 " + t.SelectMainModel
+	title := t.SelectMainModel
 	currentModel := m.config.Model
 	s := titleStyle.Render(title + " " + VERSION)
 	s += "\n"

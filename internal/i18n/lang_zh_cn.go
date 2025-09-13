@@ -84,7 +84,34 @@ func getChineseSimplified() *Translations {
 		Step4:           "自动翻译并替换剪贴板",
 		Step5:           "听到提示音后直接粘贴（Ctrl+V）",
 		Warning:         "注意: 翻译会覆盖原剪贴板内容！",
-		
+
+		// Tutorial
+		Tutorial:        "使用教程",
+		TutorialContent: `快速上手指南：
+
+1. 配置API密钥
+   • 在主菜单选择"API配置"
+   • 输入你的API密钥（如OpenAI、Anthropic等）
+   • 系统会自动识别提供商
+
+2. 选择模型
+   • 设置API后，选择"选择模型"
+   • 从列表中选择合适的AI模型
+
+3. 设置快捷键（可选）
+   • 在主菜单选择"快捷键设置"
+   • 设置监控开关和切换prompt的快捷键
+
+4. 开始使用
+   • Ctrl+C 复制文本触发翻译
+   • 程序会自动替换剪贴板内容
+   • Ctrl+V 粘贴翻译结果
+   • 某些应用可能需要手动粘贴
+
+视频教程：
+• Bilibili: （即将发布）
+• YouTube: （即将发布）`,
+
 		// Error messages
 		NoAPIKey:        "❌ 未配置API密钥",
 		RunConfigFirst:  "请先运行: xiaoniao config",
@@ -99,10 +126,10 @@ func getChineseSimplified() *Translations {
 		EnterAPIKey:     "请输入API Key",
 		EnterNewAPIKey:  "输入新的API Key",
 		ChangeAPIKey:    "更改API密钥",
-		SelectMainModel: "选择主模型",
+		SelectMainModel: "选择模型",
 		SupportedProviders: "支持的服务商",
 		SearchModel:     "搜索模型...",
-		MainModel:       "主模型",
+		MainModel:       "模型",
 		NoPromptAvailable: "(无可用prompt)",
 		
 		// Usage messages

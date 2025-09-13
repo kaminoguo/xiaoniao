@@ -105,6 +105,7 @@ const (
 	modelSelectScreen   // 主模型选择界面
 	themeScreen         // 主题选择界面
 	hotkeyScreen        // 快捷键设置界面
+	tutorialScreen      // 教程界面
 	aboutScreen         // 关于界面
 )
 
@@ -313,6 +314,8 @@ func (m configModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateThemeScreen(msg)
 		case hotkeyScreen:
 			return m.updateHotkeyScreen(msg)
+		case tutorialScreen:
+			return m.updateTutorialScreen(msg)
 		case aboutScreen:
 			return m.updateAboutScreen(msg)
 		}
@@ -414,10 +417,13 @@ func (m configModel) updateMainScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.promptNameInput.SetValue("")
 			m.promptNameInput.Focus()
 			return m, textinput.Blink
-		case 7: // 关于
+		case 7: // 教程
+			m.screen = tutorialScreen
+			return m, nil
+		case 8: // 关于
 			m.screen = aboutScreen
 			m.cursor = 0
-		case 8: // 保存退出
+		case 9: // 保存退出
 			m.quitting = true
 			saveConfig()
 			if m.promptsModified {
@@ -933,6 +939,8 @@ func (m configModel) View() string {
 		return m.viewThemeScreen()
 	case hotkeyScreen:
 		return m.viewHotkeyScreen()
+	case tutorialScreen:
+		return m.viewTutorialScreen()
 	case aboutScreen:
 		return m.viewAboutScreen()
 	default:
@@ -958,6 +966,7 @@ func (m configModel) viewMainScreen() string {
 		{t.Hotkeys, t.Hotkeys},
 		{"[R] " + t.TrayRefresh, ""},
 		{"[T] " + t.TestConnection, ""},
+		{t.Tutorial, ""},
 		{t.TrayAbout, ""},
 		{t.SaveAndExit, ""},
 	}
@@ -1153,7 +1162,7 @@ func (m configModel) viewPromptEditScreen() string {
 		title = t.EditPrompt
 	}
 
-	s := titleStyle.Render("✏️ " + title)
+	s := titleStyle.Render(title)
 	s += "\n\n"
 
 	s += t.PromptName + ":\n"
@@ -1162,7 +1171,7 @@ func (m configModel) viewPromptEditScreen() string {
 	s += t.PromptContent + ":\n"
 	s += m.promptContentInput.View() + "\n\n"
 
-	s += helpStyle.Render(fmt.Sprintf("%s | Enter 保存 | %s",
+	s += helpStyle.Render(fmt.Sprintf("Ctrl+S 保存并退出 | %s | %s",
 		t.HelpTab, t.HelpBack))
 
 	return boxStyle.Render(s)
@@ -1798,6 +1807,30 @@ func (m configModel) renderHotkeyBox(content string, focused bool) string {
 	}
 
 	return boxStyle.Render(displayContent)
+}
+
+// 教程界面
+func (m configModel) viewTutorialScreen() string {
+	t := i18n.T()
+	s := titleStyle.Render(t.Tutorial)
+	s += "\n\n"
+
+	s += normalStyle.Render(t.TutorialContent)
+	s += "\n\n"
+
+	s += helpStyle.Render(t.BackToMainMenu)
+
+	return boxStyle.Render(s)
+}
+
+// 更新教程界面
+func (m configModel) updateTutorialScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch {
+	case key.Matches(msg, keys.Back), key.Matches(msg, keys.Quit):
+		m.screen = mainScreen
+		m.cursor = 7 // 返回到教程选项
+	}
+	return m, nil
 }
 
 // 关于界面
