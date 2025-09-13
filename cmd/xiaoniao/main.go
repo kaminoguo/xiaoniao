@@ -683,13 +683,12 @@ func getPromptName(id string) string {
 }
 
 func getPromptContent(id string) string {
-	// 简单的默认prompt内容
-	switch id {
-	case "direct":
-		return "Please translate the following text to Chinese:"
-	default:
-		return "Translate the following to Chinese:"
+	// 从文件中获取实际的prompt内容
+	if prompt := GetPromptByID(id); prompt != nil {
+		return prompt.Content
 	}
+	// 如果找不到prompt，返回空字符串，不使用默认值
+	return ""
 }
 
 // toggleTerminalVisibility 切换终端窗口的显示/隐藏状态 (deprecated, replaced by debug console)
