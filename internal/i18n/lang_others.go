@@ -349,6 +349,21 @@ func getChineseTraditional() *Translations {
 		TrayMonitoring: "xiaoniao - 監控中 | 風格: %s",
 		TrayStopped: "xiaoniao - 已停止 | 風格: %s",
 		StyleLabel: "風格",
+
+		// New i18n fields for v1.0
+		SingleModifier: "單個修飾鍵",
+		SwitchFunction: "切換功能",
+		Edit: "編輯",
+		Save: "保存",
+		FormatError: "格式錯誤：請使用 '修飾鍵+主鍵' 格式，如 'Ctrl+C'",
+		SingleKey: "單個按鍵",
+		Back: "返回",
+		InvalidModifier: "無效的修飾鍵: %s",
+		InvalidMainKey: "無效的主鍵: %s",
+		ProviderLabel: "提供商: ",
+		CommonExamples: "常用範例",
+		InputFormat: "輸入格式",
+		ModifierPlusKey: "修飾鍵+主鍵",
 	}
 }
 
@@ -697,6 +712,21 @@ func getJapanese() *Translations {
 		TrayMonitoring: "xiaoniao - 監視中 | スタイル: %s",
 		TrayStopped: "xiaoniao - 停止中 | スタイル: %s",
 		StyleLabel: "スタイル",
+
+		// New i18n fields for v1.0
+		SingleModifier: "単一修飾キー",
+		Save: "保存",
+		ProviderLabel: "プロバイダー: ",
+		InputFormat: "入力形式",
+		SingleKey: "単一キー",
+		SwitchFunction: "機能切り替え",
+		Edit: "編集",
+		Back: "戻る",
+		FormatError: "フォーマットエラー：'修飾キー+メインキー' 形式を使用してください（例：'Ctrl+C'）",
+		InvalidModifier: "無効な修飾キー: %s",
+		InvalidMainKey: "無効なメインキー: %s",
+		CommonExamples: "よく使う例",
+		ModifierPlusKey: "修飾キー+メインキー",
 	}
 }
 
@@ -1045,6 +1075,21 @@ func getKorean() *Translations {
 		TrayMonitoring: "xiaoniao - 모니터링 중 | 스타일: %s",
 		TrayStopped: "xiaoniao - 중지됨 | 스타일: %s",
 		StyleLabel: "스타일",
+
+		// New i18n fields for v1.0
+		Back: "뒤로",
+		FormatError: "형식 오류: '수정자+키' 형식을 사용하세요 (예: 'Ctrl+C')",
+		ProviderLabel: "제공자: ",
+		CommonExamples: "자주 사용하는 예",
+		InputFormat: "입력 형식",
+		ModifierPlusKey: "수정자+메인 키",
+		SingleModifier: "단일 수정자",
+		Edit: "편집",
+		Save: "저장",
+		InvalidModifier: "잘못된 수정자: %s",
+		InvalidMainKey: "잘못된 메인 키: %s",
+		SingleKey: "단일 키",
+		SwitchFunction: "기능 전환",
 	}
 }
 
@@ -1393,6 +1438,21 @@ func getSpanish() *Translations {
 		TrayMonitoring: "xiaoniao - Monitoreando | Estilo: %s",
 		TrayStopped: "xiaoniao - Detenido | Estilo: %s",
 		StyleLabel: "Estilo",
+
+		// New i18n fields for v1.0
+		Save: "Guardar",
+		FormatError: "Error de formato: Use el formato 'Modificador+Tecla', como 'Ctrl+C'",
+		InvalidModifier: "Modificador inválido: %s",
+		InvalidMainKey: "Tecla principal inválida: %s",
+		ProviderLabel: "Proveedor: ",
+		CommonExamples: "Ejemplos comunes",
+		InputFormat: "Formato de entrada",
+		ModifierPlusKey: "Modificador+Tecla",
+		SingleModifier: "Modificador único",
+		SingleKey: "Tecla única",
+		SwitchFunction: "Cambiar función",
+		Edit: "Editar",
+		Back: "Atrás",
 	}
 }
 // getFrench returns French translations
@@ -1740,5 +1800,20 @@ func getFrench() *Translations {
 		TrayMonitoring: "xiaoniao - Surveillance | Style: %s",
 		TrayStopped: "xiaoniao - Arrêté | Style: %s",
 		StyleLabel: "Style",
+
+		// New i18n fields for v1.0
+		FormatError: "Erreur de format : Utilisez le format 'Modificateur+Touche', comme 'Ctrl+C'",
+		InvalidModifier: "Modificateur invalide : %s",
+		ProviderLabel: "Fournisseur : ",
+		CommonExamples: "Exemples courants",
+		InputFormat: "Format d'entrée",
+		ModifierPlusKey: "Modificateur+Touche",
+		SwitchFunction: "Changer de fonction",
+		Save: "Enregistrer",
+		InvalidMainKey: "Touche principale invalide : %s",
+		SingleModifier: "Modificateur unique",
+		SingleKey: "Touche unique",
+		Edit: "Modifier",
+		Back: "Retour",
 	}
 }
