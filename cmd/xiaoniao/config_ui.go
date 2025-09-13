@@ -18,7 +18,7 @@ import (
 )
 
 // 版本号定义
-const APP_VERSION = "v1.4"
+const APP_VERSION = "v1.0"
 
 var (
 	// 修复颜色问题 - 使用高对比度配色
@@ -211,8 +211,9 @@ func initialModel() configModel {
 		i18n.SetLanguage(i18n.Language(config.Language))
 	}
 
-	// 检查是否要显示关于页面
+	// 检查是否要显示关于页面或教程页面
 	showAbout := os.Getenv("SHOW_ABOUT") == "1"
+	showTutorial := os.Getenv("SHOW_TUTORIAL") == "1"
 
 	// 初始化快捷键输入框
 	hotkeyInputs := make([]textinput.Model, 2)
@@ -260,6 +261,8 @@ func initialModel() configModel {
 	initialScreen := mainScreen
 	if showAbout {
 		initialScreen = aboutScreen
+	} else if showTutorial {
+		initialScreen = tutorialScreen
 	}
 
 	return configModel{
@@ -423,13 +426,6 @@ func (m configModel) updateMainScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		case 8: // 关于
 			m.screen = aboutScreen
 			m.cursor = 0
-		case 9: // 保存退出
-			m.quitting = true
-			saveConfig()
-			if m.promptsModified {
-				saveAllPrompts(m.prompts)
-			}
-			return m, tea.Quit
 		}
 	}
 
@@ -968,7 +964,6 @@ func (m configModel) viewMainScreen() string {
 		{"[T] " + t.TestConnection, ""},
 		{t.Tutorial, ""},
 		{t.TrayAbout, ""},
-		{t.SaveAndExit, ""},
 	}
 
 	for i, opt := range options {
