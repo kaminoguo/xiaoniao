@@ -346,6 +346,7 @@ func (m configModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m configModel) updateMainScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	t := i18n.T()
 	switch {
 	case key.Matches(msg, keys.Quit):
 		m.quitting = true
@@ -410,7 +411,7 @@ func (m configModel) updateMainScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			homeDir, _ := os.UserHomeDir()
 			signalPath := filepath.Join(homeDir, ".config", "xiaoniao", ".refresh_signal")
 			os.WriteFile(signalPath, []byte(time.Now().Format(time.RFC3339)), 0644)
-			m.testResult = "✅ 配置已刷新，翻译器将重新初始化"
+			m.testResult = t.ConfigRefreshedReinit
 			return m, nil
 		case 6: // 测试翻译
 			m.screen = testScreen
@@ -465,6 +466,7 @@ func (m configModel) updateLanguageScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	t := i18n.T()
 	// 动态获取当前provider的模型列表
 	var models []string
 	if m.promptNameInput.Value() != "" {
@@ -497,7 +499,7 @@ func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd
 				config = *m.config
 				saveConfig()
 				m.screen = apiKeyScreen
-				m.testResult = fmt.Sprintf("✅ 主模型已更改为: %s", m.config.Model)
+				m.testResult = fmt.Sprintf(t.MainModelChanged, m.config.Model)
 			}
 		}
 		return m, nil
@@ -507,7 +509,7 @@ func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd
 		if totalModels > 0 && m.selectedPrompt < totalModels {
 			selectedModel := models[m.selectedPrompt]
 			m.testing = true
-			m.testResult = fmt.Sprintf("🔄 "+i18n.T().TestingModel, selectedModel)
+			m.testResult = fmt.Sprintf(t.TestingModelMsg, selectedModel)
 
 			// 创建测试命令
 			return m, func() tea.Msg {
@@ -527,19 +529,19 @@ func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd
 				}
 				trans, err := translator.NewTranslator(transConfig)
 				if err != nil {
-					return fmt.Sprintf("❌ 模型 %s 初始化失败: %v", selectedModel, err)
+					return fmt.Sprintf(t.ModelInitFailed, selectedModel, err)
 				}
-				result, err := trans.Translate("Hello world", "请仅翻译以下内容成中文，不要回答或解释，只输出译文：")
+				result, err := trans.Translate("Hello world", t.TranslateToChineseOnly)
 
 				if err != nil {
-					return fmt.Sprintf("❌ "+i18n.T().ModelTestFailed, selectedModel, err)
+					return fmt.Sprintf(t.ModelTestFailedMsg, selectedModel, err)
 				}
 
 				if result.Success && result.Translation != "" {
-					return fmt.Sprintf("✅ 模型 %s 可用！译文: %s", selectedModel, result.Translation)
+					return fmt.Sprintf(t.ModelAvailable, selectedModel, result.Translation)
 				}
 
-				return fmt.Sprintf("❌ 模型 %s 无响应", selectedModel)
+				return fmt.Sprintf(t.ModelNoResponse, selectedModel)
 			}
 		}
 		return m, nil
@@ -579,6 +581,7 @@ func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd
 }
 
 func (m configModel) updatePromptScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	t := i18n.T()
 	switch {
 	case key.Matches(msg, keys.Back):
 		m.screen = mainScreen
@@ -631,7 +634,7 @@ func (m configModel) updatePromptScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				promptToDelete := m.prompts[m.selectedPrompt]
 				err := DeletePrompt(promptToDelete.ID)
 				if err != nil {
-					m.testResult = fmt.Sprintf("删除失败: %v", err)
+					m.testResult = fmt.Sprintf(t.DeleteFailed, err)
 				} else {
 					// 重新加载prompts以确保同步
 					m.prompts = loadAllPrompts()
@@ -662,6 +665,7 @@ func (m configModel) updatePromptScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m configModel) updatePromptEditScreenWithMsg(msg tea.Msg) (tea.Model, tea.Cmd) {
+	t := i18n.T()
 	// Handle key messages
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		// Handle special keys first
@@ -702,7 +706,7 @@ func (m configModel) updatePromptEditScreenWithMsg(msg tea.Msg) (tea.Model, tea.
 					id := fmt.Sprintf("custom_%d", maxID+1)
 					err := AddPrompt(id, name, content)
 					if err != nil {
-						m.testResult = fmt.Sprintf("保存失败: %v", err)
+						m.testResult = fmt.Sprintf(t.SaveFailed, err)
 					} else {
 						// 重新加载prompts以确保同步
 						m.prompts = loadAllPrompts()
@@ -712,7 +716,7 @@ func (m configModel) updatePromptEditScreenWithMsg(msg tea.Msg) (tea.Model, tea.
 					prompt := m.prompts[m.editingPromptIdx]
 					err := UpdatePrompt(prompt.ID, name, content)
 					if err != nil {
-						m.testResult = fmt.Sprintf("更新失败: %v", err)
+						m.testResult = fmt.Sprintf(t.UpdateFailed, err)
 					} else {
 						// 重新加载prompts以确保同步
 						m.prompts = loadAllPrompts()
@@ -745,6 +749,7 @@ func (m configModel) updatePromptEditScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd)
 }
 
 func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	t := i18n.T()
 	// 添加调试信息到testResult中
 	keyPressed := msg.String()
 
@@ -814,7 +819,7 @@ func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			// 测试连接
 			m.cursor = 0
 			m.testing = true
-			m.testResult = "正在测试..."
+			m.testResult = t.TestingMsg
 			return m, func() tea.Msg {
 				success, result, _ := testAPIConnectionStandalone(m.config.APIKey, m.config.Provider)
 				if success {
@@ -873,6 +878,7 @@ func (m configModel) updateTestScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.testInput = testText
 			// 执行翻译测试
 			return m, func() tea.Msg {
+				t := i18n.T()
 				// 加载当前配置
 				loadConfig()
 
@@ -887,7 +893,7 @@ func (m configModel) updateTestScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 				trans, err := translator.NewTranslator(translatorConfig)
 				if err != nil {
-					return fmt.Sprintf("❌ 创建翻译器失败: %v", err)
+					return fmt.Sprintf(t.CreateTranslatorFailedMsg, err)
 				}
 
 				// 获取当前prompt内容
@@ -896,11 +902,11 @@ func (m configModel) updateTestScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				// 执行翻译
 				result, err := trans.Translate(testText, promptContent)
 				if err != nil {
-					return fmt.Sprintf("❌ 翻译失败: %v", err)
+					return fmt.Sprintf(t.TranslationFailedMsg, err)
 				}
 
 				// 返回结果
-				return fmt.Sprintf("✅ 翻译结果:\n原文: %s\n译文: %s\n模型: %s\nPrompt: %s",
+				return fmt.Sprintf(t.TranslationResultMsg,
 					testText, result.Translation, config.Model, getPromptName(config.PromptID))
 			}
 		}
@@ -1110,7 +1116,7 @@ func (m configModel) viewPromptScreen() string {
 
 	// 右侧：Prompt预览
 	previewContent := ""
-	previewTitle := "预览:"
+	previewTitle := t.PreviewColon
 	if m.selectedPrompt < len(m.prompts) {
 		prompt := m.prompts[m.selectedPrompt]
 		content := prompt.Content
@@ -1698,7 +1704,8 @@ func updateStyles() {
 
 // 快捷键设置界面 - 新的文本输入方式
 func (m configModel) viewHotkeyScreen() string {
-	s := titleStyle.Render("快捷键设置")
+	t := i18n.T()
+	s := titleStyle.Render(t.HotkeySettingsTitle)
 	s += "\n\n"
 
 	// 快捷键配置列表
@@ -1706,8 +1713,8 @@ func (m configModel) viewHotkeyScreen() string {
 		name  string
 		input textinput.Model
 	}{
-		{"监控开关", m.hotkeyInputs[0]},
-		{"切换风格", m.hotkeyInputs[1]},
+		{t.MonitorToggleHotkey, m.hotkeyInputs[0]},
+		{t.SwitchStyleHotkey, m.hotkeyInputs[1]},
 	}
 
 	// 显示每个快捷键输入框
@@ -1736,7 +1743,7 @@ func (m configModel) viewHotkeyScreen() string {
 
 	// 显示示例
 	s += "\n" + mutedStyle.Render("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━") + "\n"
-	s += normalStyle.Render("常用示例:") + "\n"
+	s += normalStyle.Render(t.CommonExamples+":") + "\n"
 
 	examples := GetHotkeyExamples()
 	for i := 0; i < len(examples); i += 3 {
@@ -1747,13 +1754,13 @@ func (m configModel) viewHotkeyScreen() string {
 		s += line + "\n"
 	}
 
-	s += "\n" + mutedStyle.Render("输入格式:") + "\n"
-	s += mutedStyle.Render("• 修饰键+主键: Ctrl+C, Alt+Tab") + "\n"
-	s += mutedStyle.Render("• 单个修饰键: Ctrl, Alt, Shift") + "\n"
-	s += mutedStyle.Render("• 单个按键: F1-F12, A-Z, 0-9") + "\n"
+	s += "\n" + mutedStyle.Render(t.InputFormat+":") + "\n"
+	s += mutedStyle.Render("• "+t.ModifierPlusKey+": Ctrl+C, Alt+Tab") + "\n"
+	s += mutedStyle.Render("• "+t.SingleModifier+": Ctrl, Alt, Shift") + "\n"
+	s += mutedStyle.Render("• "+t.SingleKey+": F1-F12, A-Z, 0-9") + "\n"
 
 	// 帮助信息
-	s += "\n" + helpStyle.Render("↑↓ 切换功能 | Enter 编辑 | Ctrl+S 保存 | Esc 返回")
+	s += "\n" + helpStyle.Render("↑↓ "+t.SwitchFunction+" | Enter "+t.Edit+" | Ctrl+S "+t.Save+" | Esc "+t.Back)
 
 	return boxStyle.Render(s)
 }
@@ -1836,9 +1843,9 @@ func (m configModel) viewAboutScreen() string {
 
 	s += successStyle.Render("xiaoniao "+APP_VERSION) + "\n\n"
 
-	s += normalStyle.Render(t.Author+"：") + mutedStyle.Render("梨梨果") + "\n"
-	s += normalStyle.Render(t.License+"：") + mutedStyle.Render("GPL-3.0 License") + "\n"
-	s += normalStyle.Render(t.ProjectUrl+"：") + mutedStyle.Render("https://github.com/kaminoguo/xiaoniao") + "\n\n"
+	s += normalStyle.Render(t.AuthorLabel) + mutedStyle.Render("梨梨果") + "\n"
+	s += normalStyle.Render(t.LicenseLabel) + mutedStyle.Render("GPL-3.0 License") + "\n"
+	s += normalStyle.Render(t.ProjectUrlLabel) + mutedStyle.Render("https://github.com/kaminoguo/xiaoniao") + "\n\n"
 
 	s += warningStyle.Render(t.SupportAuthor) + "\n"
 	s += mutedStyle.Render(t.PriceNote) + "\n"
@@ -1863,6 +1870,7 @@ func (m configModel) updateAboutScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 // 快捷键界面更新函数 - 新的文本输入方式
 func (m configModel) updateHotkeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	t := i18n.T()
 	// 如果正在编辑输入框
 	if m.hotkeyEditIndex >= 0 && m.hotkeyEditIndex < len(m.hotkeyInputs) {
 		if m.hotkeyInputs[m.hotkeyEditIndex].Focused() {
@@ -1949,7 +1957,7 @@ func (m configModel) updateHotkeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.config.HotkeySwitch = m.hotkeyInputs[1].Value()
 		config = *m.config
 		saveConfig()
-		m.testResult = "✅ 快捷键已保存"
+		m.testResult = t.HotkeysSaved
 		m.screen = mainScreen
 		m.cursor = 4
 		return m, nil

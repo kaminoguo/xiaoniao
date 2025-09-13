@@ -272,6 +272,7 @@ func (m configModel) viewModelSelectScreen() string {
 
 // 测试API连接（独立函数）
 func testAPIConnectionStandalone(apiKey, provider string) (bool, string, []string) {
+	t := i18n.T()
 	// 如果provider为空，先尝试检测
 	if provider == "" {
 		provider = translator.DetectProviderByKey(apiKey)
@@ -321,7 +322,7 @@ func testAPIConnectionStandalone(apiKey, provider string) (bool, string, []strin
 	fmt.Fprintf(os.Stderr, "[DEBUG] Testing connection...\n")
 	if err := p.TestConnection(); err != nil {
 		fmt.Fprintf(os.Stderr, "[DEBUG] Connection test failed: %v\n", err)
-		return false, fmt.Sprintf("连接失败 (%s): %v", provider, err), nil
+		return false, fmt.Sprintf(t.ConnectionFailed+" (%s): %v", provider, err), nil
 	}
 	
 	// 获取模型列表（可选）
@@ -359,9 +360,10 @@ type apiConfigData struct {
 
 // 处理API配置的更新
 func (m configModel) updateAPIConfig(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	t := i18n.T()
 	// 添加调试信息
 	// m.testResult = fmt.Sprintf("键: %s, cursor: %d", msg.String(), m.cursor)
-	
+
 	// 处理不同的API配置状态
 	if m.config.APIKey == "" || m.changingAPIKey {
 		// 没有API Key或正在更改，显示输入界面
@@ -422,7 +424,7 @@ func (m configModel) updateAPIConfig(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			// 测试连接
 			m.cursor = 0  // 确保cursor正确
 			m.testing = true
-			m.testResult = "正在测试..."  // 添加即时反馈
+			m.testResult = t.TestingConnection  // 添加即时反馈
 			return m, m.testAPIConnection()
 			
 		case "2":

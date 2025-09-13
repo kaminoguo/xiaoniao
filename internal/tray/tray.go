@@ -246,7 +246,7 @@ func (m *Manager) onReady() {
 	m.mRefresh = systray.AddMenuItem(t.TrayRefresh, t.TrayRefresh)
 	mConfig := systray.AddMenuItem(t.TraySettings, t.TraySettings)
 	m.mPromptMenu = systray.AddMenuItem(t.TranslateStyle, t.TranslateStyle)
-	m.mDebugConsole = systray.AddMenuItem("导出日志", "导出日志")
+	m.mDebugConsole = systray.AddMenuItem(t.ExportLogs, t.ExportLogs)
 	systray.AddSeparator()
 
 	mTutorial := systray.AddMenuItem(t.Tutorial, t.Tutorial)

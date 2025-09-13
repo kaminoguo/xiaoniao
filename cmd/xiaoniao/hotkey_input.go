@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/kaminoguo/xiaoniao/internal/i18n"
 )
 
 // ValidateHotkeyString validates a hotkey string format
@@ -27,7 +29,8 @@ func ValidateHotkeyString(hotkeyStr string) error {
 		if isValidSingleKey(hotkeyStr) {
 			return nil
 		}
-		return fmt.Errorf("格式错误：请使用 '修饰键+主键' 格式，如 'Ctrl+C'")
+		t := i18n.T()
+		return fmt.Errorf(t.FormatError)
 	}
 
 	// Validate modifiers (all parts except the last one)
@@ -41,14 +44,16 @@ func ValidateHotkeyString(hotkeyStr string) error {
 	for i := 0; i < len(parts)-1; i++ {
 		mod := strings.ToLower(strings.TrimSpace(parts[i]))
 		if !validModifiers[mod] {
-			return fmt.Errorf("无效的修饰键: %s", parts[i])
+			t := i18n.T()
+			return fmt.Errorf(t.InvalidModifier, parts[i])
 		}
 	}
 
 	// Validate the main key (last part)
 	mainKey := strings.TrimSpace(parts[len(parts)-1])
 	if !isValidMainKey(mainKey) {
-		return fmt.Errorf("无效的主键: %s", mainKey)
+		t := i18n.T()
+		return fmt.Errorf(t.InvalidMainKey, mainKey)
 	}
 
 	return nil

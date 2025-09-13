@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.0.0] - 2025-09-13
+
+### 🎉 Major Release - Complete Internationalization
+
+### Added
+- 完整的国际化（i18n）支持
+- 修复了所有硬编码的中文字符串（90+ 个字符串）
+- 英文界面完全本地化，不再显示乱码
+- 新增多个 i18n 键值对，覆盖所有用户界面元素
+
+### Fixed
+- 修复了非中文 Windows 系统的乱码问题
+- 修复了配置界面、API 配置、快捷键设置等所有界面的国际化
+- 修复了系统托盘菜单的国际化
+- 修复了日志和错误消息的国际化
+- 修复了控制台输出的国际化
+
+### Changed
+- 所有用户界面文本现在通过 i18n 系统管理
+- 程序版本号更新为 v1.0.0，标志着第一个稳定的国际化版本
+
+### Technical Details
+- 添加了 90+ 个新的 i18n 翻译条目
+- 更新了 `lang_en.go` 和 `lang_zh_cn.go`
+- 修复了 `main.go`, `config_ui.go`, `api_config_ui.go`, `tray.go`, `logbuffer.go` 等文件中的硬编码字符串
+- 确保所有字符串都通过 `i18n.T()` 获取
+
 ## [1.6.7] - 2025-09-13
 
 ### Changed

@@ -139,7 +139,8 @@ func main() {
 	// Acquire lock for run mode
 	if ok, cleanup := acquireLock(); !ok {
 		// Show error message using Windows message box
-		showErrorMessage("xiaoniao", "程序已在运行中。请检查系统托盘图标。\n如果没有看到托盘图标，请尝试结束所有xiaoniao进程后重新启动。")
+		t := i18n.T()
+		showErrorMessage("xiaoniao", t.ProgramAlreadyRunning)
 		os.Exit(1)
 	} else {
 		defer cleanup()
@@ -194,7 +195,8 @@ func runDaemonWithHotkey() {
 	// 初始化托盘管理器
 	trayManager, err := tray.NewManager()
 	if err != nil {
-		showErrorMessage("xiaoniao 启动失败", fmt.Sprintf("托盘管理器初始化失败：%v\n\n请检查系统是否支持系统托盘功能。", err))
+		t := i18n.T()
+		showErrorMessage("xiaoniao", fmt.Sprintf(t.TrayManagerInitFailed, err))
 		return
 	}
 	
@@ -206,7 +208,8 @@ func runDaemonWithHotkey() {
 	
 	// 直接在主线程中启动托盘（这是阻塞调用）
 	if err := trayManager.Initialize(); err != nil {
-		showErrorMessage("xiaoniao 启动失败", fmt.Sprintf("系统托盘启动失败：%v\n\n可能的原因：\n1. 系统托盘功能被禁用\n2. 权限不足\n3. 系统资源不足\n\n请检查系统设置并重试。", err))
+		t := i18n.T()
+		showErrorMessage("xiaoniao", fmt.Sprintf(t.SystemTrayStartFailed, err))
 		return
 	}
 }
@@ -228,7 +231,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		fmt.Println(t.OpeningConfig)
 		
 		// 设置托盘为未配置状态
-		trayManager.SetCurrentPrompt("未配置 / Not Configured")
+		trayManager.SetCurrentPrompt(t.NotConfiguredStatus)
 		
 		// 设置托盘回调 - 只允许打开设置
 		trayManager.SetOnSettings(func() {
@@ -237,7 +240,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		})
 		
 		trayManager.SetOnToggleMonitor(func(enabled bool) {
-			fmt.Println("请先配置 API / Please configure API first")
+			fmt.Println(t.PleaseConfigureAPIFirst)
 		})
 		
 		trayManager.SetOnQuit(func() {
@@ -259,7 +262,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 				loadConfig()
 				if config.APIKey != "" && config.APIKey != oldAPIKey {
 					// API配置完成，重新初始化业务逻辑
-					fmt.Println("\nAPI配置已完成，重新启动翻译服务...")
+					fmt.Println("\n" + t.APIConfigCompleted)
 					go runDaemonBusinessLogic(trayManager)
 					return
 				}
@@ -306,10 +309,10 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		trayManager.SetOnToggleMonitor(func(enabled bool) {
 			if enabled {
 				monitor.Start()
-				fmt.Println("\n监控已启动")
+				fmt.Println("\n" + t.MonitorStartedConsole)
 			} else {
 				monitor.Stop()
-				fmt.Println("\n监控已暂停")
+				fmt.Println("\n" + t.MonitorPausedConsole)
 			}
 		})
 	
@@ -340,9 +343,9 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		// 导出日志到文件
 		filePath, err := logbuffer.ExportLogs()
 		if err != nil {
-			fmt.Printf("导出日志失败: %v\n", err)
+			fmt.Printf(t.ExportLogsFailed+"\n", err)
 		} else {
-			fmt.Printf("日志已导出到: %s\n", filePath)
+			fmt.Printf(t.LogsExportedTo+"\n", filePath)
 		}
 	})
 	
@@ -372,7 +375,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			newTrans, err := translator.NewTranslator(translatorConfig)
 			if err == nil {
 				trans = newTrans
-				fmt.Printf("\n配置已刷新: %s | %s | %s\n", 
+				fmt.Printf("\n"+t.ConfigRefreshedDetail+"\n", 
 					config.Provider, config.Model, getPromptName(config.PromptID))
 				
 				// 如果切换了模型或Provider，进行预热
@@ -380,7 +383,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 					go prewarmModel(trans)
 				}
 			} else {
-				fmt.Printf("\n刷新配置失败: %v\n", err)
+				fmt.Printf("\n"+t.RefreshConfigFailed+"\n", err)
 			}
 		})
 	
@@ -402,7 +405,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			}
 		
 			// 显示提示
-			fmt.Printf("\n切换到: %s\n", promptName)
+			fmt.Printf("\n"+t.SwitchedTo+"\n", promptName)
 			trayManager.SetCurrentPrompt(promptName)
 			// 不显示通知，只在终端显示
 		})
@@ -436,12 +439,12 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			if monitoring {
 				monitor.Stop()
 				trayManager.UpdateMonitorStatus(false)
-				fmt.Println("\n监控已暂停")
+				fmt.Println("\n" + t.MonitorPausedMsg)
 				monitoring = false
 			} else {
 				monitor.Start()
 				trayManager.UpdateMonitorStatus(true)
-				fmt.Println("\n监控已恢复")
+				fmt.Println("\n" + t.MonitorResumedMsg)
 				monitoring = true
 			}
 		})
@@ -474,7 +477,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			
 			// 显示通知
 			promptName := prompts[nextIdx].Name
-			fmt.Printf("\n🔄 切换Prompt: %s\n", promptName)
+			fmt.Printf("\n" + t.SwitchPromptMsg + "\n", promptName)
 			trayManager.SetCurrentPrompt(promptName)
 			// 不弹窗通知
 		})
@@ -485,22 +488,22 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	
 	// Console mode startup info
 	fmt.Printf("\nxiaoniao v%s\n", version)
-	fmt.Printf("提供商: %s | 模型: %s\n", config.Provider, config.Model)
-	fmt.Printf("翻译风格: %s\n", getPromptName(config.PromptID))
-	fmt.Printf("自动粘贴: 已启用")
+	fmt.Printf(t.ProviderLabel+"%s | "+t.ModelLabel+"%s\n", config.Provider, config.Model)
+	fmt.Printf(t.TranslationStyle+"\n", getPromptName(config.PromptID))
+	fmt.Printf(t.AutoPasteEnabledMsg)
 	
 	// 记录快捷键信息
 	if config.HotkeyToggle != "" || config.HotkeySwitch != "" {
-		fmt.Printf("\n快捷键:\n")
+		fmt.Printf("\n"+t.HotkeysColon+"\n")
 		if config.HotkeyToggle != "" {
-			fmt.Printf("  监控开关: %s\n", config.HotkeyToggle)
+			fmt.Printf(t.MonitorToggleLabel+"\n", config.HotkeyToggle)
 		}
 		if config.HotkeySwitch != "" {
-			fmt.Printf("  切换风格: %s\n", config.HotkeySwitch)
+			fmt.Printf(t.SwitchStyleLabel+"\n", config.HotkeySwitch)
 		}
 	}
 	
-	fmt.Println("\n监控已启动 - 复制文字即可翻译")
+	fmt.Println("\n" + t.MonitorStartedCopyToTranslate)
 	
 	// 不播放启动提示音
 	// sound.PlayStart()
@@ -520,13 +523,13 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		
 		// 每次翻译前重新获取prompt（以防配置文件被修改）
 		currentPrompt := getPromptContent(config.PromptID)
-		fmt.Printf("\n开始翻译: %s\n", text)
-		fmt.Printf("使用Prompt: %s (内容长度: %d)\n", config.PromptID, len(currentPrompt))
+		fmt.Printf("\n"+t.StartTranslating+"\n", text)
+		fmt.Printf(t.UsingPrompt+"\n", config.PromptID, len(currentPrompt))
 		
 		// 执行翻译
 		result, err := trans.Translate(text, currentPrompt)
 		if err != nil {
-			fmt.Printf(" 失败\n  错误: %v\n", err)
+			fmt.Printf(t.TranslationFailedError+"\n", err)
 			// sound.PlayError() // 错误提示音已禁用
 			trayManager.SetStatus(tray.StatusError)
 			// 3秒后恢复正常状态
@@ -545,11 +548,11 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			clipboard.SetClipboard(result.Translation)
 			translationCount++
 			
-			fmt.Printf(" 完成 (#%d)\n", translationCount)
+			fmt.Printf(t.TranslationComplete+"\n", translationCount)
 			trayManager.IncrementTranslationCount()
 			trayManager.SetStatus(tray.StatusIdle)
-			fmt.Printf("  原文: %s\n", truncate(text, 60))
-			fmt.Printf("  译文: %s\n", truncate(result.Translation, 60))
+			fmt.Printf(t.OriginalText+"\n", truncate(text, 60))
+			fmt.Printf(t.TranslatedText+"\n", truncate(result.Translation, 60))
 			
 			// 自动粘贴
 			{
@@ -584,12 +587,12 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 				if monitoring {
 					monitor.Stop()
 					trayManager.UpdateMonitorStatus(false)
-					fmt.Println("\n监控已暂停 (通过快捷键)")
+					fmt.Println("\n" + t.MonitorPausedViaHotkey)
 					monitoring = false
 				} else {
 					monitor.Start()
 					trayManager.UpdateMonitorStatus(true)
-					fmt.Println("\n监控已恢复 (通过快捷键)")
+					fmt.Println("\n" + t.MonitorResumedViaHotkey)
 					monitoring = true
 				}
 				
@@ -610,7 +613,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 					saveConfig()
 					
 					promptName := prompts[nextIdx].Name
-					fmt.Printf("\n🔄 切换Prompt: %s (通过快捷键)\n", promptName)
+					fmt.Printf("\n" + t.SwitchPromptViaHotkey + "\n", promptName)
 					trayManager.SetCurrentPrompt(promptName)
 					// 只在终端显示，不弹窗
 				}
@@ -720,21 +723,23 @@ func watchConfig() {
 
 // prewarmModel 预热模型
 func prewarmModel(trans *translator.Translator) {
-	fmt.Print("预热模型中...")
+	t := i18n.T()
+	fmt.Print(t.PrewarmingModel)
 	err := translator.PrewarmConnection(trans)
 	if err == nil {
-		fmt.Println(" 成功")
+		fmt.Println(t.PrewarmSuccess2)
 	} else {
 		// 预热失败不影响使用，只是警告
-		fmt.Printf(" 跳过 (可忽略: %v)\n", err)
+		fmt.Printf(t.PrewarmSkip+"\n", err)
 	}
 }
 
 // monitorRefreshSignal 监控刷新信号文件
 func monitorRefreshSignal(trans **translator.Translator) {
+	t := i18n.T()
 	homeDir, _ := os.UserHomeDir()
 	signalPath := filepath.Join(homeDir, ".config", "xiaoniao", ".refresh_signal")
-	
+
 	var lastModel string = config.Model
 	var lastProvider string = config.Provider
 	
@@ -761,7 +766,7 @@ func monitorRefreshSignal(trans **translator.Translator) {
 			newTrans, err := translator.NewTranslator(translatorConfig)
 			if err == nil {
 				*trans = newTrans
-				fmt.Printf("\n翻译器已刷新: %s | %s\n", config.Provider, config.Model)
+				fmt.Printf("\n"+t.TranslatorRefreshed+"\n", config.Provider, config.Model)
 				
 				// 检查是否切换了模型或Provider，如果是则预热
 				if config.Model != lastModel || config.Provider != lastProvider {
@@ -770,7 +775,7 @@ func monitorRefreshSignal(trans **translator.Translator) {
 					lastProvider = config.Provider
 				}
 			} else {
-				fmt.Printf("\n翻译器刷新失败: %v\n", err)
+				fmt.Printf("\n"+t.TranslatorRefreshFailed+"\n", err)
 			}
 		}
 	}
