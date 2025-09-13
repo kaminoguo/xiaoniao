@@ -82,16 +82,16 @@ func (m configModel) viewAPIConfigScreen() string {
 		// 支持的Provider提示
 		s += mutedStyle.Render(t.SupportedProviders + ":\n")
 		providers := translator.GetSupportedProviders()
-		// 显示所有支持的providers，按列排列
-		for i, p := range providers {
-			s += mutedStyle.Render("  • " + p + "\n")
-			if i >= 15 { // 限制显示数量以免界面过长
-				remaining := len(providers) - i - 1
-				if remaining > 0 {
-					s += mutedStyle.Render(fmt.Sprintf("  ...还有%d个\n", remaining))
-				}
-				break
+		// 显示所有支持的providers，以3列整齐排列
+		cols := 3
+		for i := 0; i < len(providers); i += cols {
+			line := ""
+			for j := 0; j < cols && i+j < len(providers); j++ {
+				provider := providers[i+j]
+				// 固定宽度20个字符，确保对齐
+				line += fmt.Sprintf("  • %-20s", provider)
 			}
+			s += mutedStyle.Render(line) + "\n"
 		}
 	} else if m.config.APIKey != "" {
 		// 已配置
@@ -103,19 +103,13 @@ func (m configModel) viewAPIConfigScreen() string {
 		s += successStyle.Render("✓ " + t.APIKeySet) + "\n"
 		s += normalStyle.Render(fmt.Sprintf("Provider: %s", provider)) + "\n"
 		s += normalStyle.Render(fmt.Sprintf("%s: %s", t.MainModel, m.config.Model)) + "\n"
-		if m.config.FallbackModel != "" {
-			s += normalStyle.Render(fmt.Sprintf("%s: %s", t.FallbackModel, m.config.FallbackModel)) + "\n"
-		} else {
-			s += mutedStyle.Render(fmt.Sprintf("%s: %s", t.FallbackModel, t.NotSet)) + "\n"
-		}
 		s += "\n"
 		
 		// 选项菜单
 		options := []string{
 			"1. " + t.TestConnection,
 			"2. " + t.SelectMainModel,
-			"3. " + t.SelectFallback,
-			"4. " + t.ChangeAPIKey,
+			"3. " + t.ChangeAPIKey,
 		}
 		
 		for i, option := range options {
@@ -134,16 +128,16 @@ func (m configModel) viewAPIConfigScreen() string {
 		// 支持的Provider提示
 		s += mutedStyle.Render(t.SupportedProviders + ":\n")
 		providers := translator.GetSupportedProviders()
-		// 显示所有支持的providers，按列排列
-		for i, p := range providers {
-			s += mutedStyle.Render("  • " + p + "\n")
-			if i >= 15 { // 限制显示数量以免界面过长
-				remaining := len(providers) - i - 1
-				if remaining > 0 {
-					s += mutedStyle.Render(fmt.Sprintf("  ...还有%d个\n", remaining))
-				}
-				break
+		// 显示所有支持的providers，以3列整齐排列
+		cols := 3
+		for i := 0; i < len(providers); i += cols {
+			line := ""
+			for j := 0; j < cols && i+j < len(providers); j++ {
+				provider := providers[i+j]
+				// 固定宽度20个字符，确保对齐
+				line += fmt.Sprintf("  • %-20s", provider)
 			}
+			s += mutedStyle.Render(line) + "\n"
 		}
 	}
 	
@@ -172,13 +166,6 @@ func (m configModel) viewModelSelectScreen() string {
 	const VERSION = "v1.4"
 	title := "🤖 " + t.SelectMainModel
 	currentModel := m.config.Model
-	if m.selectingFallback {
-		title = "🔧 " + t.SelectFallback
-		currentModel = m.config.FallbackModel
-		if currentModel == "" {
-			currentModel = t.NotSet
-		}
-	}
 	s := titleStyle.Render(title + " " + VERSION)
 	s += "\n"
 	
@@ -421,9 +408,6 @@ func (m configModel) updateAPIConfig(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				// 选择主模型
 				return m.showModelSelector()
 			case 2:
-				// 选择副模型
-				return m.showFallbackModelSelector()
-			case 3:
 				// 更改API密钥
 				m.changingAPIKey = true  // 设置标志
 				m.apiKeyInput.SetValue(m.config.APIKey)
@@ -447,11 +431,6 @@ func (m configModel) updateAPIConfig(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m.showModelSelector()
 			
 		case "3":
-			// 选择副模型
-			m.cursor = 2  // 确保cursor正确
-			return m.showFallbackModelSelector()
-			
-		case "4":
 			// 更改API密钥
 			m.cursor = 3  // 确保cursor正确
 			m.changingAPIKey = true  // 设置标志
@@ -543,7 +522,6 @@ func (m configModel) showModelSelector() (tea.Model, tea.Cmd) {
 	m.screen = modelSelectScreen 
 	m.selectedPrompt = 0 // 重置选择索引
 	m.cursor = 0 // 重置光标
-	m.selectingFallback = false // 选择主模型
 	
 	// 清除模型缓存，强制重新加载
 	m.cachedModels = nil
@@ -558,23 +536,3 @@ func (m configModel) showModelSelector() (tea.Model, tea.Cmd) {
 	return m, textinput.Blink
 }
 
-// 显示副模型选择器
-func (m configModel) showFallbackModelSelector() (tea.Model, tea.Cmd) {
-	// 切换到模型选择界面（使用同一个界面，通过selectingFallback标志区分）
-	m.screen = modelSelectScreen  
-	m.selectedPrompt = 0 // 重置选择索引
-	m.cursor = 0 // 重置光标
-	m.selectingFallback = true // 选择副模型
-	
-	// 清除模型缓存，强制重新加载
-	m.cachedModels = nil
-	m.modelsLoaded = false
-	
-	// 初始化搜索框
-	if m.promptNameInput.Value() != "" {
-		m.promptNameInput.SetValue("")
-	}
-	m.promptNameInput.Focus()
-	
-	return m, textinput.Blink
-}

@@ -100,11 +100,9 @@ func getChineseTraditional() *Translations {
 		EnterNewAPIKey:  "輸入新的API Key",
 		ChangeAPIKey:    "更改API密鑰",
 		SelectMainModel: "選擇主模型",
-		SelectFallback:  "選擇副模型",
 		SupportedProviders: "支持的服務商",
 		SearchModel:     "搜索模型...",
 		MainModel:       "主模型",
-		FallbackModel:   "副模型",
 		NoPromptAvailable: "(無可用prompt)",
 		
 		// Usage messages
@@ -450,11 +448,9 @@ func getJapanese() *Translations {
 		EnterNewAPIKey:  "新しいAPI Keyを入力",
 		ChangeAPIKey:    "APIキー変更",
 		SelectMainModel: "メインモデルを選択",
-		SelectFallback:  "フォールバックモデルを選択",
 		SupportedProviders: "サポートされているプロバイダー",
 		SearchModel:     "モデルを検索...",
 		MainModel:       "メインモデル",
-		FallbackModel:   "フォールバックモデル",
 		NoPromptAvailable: "(利用可能なプロンプトなし)",
 		
 		// Usage messages
@@ -800,11 +796,9 @@ func getKorean() *Translations {
 		EnterNewAPIKey:  "새 API Key 입력",
 		ChangeAPIKey:    "API 키 변경",
 		SelectMainModel: "메인 모델 선택",
-		SelectFallback:  "대체 모델 선택",
 		SupportedProviders: "지원되는 공급자",
 		SearchModel:     "모델 검색...",
 		MainModel:       "메인 모델",
-		FallbackModel:   "대체 모델",
 		NoPromptAvailable: "(사용 가능한 프롬프트 없음)",
 		
 		// Usage messages
@@ -1150,11 +1144,9 @@ func getSpanish() *Translations {
 		EnterNewAPIKey:  "Ingresa nueva clave API",
 		ChangeAPIKey:    "Cambiar clave API",
 		SelectMainModel: "Seleccionar modelo principal",
-		SelectFallback:  "Seleccionar modelo de respaldo",
 		SupportedProviders: "Proveedores soportados",
 		SearchModel:     "Buscar modelo...",
 		MainModel:       "Modelo principal",
-		FallbackModel:   "Modelo de respaldo",
 		NoPromptAvailable: "(Sin prompts disponibles)",
 		
 		// Usage messages
@@ -1499,11 +1491,9 @@ func getFrench() *Translations {
 		EnterNewAPIKey:  "Entrer une nouvelle clé API",
 		ChangeAPIKey:    "Changer la clé API",
 		SelectMainModel: "Sélectionner le modèle principal",
-		SelectFallback:  "Sélectionner le modèle de secours",
 		SupportedProviders: "Fournisseurs pris en charge",
 		SearchModel:     "Rechercher un modèle...",
 		MainModel:       "Modèle principal",
-		FallbackModel:   "Modèle de secours",
 		NoPromptAvailable: "(Aucun prompt disponible)",
 		
 		// Usage messages

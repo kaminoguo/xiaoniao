@@ -104,7 +104,6 @@ const (
 	languageScreen
 	modelSelectScreen   // 主模型选择界面
 	themeScreen         // 主题选择界面
-	fallbackModelScreen // 副模型选择界面
 	hotkeyScreen        // 快捷键设置界面
 	aboutScreen         // 关于界面
 )
@@ -138,7 +137,6 @@ type configModel struct {
 	cachedModels       []string        // 缓存的模型列表
 	selectedTheme      int             // 选中的主题索引
 	modelsLoaded       bool            // 模型是否已加载
-	selectingFallback  bool            // 是否正在选择副模型
 	changingAPIKey     bool            // 是否正在更改API密钥
 
 	// 新的快捷键输入状态
@@ -491,14 +489,7 @@ func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd
 	case "enter":
 		// 选择模型
 		if totalModels > 0 && m.selectedPrompt < totalModels {
-			if m.selectingFallback {
-				// 选择副模型
-				m.config.FallbackModel = models[m.selectedPrompt]
-				config = *m.config
-				saveConfig()
-				m.screen = apiKeyScreen
-				m.testResult = fmt.Sprintf("✅ 副模型已设置为: %s", m.config.FallbackModel)
-			} else {
+			{
 				// 选择主模型
 				m.config.Model = models[m.selectedPrompt]
 				config = *m.config
@@ -810,9 +801,6 @@ func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				// 选择主模型
 				return m.showModelSelector()
 			case 2:
-				// 选择副模型
-				return m.showFallbackModelSelector()
-			case 3:
 				// 更改API密钥
 				m.changingAPIKey = true
 				m.apiKeyInput.SetValue(m.config.APIKey)
@@ -839,11 +827,6 @@ func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m.showModelSelector()
 
 		case "3":
-			// 选择副模型
-			m.cursor = 2
-			return m.showFallbackModelSelector()
-
-		case "4":
 			// 更改API密钥
 			m.cursor = 3
 			m.changingAPIKey = true

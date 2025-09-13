@@ -26,7 +26,6 @@ type Config struct {
 	APIKey        string `json:"api_key"`
 	Provider      string `json:"provider"`
 	Model         string `json:"model"`
-	FallbackModel string `json:"fallback_model,omitempty"` // 副模型
 	PromptID      string `json:"prompt_id"`
 	Language      string `json:"language,omitempty"`
 	Theme         string `json:"theme,omitempty"`      // UI主题
@@ -276,7 +275,6 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			APIKey:        config.APIKey,
 			Provider:      config.Provider,
 			Model:         config.Model,
-			FallbackModel: config.FallbackModel,
 			MaxRetries:    3,
 			Timeout:      60,  // 增加到60秒
 		}
@@ -368,8 +366,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 				APIKey:        config.APIKey,
 				Provider:      config.Provider,
 				Model:         config.Model,
-				FallbackModel: config.FallbackModel,
-				MaxRetries:    3,
+					MaxRetries:    3,
 				Timeout:      60,
 			}
 		
@@ -758,8 +755,7 @@ func monitorRefreshSignal(trans **translator.Translator) {
 				APIKey:        config.APIKey,
 				Provider:      config.Provider,
 				Model:         config.Model,
-				FallbackModel: config.FallbackModel,
-				MaxRetries:    3,
+					MaxRetries:    3,
 				Timeout:      60,
 			}
 			

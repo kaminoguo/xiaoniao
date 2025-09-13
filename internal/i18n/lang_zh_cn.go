@@ -100,11 +100,9 @@ func getChineseSimplified() *Translations {
 		EnterNewAPIKey:  "输入新的API Key",
 		ChangeAPIKey:    "更改API密钥",
 		SelectMainModel: "选择主模型",
-		SelectFallback:  "选择副模型",
 		SupportedProviders: "支持的服务商",
 		SearchModel:     "搜索模型...",
 		MainModel:       "主模型",
-		FallbackModel:   "副模型",
 		NoPromptAvailable: "(无可用prompt)",
 		
 		// Usage messages
