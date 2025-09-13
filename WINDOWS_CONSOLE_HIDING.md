@@ -3,30 +3,26 @@
 ## 问题描述
 xiaoniao Windows版本在运行时，控制台窗口仍会在任务栏显示，影响用户体验。
 
-## 解决方案
+## 当前解决方案 - 隐形父窗口方案（v1.6.5+）
 
-### 1. 编译时隐藏 (-H windowsgui)
-```bash
-go build -ldflags="-H windowsgui" ./cmd/xiaoniao
-```
-这个标志告诉Go编译器生成GUI应用程序而非控制台应用程序。
+### 实现原理
+利用Windows系统规则：子窗口不会在任务栏显示。通过创建一个不可见的父窗口，将控制台窗口设置为其子窗口，从而实现任务栏隐藏。
 
-### 2. 运行时多层次隐藏
-
-#### 方案实现位置
+### 技术实现
 - 文件：`/home/lyrica/xiaoniao/cmd/xiaoniao/windows.go`
-- 函数：`initializeHiddenConsole()`, `hideConsoleWindow()`, `hideFromTaskbarUltimate()`
+- 核心函数：
+  - `createInvisibleParentWindow()` - 创建隐形父窗口
+  - `initializeHiddenConsole()` - 初始化隐藏控制台
+  - `showConsoleWindow()` - 显示时临时解除父子关系
+  - `hideConsoleWindow()` - 隐藏时重新建立父子关系
 
-#### 隐藏策略
-1. **异步最小化**：`ShowWindowAsync(SW_FORCEMINIMIZE)` - 避免窗口闪烁
-2. **窗口样式修改**：
-   - 添加 `WS_EX_TOOLWINDOW` - 工具窗口，不在任务栏显示
-   - 添加 `WS_EX_NOACTIVATE` - 不激活窗口
-   - 移除 `WS_EX_APPWINDOW` - 移除应用窗口标志
-   - 移除 `WS_VISIBLE` - 窗口不可见
-3. **底层位置控制**：`SetWindowPos(HWND_BOTTOM, SWP_HIDEWINDOW)`
-4. **完全隐藏**：`ShowWindow(SW_HIDE)`
-5. **禁用交互**：`EnableWindow(FALSE)`
+### 实现步骤
+1. **注册窗口类**：使用 `RegisterClassEx` 注册自定义窗口类
+2. **创建隐形父窗口**：`CreateWindowEx` 创建 `WS_POPUP` 样式窗口（不在任务栏）
+3. **设置父子关系**：`SetParent` 将控制台设为隐形窗口的子窗口
+4. **动态切换**：
+   - 显示控制台时：临时解除父子关系，允许正常显示
+   - 隐藏控制台时：重新建立父子关系，从任务栏消失
 
 ### 3. 启动时立即隐藏
 ```go
@@ -39,15 +35,20 @@ func runDaemonWithHotkey() {
 
 ## 构建方法
 
-使用高级构建脚本：
+使用标准构建脚本：
 ```bash
+./build-windows.sh
+# 或
 ./build-windows-advanced.sh
 ```
 
+**注意**：不再使用 `-H windowsgui` 标志，保持为控制台程序以确保终端功能正常。
+
 构建特性：
-- ✅ 终极控制台隐藏模式 (-H windowsgui)
-- ✅ 多层次窗口样式隐藏
+- ✅ 隐形父窗口实现任务栏隐藏
+- ✅ 保持控制台功能完整性
 - ✅ 任务栏和Alt+Tab完全隐藏
+- ✅ 托盘菜单控制显示/隐藏
 
 ## 测试验证
 
@@ -58,12 +59,11 @@ func runDaemonWithHotkey() {
 
 ## 恢复机制
 
-当需要显示控制台时（如config命令），`showConsoleWindow()`会：
-1. 重新启用窗口交互
-2. 恢复正常窗口样式
-3. 恢复到任务栏
-4. 使用SetWindowPos显示窗口
-5. 正常显示控制台
+当需要显示控制台时（通过托盘菜单），`showConsoleWindow()`会：
+1. 临时解除父子关系（`SetParent(console, 0)`）
+2. 显示控制台窗口（`ShowWindow(SW_SHOW)`）
+3. 控制台可正常使用和交互
+4. 隐藏时重新设置父子关系
 
 ## 跨平台兼容性
 
@@ -76,23 +76,36 @@ func initializeHiddenConsole() {
 
 ## 技术细节
 
-### Windows API 调用
+### 新增 Windows API 调用（v1.6.5+）
+- `RegisterClassEx()` - 注册窗口类
+- `CreateWindowEx()` - 创建隐形父窗口
+- `GetModuleHandle()` - 获取模块句柄
+- `DefWindowProc()` - 默认窗口过程
+- `SetParent()` - 设置父子窗口关系
 - `GetConsoleWindow()` - 获取控制台窗口句柄
-- `ShowWindowAsync()` - 异步显示/隐藏窗口
-- `SetWindowLongPtr()` - 修改窗口样式
-- `SetWindowPos()` - 设置窗口位置和状态
-- `EnableWindow()` - 启用/禁用窗口
+- `ShowWindow()` - 显示/隐藏窗口
 
-### 常量定义
+### 关键常量定义
 ```go
 const (
-    WS_EX_TOOLWINDOW   = 0x00000080  // 工具窗口
-    WS_EX_NOACTIVATE   = 0x08000000  // 不激活
-    WS_EX_APPWINDOW    = 0x00040000  // 应用窗口
-    WS_VISIBLE         = 0x10000000  // 可见
-    SW_FORCEMINIMIZE   = 11          // 强制最小化
-    SWP_HIDEWINDOW     = 0x0080      // 隐藏窗口
+    WS_POPUP         = 0x80000000  // 弹出窗口（不在任务栏）
+    CS_HREDRAW       = 0x0002      // 水平重绘
+    CS_VREDRAW       = 0x0001      // 垂直重绘
+    COLOR_WINDOW     = 5           // 窗口背景色
+    SW_HIDE          = 0           // 隐藏窗口
+    SW_SHOW          = 5           // 显示窗口
 )
 ```
 
-这个方案应该能够完全解决控制台窗口在任务栏显示的问题。
+## 历史方案记录
+
+### 旧方案问题
+- **-H windowsgui**：导致控制台功能完全丢失，出现黑屏
+- **WS_EX_TOOLWINDOW**：只能从Alt+Tab隐藏，无法从任务栏隐藏
+- **窗口样式修改**：效果有限，无法完全隐藏任务栏图标
+
+### 当前方案优势
+- ✅ 利用Windows系统规则，可靠性高
+- ✅ 保持控制台功能完整
+- ✅ 完全从任务栏和Alt+Tab隐藏
+- ✅ 代码实现简洁，易于维护

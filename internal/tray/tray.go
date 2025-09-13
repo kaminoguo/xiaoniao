@@ -39,14 +39,15 @@ type Manager struct {
 	onRefresh         func()
 	onSwitchPrompt    func()
 	onSelectPrompt    func(string) // Callback for selecting a specific prompt
-	onToggleTerminal  func()
+	onToggleDebugConsole func()
 	// Menu items
-	mToggle     *systray.MenuItem
-	mPromptInfo *systray.MenuItem
-	mStatus     *systray.MenuItem
-	mRefresh    *systray.MenuItem
-	mPromptMenu *systray.MenuItem // Main prompt menu
-	promptItems []*systray.MenuItem // Individual prompt menu items
+	mToggle       *systray.MenuItem
+	mPromptInfo   *systray.MenuItem
+	mStatus       *systray.MenuItem
+	mRefresh      *systray.MenuItem
+	mPromptMenu   *systray.MenuItem // Main prompt menu
+	mDebugConsole *systray.MenuItem // Debug console menu item
+	promptItems   []*systray.MenuItem // Individual prompt menu items
 }
 
 // NewManager creates a new tray manager
@@ -173,9 +174,9 @@ func (m *Manager) SetOnSelectPrompt(callback func(string)) {
 	m.onSelectPrompt = callback
 }
 
-// SetOnToggleTerminal sets the terminal toggle callback
-func (m *Manager) SetOnToggleTerminal(callback func()) {
-	m.onToggleTerminal = callback
+// SetOnToggleDebugConsole sets the debug console toggle callback
+func (m *Manager) SetOnToggleDebugConsole(callback func()) {
+	m.onToggleDebugConsole = callback
 }
 
 // SetBusinessLogic sets the business logic callback to run after tray initialization
@@ -244,7 +245,7 @@ func (m *Manager) onReady() {
 	m.mRefresh = systray.AddMenuItem(t.TrayRefresh, t.TrayRefresh)
 	mConfig := systray.AddMenuItem(t.TraySettings, t.TraySettings)
 	m.mPromptMenu = systray.AddMenuItem(t.TranslateStyle, t.TranslateStyle)
-	mTerminal := systray.AddMenuItem(t.TrayShow+"/"+t.TrayHide, t.TrayShow+"/"+t.TrayHide)
+	m.mDebugConsole = systray.AddMenuItem("导出日志", "导出日志")
 	systray.AddSeparator()
 	
 	mAbout := systray.AddMenuItem(t.TrayAbout, t.TrayAbout)
@@ -264,9 +265,9 @@ func (m *Manager) onReady() {
 			case <-mConfig.ClickedCh:
 				fmt.Println("🔥 DEBUG: 检测到设置菜单点击事件")
 				m.openSettings()
-			case <-mTerminal.ClickedCh:
-				fmt.Println("🔥 DEBUG: 检测到显示/隐藏终端菜单点击事件")
-				m.toggleTerminal()
+			case <-m.mDebugConsole.ClickedCh:
+				fmt.Println("🔥 DEBUG: 检测到调试控制台菜单点击事件")
+				m.toggleDebugConsole()
 			case <-mAbout.ClickedCh:
 				fmt.Println("🔥 DEBUG: 检测到关于菜单点击事件")
 				m.showAbout()
@@ -397,9 +398,9 @@ func (m *Manager) switchPrompt() {
 	}
 }
 
-func (m *Manager) toggleTerminal() {
-	if m.onToggleTerminal != nil {
-		m.onToggleTerminal()
+func (m *Manager) toggleDebugConsole() {
+	if m.onToggleDebugConsole != nil {
+		m.onToggleDebugConsole()
 	}
 }
 
@@ -518,5 +519,10 @@ func (m *Manager) UpdatePromptList(prompts []struct{ ID, Name string }) {
 			}(prompt.ID)
 		}
 	}
+}
+
+// UpdateDebugConsoleMenu 保留函数签名以兼容，但不再更新菜单文字
+func (m *Manager) UpdateDebugConsoleMenu(isVisible bool) {
+	// 不再需要更新菜单文字，因为现在是"导出日志"功能
 }
 

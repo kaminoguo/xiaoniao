@@ -172,6 +172,11 @@ func (m *Monitor) Start() {
 	m.stopCh = make(chan struct{})
 	m.doneCh = make(chan struct{})
 	
+	// Get current clipboard content and set it as lastContent to prevent initial translation
+	if currentText, err := GetText(); err == nil {
+		m.lastContent = currentText
+	}
+	
 	// Set running flag
 	atomic.StoreInt32(&m.running, 1)
 	
