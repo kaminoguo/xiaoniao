@@ -1,16 +1,35 @@
-# Project Structure - Windows专用版 v1.6.5
+# Project Structure - Windows专用版 v1.6.6
+
+## ⚠️ 技术限制说明
+
+### 交叉编译问题
+- **问题**：从 WSL2/Linux 交叉编译到 Windows 时功能受限
+- **原因**：
+  1. CGO 在交叉编译时默认禁用
+  2. Windows 键盘钩子 API (SetWindowsHookEx) 需要回调函数
+  3. 纯 Go 无法实现 DLL 注入和回调机制
+- **影响**：
+  - 快捷键录制功能无法正常工作
+  - 只能使用功能受限的 stub 实现
+  - 部分 Windows API 功能不可用
+
+### 当前解决方案
+- 使用预设的默认快捷键
+- 导出日志功能替代控制台显示
+- 手动编辑配置文件设置快捷键
 
 ## 目录结构
 
 ```
 xiaoniao/
 ├── cmd/xiaoniao/               # 应用程序入口点
-│   ├── main.go                 # 主程序
-│   ├── config_ui.go            # 配置界面（改进的快捷键录制）
+│   ├── main.go                 # 主程序（GUI模式）
+│   ├── config_ui.go            # 配置界面（Windows API快捷键录制）
 │   ├── api_config_ui.go        # API配置
 │   ├── prompts.go              # 提示词管理
 │   ├── system_hotkey.go        # 系统热键处理
-│   ├── windows.go              # Windows特定功能（窗口控制）
+│   ├── windows.go              # Windows特定功能（动态调试窗口）
+│   ├── hotkey_recorder_windows.go # Windows API键盘钩子录制
 │   ├── notwindows.go           # 非Windows平台stub
 │   └── paste_windows.go        # Windows自动粘贴实现
 │
@@ -60,6 +79,7 @@ xiaoniao/
 │   └── icon.ico               # Windows应用图标
 │
 ├── build-windows.sh           # Linux上构建Windows版本的脚本
+├── build-windows-advanced.sh  # 带GUI模式的高级构建脚本
 ├── install.ps1                # Windows PowerShell安装脚本
 ├── versioninfo.json           # Windows版本信息
 ├── go.mod                     # Go模块定义
@@ -71,13 +91,15 @@ xiaoniao/
 
 ## 模块描述
 
-### 命令行界面 (cmd/xiaoniao)
+### 主应用程序 (cmd/xiaoniao)
 
-主应用程序入口，包含：
+GUI模式Windows应用程序，包含：
 - 带主题支持的终端UI配置界面
 - API配置和模型选择
 - 提示词管理系统
-- Windows特定信号处理
+- Windows API键盘钩子快捷键录制
+- 动态调试窗口（AllocConsole/FreeConsole）
+- 日志文件输出（~/.config/xiaoniao/xiaoniao.log）
 
 ### 翻译引擎 (internal/translator)
 
@@ -115,6 +137,13 @@ Windows配置路径：`%APPDATA%\xiaoniao\`
 - `config.json`：主要应用设置
 - `prompts.json`：自定义翻译提示词
 
+## v1.6.6 更新内容
+
+- 添加日志导出功能替代控制台显示
+- 记录已知的快捷键录制问题
+- 更新交叉编译限制说明
+- 保持单文件部署特性
+
 ## v1.6.5 更新内容
 
 - 修复循环翻译问题
@@ -129,31 +158,35 @@ Windows配置路径：`%APPDATA%\xiaoniao\`
 ### 在Linux上交叉编译Windows版本
 
 ```bash
-# 使用构建脚本
+# 使用构建脚本（GUI模式）
 ./build-windows.sh
 
-# 或手动编译
-GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
+# 或使用高级构建脚本
+./build-windows-advanced.sh
+
+# 或手动编译（GUI模式）
+GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
 ### 在Windows上构建
 
 ```cmd
-go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
+go build -ldflags="-s -w -H windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
 ### 带图标构建
 
-使用goversioninfo嵌入应用图标：
+使用rsrc嵌入应用图标：
 
-```cmd
-go generate
-go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
+```bash
+~/go/bin/rsrc -ico assets/icon.ico -o cmd/xiaoniao/resource.syso
+GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H windowsgui" -o xiaoniao.exe cmd/xiaoniao/*.go
 ```
 
 构建标志说明：
 - `-s -w`：减小二进制文件大小（strip符号表）
-- **重要**：不使用`-H=windowsgui`，因为配置界面需要控制台窗口（TUI）
+- `-H windowsgui`：GUI模式，无控制台窗口
+- **重要**：v1.7.0使用GUI模式，配置界面通过动态分配控制台实现
 
 ## 测试
 
@@ -200,6 +233,12 @@ Set-Clipboard "test text"
 - 支持提供商：20+
 
 ## 版本历史
+
+### v1.6.6 (2025-09-13)
+- 添加日志导出功能替代控制台显示
+- 记录已知的快捷键录制问题（交叉编译限制）
+- 更新技术限制文档
+- 保持单文件exe部署
 
 ### v1.6.4 (2025-09-11)
 - 完全移除Linux/macOS支持，专注Windows平台
@@ -260,4 +299,4 @@ Lyrica
 
 ---
 
-最后更新：2025-09-09 | 版本：1.6.3
+最后更新：2025-09-13 | 版本：1.6.6

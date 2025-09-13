@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="1.6.5"
+VERSION="1.6.6"
 BUILD_DATE=$(date +%Y%m%d)
 
 echo "========================================="
@@ -38,9 +38,9 @@ else
     exit 1
 fi
 
-# Build Windows 64-bit executable (console app for TUI)
-# NOTE: NOT using -H windowsgui flag to keep console window for TUI
+# Build Windows 64-bit executable (Console mode)
 echo "→ Building Windows amd64 executable..."
+# Removed cross_compile tag to use real Windows API functions
 GOOS=windows GOARCH=amd64 go build \
     -ldflags="-s -w -X main.version=$VERSION" \
     -o dist/xiaoniao.exe \

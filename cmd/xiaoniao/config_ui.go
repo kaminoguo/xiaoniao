@@ -150,6 +150,12 @@ type configModel struct {
 	hotkeyBox2  string // 第二个框
 	hotkeyBox3  string // 第三个框
 	hotkeyFocus int    // 当前焦点框 (0,1,2)
+	// GoHook keyboard recorder for hotkey recording
+	gohookActive    bool             // 是否启用gohook键盘录制器
+	gohookRecorder  *GoHookRecorder  // gohook键盘录制器
+	
+	// Fallback Windows API recorder (cross-compilation compatible)
+	fallbackRecorder *HotkeyRecorder // 后备Windows API录制器
 }
 
 type keyMap struct {
@@ -393,6 +399,8 @@ func (m configModel) updateMainScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.cursor = 0
 			m.hotkeyFocus = 0
 			m.loadCurrentHotkeyToBoxes() // 加载当前选中功能的快捷键配置
+			// 启动gohook键盘钩子以检测修饰键
+			m.startGoHookRecording()
 		case 5: // 刷新配置
 			// 重新加载配置
 			loadConfig()
@@ -765,6 +773,8 @@ func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				return m, m.detectAndTestAPI(apiKey)
 			}
 		case "esc":
+			// 停止gohook键盘钩子
+			m.stopGoHookRecording()
 			if m.changingAPIKey {
 				m.changingAPIKey = false
 				// API密钥保持不变
@@ -859,6 +869,8 @@ func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 
 		case "esc":
+			// 停止gohook键盘钩子
+			m.stopGoHookRecording()
 			m.screen = mainScreen
 			m.cursor = 0
 			return m, nil
@@ -1785,7 +1797,7 @@ func (m configModel) viewHotkeyScreen() string {
 	}
 
 	// 帮助信息
-	s += "\n" + helpStyle.Render("↑↓ 切换功能  ←→ 切换框  Backspace 清空  Ctrl+S 保存  Esc 返回")
+	s += "\n" + helpStyle.Render("↑↓ 切换功能  ←→ 切换框  Backspace 清空  Ctrl+Space录制Ctrl  Alt+Space录制Alt  Shift+Space录制Shift  Ctrl+S 保存  Esc 返回")
 
 	return boxStyle.Render(s)
 }
@@ -1870,11 +1882,14 @@ func (m configModel) updateAboutScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 // 快捷键界面更新函数 - 完全重写为简洁逻辑
+
 func (m configModel) updateHotkeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 
 	switch key {
 	case "esc":
+		// 停止gohook键盘钩子
+		m.stopGoHookRecording()
 		// Esc：返回主菜单，清空临时状态
 		m.screen = mainScreen
 		m.cursor = 4
@@ -1889,18 +1904,18 @@ func (m configModel) updateHotkeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		// 上箭头：切换功能
 		if m.cursor > 0 {
 			m.cursor--
+			m.hotkeyFocus = 0            // 重置到第一个框
+			m.loadCurrentHotkeyToBoxes() // 只在切换功能时加载
 		}
-		m.hotkeyFocus = 0            // 重置到第一个框
-		m.loadCurrentHotkeyToBoxes() // 加载当前选中功能的快捷键到输入框
 		return m, nil
 
 	case "down":
 		// 下箭头：切换功能
 		if m.cursor < 1 { // 只有2个功能
 			m.cursor++
+			m.hotkeyFocus = 0            // 重置到第一个框
+			m.loadCurrentHotkeyToBoxes() // 只在切换功能时加载
 		}
-		m.hotkeyFocus = 0            // 重置到第一个框
-		m.loadCurrentHotkeyToBoxes() // 加载当前选中功能的快捷键到输入框
 		return m, nil
 
 	case "left":
@@ -1938,8 +1953,8 @@ func (m configModel) updateHotkeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.saveCurrentHotkey()
 
 	default:
-		// 其他任何按键：直接录入当前焦点框
-		keyName := m.normalizeKeyName(key)
+		// 其他任何按键：使用新的按键处理逻辑
+		keyName := m.handleModifierKeys(msg)
 		if keyName != "" {
 			switch m.hotkeyFocus {
 			case 0:
@@ -1951,6 +1966,202 @@ func (m configModel) updateHotkeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, nil
+	}
+}
+
+// handleModifierKeys function is now in build-tagged files:
+// - gohook_integration.go (for actual Windows builds)
+// - gohook_integration_stub.go (for cross-compilation builds)
+// contains helper function
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+// 标准化按键名称 - 完全重写支持所有按键类型
+func (m *configModel) normalizeKeyName(key string) string {
+	// 处理修饰键组合 (如 ctrl+a, alt+tab, shift+f1)
+	if strings.Contains(key, "+") {
+		parts := strings.Split(key, "+")
+		if len(parts) >= 2 {
+			// 返回最后一个按键部分，修饰键在bubble tea中已经分离处理
+			lastKey := parts[len(parts)-1]
+			return m.normalizeKeyName(lastKey)
+		}
+	}
+
+	// 特殊字符映射
+	switch key {
+	case " ":
+		return "Space"
+	case "\t":
+		return "Tab"
+	case "\n", "\r":
+		return "Enter"
+	}
+
+	// 功能键映射
+	switch strings.ToLower(key) {
+	// 基础控制键
+	case "enter":
+		return "Enter"
+	case "escape", "esc":
+		return "Escape"
+	case "backspace":
+		return "Backspace"
+	case "delete", "del":
+		return "Delete"
+	case "tab":
+		return "Tab"
+	case "space":
+		return "Space"
+	
+	// 修饰键
+	case "ctrl":
+		return "Ctrl"
+	case "alt":
+		return "Alt"
+	case "shift":
+		return "Shift"
+	case "meta", "cmd", "win", "windows":
+		return "Meta"
+	
+	// 方向键
+	case "up":
+		return "Up"
+	case "down":
+		return "Down"
+	case "left":
+		return "Left"
+	case "right":
+		return "Right"
+	
+	// 功能键 F1-F12
+	case "f1":
+		return "F1"
+	case "f2":
+		return "F2"
+	case "f3":
+		return "F3"
+	case "f4":
+		return "F4"
+	case "f5":
+		return "F5"
+	case "f6":
+		return "F6"
+	case "f7":
+		return "F7"
+	case "f8":
+		return "F8"
+	case "f9":
+		return "F9"
+	case "f10":
+		return "F10"
+	case "f11":
+		return "F11"
+	case "f12":
+		return "F12"
+	
+	// 导航键
+	case "home":
+		return "Home"
+	case "end":
+		return "End"
+	case "pageup", "pgup":
+		return "PageUp"
+	case "pagedown", "pgdn", "pgdown":
+		return "PageDown"
+	case "insert", "ins":
+		return "Insert"
+	
+	// 数字键盘
+	case "kp0", "kp_0":
+		return "KP0"
+	case "kp1", "kp_1":
+		return "KP1"
+	case "kp2", "kp_2":
+		return "KP2"
+	case "kp3", "kp_3":
+		return "KP3"
+	case "kp4", "kp_4":
+		return "KP4"
+	case "kp5", "kp_5":
+		return "KP5"
+	case "kp6", "kp_6":
+		return "KP6"
+	case "kp7", "kp_7":
+		return "KP7"
+	case "kp8", "kp_8":
+		return "KP8"
+	case "kp9", "kp_9":
+		return "KP9"
+	case "kp_plus", "kp+":
+		return "KP+"
+	case "kp_minus", "kp-":
+		return "KP-"
+	case "kp_multiply", "kp*":
+		return "KP*"
+	case "kp_divide", "kp/":
+		return "KP/"
+	case "kp_enter":
+		return "KPEnter"
+	case "kp_decimal", "kp.":
+		return "KP."
+	
+	// 媒体键
+	case "volumeup", "vol+":
+		return "VolumeUp"
+	case "volumedown", "vol-":
+		return "VolumeDown"
+	case "mute":
+		return "Mute"
+	case "play", "playpause":
+		return "Play"
+	case "stop":
+		return "Stop"
+	case "next":
+		return "Next"
+	case "prev", "previous":
+		return "Previous"
+	}
+
+	// 单字符处理
+	if len(key) == 1 {
+		char := key[0]
+		// 字母转大写
+		if char >= 'a' && char <= 'z' {
+			return strings.ToUpper(key)
+		}
+		// 数字保持原样
+		if char >= '0' && char <= '9' {
+			return key
+		}
+		// 符号保持原样
+		return key
+	}
+
+	// 对于其他情况，首字母大写
+	if key != "" {
+		return strings.Title(strings.ToLower(key))
+	}
+	
+	return key
+}
+
+
+func showConfigUI() {
+	// 应用保存的主题
+	if config.Theme != "" {
+		applyTheme(config.Theme)
+	}
+
+	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("配置界面错误: %v\n", err)
 	}
 }
 
@@ -2036,36 +2247,6 @@ func (m *configModel) saveCurrentHotkey() (tea.Model, tea.Cmd) {
 	})
 }
 
-// 标准化按键名称 - 用户按什么就录什么
-func (m *configModel) normalizeKeyName(key string) string {
-	switch key {
-	case " ":
-		return "Space"
-	case "\t":
-		return "Tab"
-	case "enter":
-		return "Enter"
-	default:
-		// 单字符按键转大写
-		if len(key) == 1 && key >= "a" && key <= "z" {
-			return strings.ToUpper(key)
-		}
-		// 修饰键和特殊键首字母大写
-		if key != "" {
-			return strings.Title(strings.ToLower(key))
-		}
-		return key
-	}
-}
-
-func showConfigUI() {
-	// 应用保存的主题
-	if config.Theme != "" {
-		applyTheme(config.Theme)
-	}
-
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("配置界面错误: %v\n", err)
-	}
-}
+// startGoHookRecording and stopGoHookRecording functions are now in build-tagged files:
+// - gohook_integration.go (for actual Windows builds)  
+// - gohook_integration_stub.go (for cross-compilation builds)

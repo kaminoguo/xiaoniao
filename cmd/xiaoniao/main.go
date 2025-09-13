@@ -14,12 +14,13 @@ import (
 	"github.com/kaminoguo/xiaoniao/internal/clipboard"
 	"github.com/kaminoguo/xiaoniao/internal/hotkey"
 	"github.com/kaminoguo/xiaoniao/internal/i18n"
+	"github.com/kaminoguo/xiaoniao/internal/logbuffer"
 	"github.com/kaminoguo/xiaoniao/internal/tray"
 	"github.com/kaminoguo/xiaoniao/internal/translator"
 	"golang.design/x/hotkey/mainthread"
 )
 
-const version = "1.6.3"
+const version = "1.6.6"
 
 type Config struct {
 	APIKey        string `json:"api_key"`
@@ -90,49 +91,62 @@ func acquireLock() (bool, func()) {
 	return true, cleanup
 }
 
+
 func main() {
-	// Windows下确保控制台窗口可见（如果需要）
+	// 开始捕获所有控制台输出到日志缓冲区
+	logbuffer.CaptureStdout()
+	
+	// 只有在没有参数（主进程）时才隐藏控制台
+	// config、about 等子命令不应该隐藏控制台
+	if len(os.Args) == 1 {
+		// 延迟一小段时间让Windows Terminal完全初始化
+		// 然后隐藏控制台窗口
+		go func() {
+			time.Sleep(100 * time.Millisecond)
+			hideConsoleWindow()
+		}()
+	}
+	
+	// Handle special commands
 	if len(os.Args) >= 2 && (os.Args[1] == "config" || os.Args[1] == "about" || os.Args[1] == "help" || os.Args[1] == "version") {
-		// 对于需要显示输出的命令，确保控制台窗口可见
-		showConsoleWindow()
-	}
-	
-	// 无参数时默认执行 run
-	if len(os.Args) < 2 {
-		os.Args = append(os.Args, "run")
-	}
-	
-	command := os.Args[1]
-	
-	switch command {
-	case "run":
-		// Acquire lock for run mode
-		if ok, cleanup := acquireLock(); !ok {
-			// 显示错误消息（用户可见）
-			showErrorMessage("xiaoniao", "程序已在运行中。请检查系统托盘图标。\n如果没有看到托盘图标，请尝试结束所有xiaoniao进程后重新启动。")
-			os.Exit(1)
-		} else {
-			defer cleanup()
+		
+		command := os.Args[1]
+		switch command {
+		case "config":
+			showConfigUI()
+		case "about":
+			os.Setenv("SHOW_ABOUT", "1")
+			showConfigUI()
+		case "version", "--version", "-v":
+			fmt.Printf("xiaoniao version %s\n", version)
+		case "help", "--help", "-h":
+			showHelp()
 		}
-		// 需要使用mainthread来支持快捷键
-		mainthread.Init(func() {
-			runDaemonWithHotkey()
-		})
-	case "config":
-		showConfigUI()
-	case "about":
-		// 设置环境变量后显示配置界面
-		os.Setenv("SHOW_ABOUT", "1")
-		showConfigUI()
-	case "version", "--version", "-v":
-		fmt.Printf("xiaoniao version %s\n", version)
-	case "help", "--help", "-h":
-		showHelp()
-	default:
-		t := i18n.T()
-		fmt.Printf("%s: %s\n", t.UnknownCommand, command)
-		showUsage()
+		
+		// Wait for user input before closing console
+		fmt.Println("\nPress Enter to exit...")
+		fmt.Scanln()
+		return
 	}
+	
+	// GUI mode - hide console window on startup
+	hideConsoleWindow()
+	// Set up console control handler to prevent program exit on X click (Windows only)
+	setupMainConsoleHandler()
+	// Acquire lock for run mode
+	if ok, cleanup := acquireLock(); !ok {
+		// Show error message using Windows message box
+		showErrorMessage("xiaoniao", "程序已在运行中。请检查系统托盘图标。\n如果没有看到托盘图标，请尝试结束所有xiaoniao进程后重新启动。")
+		os.Exit(1)
+	} else {
+		defer cleanup()
+	}
+	
+	
+	// Run GUI mode - this is blocking and keeps the app running
+	mainthread.Init(func() {
+		runDaemonWithHotkey()
+	})
 }
 
 func showUsage() {
@@ -173,11 +187,8 @@ func showHelp() {
 	fmt.Println(t.Warning)
 }
 
-// runDaemonWithHotkey 在主线程运行，支持全局快捷键
+// runDaemonWithHotkey 在主线程运行，支持全局快捷键（控制台模式）
 func runDaemonWithHotkey() {
-	// 隐藏控制台窗口但保持控制台功能
-	hideConsoleWindow()
-	
 	// 初始化托盘管理器
 	trayManager, err := tray.NewManager()
 	if err != nil {
@@ -328,10 +339,15 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		// 启动配置文件监控
 		go watchConfig()
 	})
-	trayManager.SetOnToggleTerminal(func() {
-		// 切换终端窗口显示/隐藏
-		toggleTerminalVisibility()
-		})
+	trayManager.SetOnToggleDebugConsole(func() {
+		// 导出日志到文件
+		filePath, err := logbuffer.ExportLogs()
+		if err != nil {
+			fmt.Printf("导出日志失败: %v\n", err)
+		} else {
+			fmt.Printf("日志已导出到: %s\n", filePath)
+		}
+	})
 	
 	trayManager.SetOnRefresh(func() {
 			oldModel := config.Model
@@ -409,6 +425,9 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			promptList[i] = struct{ ID, Name string }{ID: p.ID, Name: p.Name}
 		}
 		trayManager.UpdatePromptList(promptList)
+		
+		// 初始化终端菜单状态（程序启动时控制台被隐藏）
+		trayManager.UpdateDebugConsoleMenu(false)
 	
 		// 创建快捷键管理器
 		hotkeyManager := hotkey.NewManager()
@@ -468,16 +487,13 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		}
 	}
 	
-	clearScreen()
-	fmt.Println("╔════════════════════════════════════════╗")
-	fmt.Printf("║            xiaoniao - %s           ║\n", t.Running)
-	fmt.Println("╚════════════════════════════════════════╝")
-	fmt.Println()
+	// Console mode startup info
+	fmt.Println("xiaoniao console mode started")
 	fmt.Printf("%s: %s | %s: %s\n", t.Provider, config.Provider, t.Model, config.Model)
 	fmt.Printf("%s: %s\n", t.TranslateStyle, getPromptName(config.PromptID))
 	fmt.Printf("%s: ✅ %s\n", t.AutoPaste, t.Enabled)
 	
-	// 显示快捷键信息
+	// 记录快捷键信息
 	if config.HotkeyToggle != "" || config.HotkeySwitch != "" {
 		fmt.Printf("%s\n", t.HotkeysLabel)
 		if config.HotkeyToggle != "" {
@@ -488,12 +504,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		}
 	}
 	
-	fmt.Println("─────────────────────────────────────────")
-	fmt.Println(t.Monitoring)
-	fmt.Println(t.CopyToTranslate)
-	fmt.Println(t.Step5)
-	fmt.Println(t.ExitTip)
-	fmt.Println("─────────────────────────────────────────")
+	fmt.Println("监控开始 - 复制文字即可翻译")
 	
 	// 不播放启动提示音
 	// sound.PlayStart()
@@ -627,7 +638,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 // 辅助函数
 
 func clearScreen() {
-	fmt.Print("\033[H\033[2J")
+	// GUI mode: no need to clear screen, function kept for compatibility
 }
 
 
@@ -681,10 +692,10 @@ func getPromptContent(id string) string {
 	}
 }
 
-// toggleTerminalVisibility 切换终端窗口的显示/隐藏状态
+// toggleTerminalVisibility 切换终端窗口的显示/隐藏状态 (deprecated, replaced by debug console)
 func toggleTerminalVisibility() {
-	// 使用Windows API切换控制台窗口显示状态
-	toggleConsoleWindow()
+	// Legacy function - now replaced by debug console functionality
+	// This function is kept for compatibility but does nothing
 }
 
 
@@ -703,7 +714,7 @@ func watchConfig() {
 				
 				loadConfig()
 				
-				// 如果模型或提供商变了，打印提示
+				// 如果模型或提供商变了，记录提示
 				if config.Model != oldModel || config.Provider != oldProvider {
 					fmt.Printf("\n🔄 配置已更新: %s | %s\n", config.Provider, config.Model)
 				}

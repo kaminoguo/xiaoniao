@@ -79,9 +79,10 @@ if [ -f cmd/xiaoniao/resource.syso ]; then
     RSRC_SIZE=$(ls -l cmd/xiaoniao/resource.syso | awk '{print $5}')
     echo "  ✓ 资源文件已生成，大小: $((RSRC_SIZE / 1024))KB"
     
-    # 构建可执行文件（控制台程序，用API隐藏窗口）
+    # 构建可执行文件（控制台程序）
     echo "→ 构建 Windows 可执行文件（控制台程序）..."
     GOOS=windows GOARCH=amd64 go build \
+        -tags cross_compile \
         -ldflags="-s -w -X main.version=$VERSION" \
         -o dist/xiaoniao.exe \
         ./cmd/xiaoniao
@@ -106,6 +107,7 @@ if [ "$BUILD_SUCCESS" != true ]; then
         # 构建可执行文件（控制台程序）
         echo "→ 构建 Windows 可执行文件（控制台程序）..."
         GOOS=windows GOARCH=amd64 go build \
+            -tags cross_compile \
             -ldflags="-s -w -X main.version=$VERSION" \
             -o dist/xiaoniao.exe \
             ./cmd/xiaoniao
@@ -117,8 +119,8 @@ if [ "$BUILD_SUCCESS" != true ]; then
     fi
 fi
 
-# 清理资源文件
-rm -f cmd/xiaoniao/resource.syso
+# 保留资源文件以便后续手动构建
+echo "→ 保留资源文件 cmd/xiaoniao/resource.syso 以便后续使用"
 
 # 检查构建结果
 if [ "$BUILD_SUCCESS" = true ] && [ -f dist/xiaoniao.exe ]; then
@@ -150,14 +152,14 @@ if [ "$BUILD_SUCCESS" = true ] && [ -f dist/xiaoniao.exe ]; then
     echo "  - dist/xiaoniao-windows-v${VERSION}.zip"
     echo ""
     echo "🔧 构建特性:"
-    echo "  ✅ 控制台程序模式（保持控制台特性）"
-    echo "  ✅ 多层次窗口样式隐藏"
-    echo "  ✅ 任务栏和Alt+Tab完全隐藏"
+    echo "  ✅ 控制台程序模式（默认显示控制台窗口）"
+    echo "  ✅ 支持调试控制台显示/隐藏功能"
+    echo "  ✅ 系统托盘运行"
     echo ""
     echo "📋 下一步:"
     echo "  1. 运行 ./verify-icon.sh 验证图标"
     echo "  2. 复制到 Windows 系统测试"
-    echo "  3. 确认控制台窗口不在任务栏显示"
+    echo "  3. 确认程序以控制台模式运行（可显示/隐藏控制台窗口）"
     echo ""
 else
     echo ""
