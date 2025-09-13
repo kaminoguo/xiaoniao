@@ -139,23 +139,12 @@ type configModel struct {
 	selectedTheme      int             // 选中的主题索引
 	modelsLoaded       bool            // 模型是否已加载
 	selectingFallback  bool            // 是否正在选择副模型
-	recordingHotkey    bool            // 是否正在录制快捷键
-	hotkeyBuffer       string          // 快捷键缓冲区
-	detectedKeys       []string        // 检测到的按键组合
-	modifierKeys       map[string]bool // 当前按下的修饰键
 	changingAPIKey     bool            // 是否正在更改API密钥
 
-	// 简化的三框快捷键状态
-	hotkeyBox1  string // 第一个框
-	hotkeyBox2  string // 第二个框
-	hotkeyBox3  string // 第三个框
-	hotkeyFocus int    // 当前焦点框 (0,1,2)
-	// GoHook keyboard recorder for hotkey recording
-	gohookActive    bool             // 是否启用gohook键盘录制器
-	gohookRecorder  *GoHookRecorder  // gohook键盘录制器
-	
-	// Fallback Windows API recorder (cross-compilation compatible)
-	fallbackRecorder *HotkeyRecorder // 后备Windows API录制器
+	// 新的快捷键输入状态
+	hotkeyInputs    []textinput.Model // 快捷键输入框数组
+	hotkeyEditIndex int               // 当前编辑的快捷键索引
+	hotkeyError     string            // 快捷键错误信息
 }
 
 type keyMap struct {
@@ -226,6 +215,18 @@ func initialModel() configModel {
 	// 检查是否要显示关于页面
 	showAbout := os.Getenv("SHOW_ABOUT") == "1"
 
+	// 初始化快捷键输入框
+	hotkeyInputs := make([]textinput.Model, 2)
+	for i := range hotkeyInputs {
+		hotkeyInputs[i] = textinput.New()
+		hotkeyInputs[i].Placeholder = "例如: Ctrl+C 或 Alt"
+		hotkeyInputs[i].Width = 30
+		hotkeyInputs[i].CharLimit = 30
+	}
+	// 设置当前快捷键值
+	hotkeyInputs[0].SetValue(config.HotkeyToggle)
+	hotkeyInputs[1].SetValue(config.HotkeySwitch)
+
 	// 初始化API输入框
 	ti := textinput.New()
 	ti.Placeholder = "sk-..."
@@ -267,16 +268,12 @@ func initialModel() configModel {
 		apiKeyInput:        ti,
 		promptNameInput:    nameInput,
 		promptContentInput: contentInput,
+		hotkeyInputs:      hotkeyInputs,
 		prompts:            prompts,
 		customPrompts:      customPrompts,
 		selectedPrompt:     getPromptIndex(config.PromptID),
 		config:             &config,
 		promptMode:         "select",
-		// 初始化快捷键相关字段
-		hotkeyBox1:  "",
-		hotkeyBox2:  "",
-		hotkeyBox3:  "",
-		hotkeyFocus: 0,
 	}
 }
 
@@ -397,10 +394,8 @@ func (m configModel) updateMainScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		case 4: // 快捷键设置
 			m.screen = hotkeyScreen
 			m.cursor = 0
-			m.hotkeyFocus = 0
-			m.loadCurrentHotkeyToBoxes() // 加载当前选中功能的快捷键配置
-			// 启动gohook键盘钩子以检测修饰键
-			m.startGoHookRecording()
+			m.hotkeyEditIndex = -1
+			m.hotkeyError = ""
 		case 5: // 刷新配置
 			// 重新加载配置
 			loadConfig()
@@ -773,8 +768,6 @@ func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				return m, m.detectAndTestAPI(apiKey)
 			}
 		case "esc":
-			// 停止gohook键盘钩子
-			m.stopGoHookRecording()
 			if m.changingAPIKey {
 				m.changingAPIKey = false
 				// API密钥保持不变
@@ -869,8 +862,6 @@ func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			}
 
 		case "esc":
-			// 停止gohook键盘钩子
-			m.stopGoHookRecording()
 			m.screen = mainScreen
 			m.cursor = 0
 			return m, nil
@@ -1718,86 +1709,64 @@ func updateStyles() {
 		Foreground(mutedColor)
 }
 
-// 快捷键设置界面 - 完全重写为简洁美观的样式
+// 快捷键设置界面 - 新的文本输入方式
 func (m configModel) viewHotkeyScreen() string {
 	s := titleStyle.Render("快捷键设置")
 	s += "\n\n"
 
 	// 快捷键配置列表
 	hotkeys := []struct {
-		name        string
-		configValue string
+		name  string
+		input textinput.Model
 	}{
-		{"监控开关", m.config.HotkeyToggle},
-		{"切换风格", m.config.HotkeySwitch},
+		{"监控开关", m.hotkeyInputs[0]},
+		{"切换风格", m.hotkeyInputs[1]},
 	}
 
-	// 为每个快捷键功能显示配置行
+	// 显示每个快捷键输入框
 	for i, hk := range hotkeys {
-		// 功能名称（左对齐，固定宽度）
+		// 功能名称
 		nameStyle := normalStyle
+		inputView := hk.input.View()
+
 		if i == m.cursor {
 			nameStyle = selectedStyle
-		}
-		funcName := nameStyle.Render(fmt.Sprintf("%-10s", hk.name+":"))
-
-		// 获取当前要显示的三个框的内容
-		var box1, box2, box3 string
-
-		if i == m.cursor {
-			// 当前正在编辑的快捷键，显示临时输入框内容
-			box1 = m.hotkeyBox1
-			box2 = m.hotkeyBox2
-			box3 = m.hotkeyBox3
-		} else {
-			// 其他快捷键，显示已保存的配置
-			if hk.configValue != "" {
-				parts := strings.Split(hk.configValue, "+")
-				if len(parts) >= 1 {
-					box1 = parts[0]
-				}
-				if len(parts) >= 2 {
-					box2 = parts[1]
-				}
-				if len(parts) >= 3 {
-					box3 = parts[2]
-				}
+			// 当前选中的输入框
+			if m.hotkeyEditIndex == i {
+				// 正在编辑
+				inputView = hk.input.View()
 			}
 		}
 
-		// 创建三个输入框
-		box1Rendered := m.renderHotkeyBox(box1, i == m.cursor && m.hotkeyFocus == 0)
-		box2Rendered := m.renderHotkeyBox(box2, i == m.cursor && m.hotkeyFocus == 1)
-		box3Rendered := m.renderHotkeyBox(box3, i == m.cursor && m.hotkeyFocus == 2)
+		funcName := nameStyle.Render(fmt.Sprintf("%-12s", hk.name+":"))
+		s += funcName + "  " + inputView + "\n"
+	}
 
-		// 拼接一行：功能名 + [框1] + [框2] + [框3]
-		line := lipgloss.JoinHorizontal(lipgloss.Center,
-			funcName,
-			"  ",
-			box1Rendered,
-			" + ",
-			box2Rendered,
-			" + ",
-			box3Rendered,
-		)
+	// 显示错误信息
+	if m.hotkeyError != "" {
+		s += "\n" + errorStyle.Render("❌ " + m.hotkeyError) + "\n"
+	}
 
+	// 显示示例
+	s += "\n" + mutedStyle.Render("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━") + "\n"
+	s += normalStyle.Render("常用示例:") + "\n"
+
+	examples := GetHotkeyExamples()
+	for i := 0; i < len(examples); i += 3 {
+		line := ""
+		for j := 0; j < 3 && i+j < len(examples); j++ {
+			line += mutedStyle.Render(fmt.Sprintf("%-12s", examples[i+j]))
+		}
 		s += line + "\n"
 	}
 
-	// 显示成功/错误消息
-	if m.testResult != "" {
-		s += "\n"
-		if strings.Contains(m.testResult, "✅") {
-			s += successStyle.Render(m.testResult) + "\n"
-		} else if strings.Contains(m.testResult, "❌") {
-			s += errorStyle.Render(m.testResult) + "\n"
-		} else {
-			s += m.testResult + "\n"
-		}
-	}
+	s += "\n" + mutedStyle.Render("输入格式:") + "\n"
+	s += mutedStyle.Render("• 修饰键+主键: Ctrl+C, Alt+Tab") + "\n"
+	s += mutedStyle.Render("• 单个修饰键: Ctrl, Alt, Shift") + "\n"
+	s += mutedStyle.Render("• 单个按键: F1-F12, A-Z, 0-9") + "\n"
 
 	// 帮助信息
-	s += "\n" + helpStyle.Render("↑↓ 切换功能  ←→ 切换框  Backspace 清空  Ctrl+Space录制Ctrl  Alt+Space录制Alt  Shift+Space录制Shift  Ctrl+S 保存  Esc 返回")
+	s += "\n" + helpStyle.Render("↑↓ 切换功能 | Enter 编辑 | Ctrl+S 保存 | Esc 返回")
 
 	return boxStyle.Render(s)
 }
@@ -1881,92 +1850,100 @@ func (m configModel) updateAboutScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// 快捷键界面更新函数 - 完全重写为简洁逻辑
-
+// 快捷键界面更新函数 - 新的文本输入方式
 func (m configModel) updateHotkeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	key := msg.String()
+	// 如果正在编辑输入框
+	if m.hotkeyEditIndex >= 0 && m.hotkeyEditIndex < len(m.hotkeyInputs) {
+		if m.hotkeyInputs[m.hotkeyEditIndex].Focused() {
+			switch msg.String() {
+			case "enter":
+				// 验证并保存输入
+				input := m.hotkeyInputs[m.hotkeyEditIndex].Value()
+				if err := ValidateHotkeyString(input); err != nil {
+					m.hotkeyError = err.Error()
+				} else {
+					// 格式化快捷键
+					normalized := NormalizeHotkeyString(input)
+					m.hotkeyInputs[m.hotkeyEditIndex].SetValue(normalized)
+					m.hotkeyInputs[m.hotkeyEditIndex].Blur()
+					m.hotkeyError = ""
+					m.hotkeyEditIndex = -1
+				}
+				return m, nil
+			case "esc":
+				// 取消编辑，恢复原值
+				if m.hotkeyEditIndex == 0 {
+					m.hotkeyInputs[0].SetValue(m.config.HotkeyToggle)
+				} else if m.hotkeyEditIndex == 1 {
+					m.hotkeyInputs[1].SetValue(m.config.HotkeySwitch)
+				}
+				m.hotkeyInputs[m.hotkeyEditIndex].Blur()
+				m.hotkeyEditIndex = -1
+				m.hotkeyError = ""
+				return m, nil
+			default:
+				// 更新输入框
+				var cmd tea.Cmd
+				m.hotkeyInputs[m.hotkeyEditIndex], cmd = m.hotkeyInputs[m.hotkeyEditIndex].Update(msg)
+				// 实时验证
+				input := m.hotkeyInputs[m.hotkeyEditIndex].Value()
+				if input != "" {
+					if err := ValidateHotkeyString(input); err != nil {
+						m.hotkeyError = err.Error()
+					} else {
+						m.hotkeyError = ""
+					}
+				} else {
+					m.hotkeyError = ""
+				}
+				return m, cmd
+			}
+		}
+	}
 
-	switch key {
+	// 非编辑模式的按键处理
+	switch msg.String() {
 	case "esc":
-		// 停止gohook键盘钩子
-		m.stopGoHookRecording()
-		// Esc：返回主菜单，清空临时状态
+		// 返回主菜单
 		m.screen = mainScreen
 		m.cursor = 4
-		m.hotkeyBox1 = ""
-		m.hotkeyBox2 = ""
-		m.hotkeyBox3 = ""
-		m.hotkeyFocus = 0
-		m.testResult = ""
+		m.hotkeyError = ""
+		m.hotkeyEditIndex = -1
 		return m, nil
 
-	case "up":
+	case "up", "k":
 		// 上箭头：切换功能
 		if m.cursor > 0 {
 			m.cursor--
-			m.hotkeyFocus = 0            // 重置到第一个框
-			m.loadCurrentHotkeyToBoxes() // 只在切换功能时加载
 		}
 		return m, nil
 
-	case "down":
+	case "down", "j":
 		// 下箭头：切换功能
 		if m.cursor < 1 { // 只有2个功能
 			m.cursor++
-			m.hotkeyFocus = 0            // 重置到第一个框
-			m.loadCurrentHotkeyToBoxes() // 只在切换功能时加载
 		}
 		return m, nil
 
-	case "left":
-		// 左箭头：切换框（循环）
-		if m.hotkeyFocus > 0 {
-			m.hotkeyFocus--
-		} else {
-			m.hotkeyFocus = 2 // 循环到最后一个框
-		}
-		return m, nil
-
-	case "right":
-		// 右箭头：切换框（循环）
-		if m.hotkeyFocus < 2 {
-			m.hotkeyFocus++
-		} else {
-			m.hotkeyFocus = 0 // 循环到第一个框
-		}
-		return m, nil
-
-	case "backspace":
-		// 退格：清空当前焦点框
-		switch m.hotkeyFocus {
-		case 0:
-			m.hotkeyBox1 = ""
-		case 1:
-			m.hotkeyBox2 = ""
-		case 2:
-			m.hotkeyBox3 = ""
-		}
-		return m, nil
+	case "enter":
+		// 开始编辑当前选中的快捷键
+		m.hotkeyEditIndex = m.cursor
+		m.hotkeyInputs[m.hotkeyEditIndex].Focus()
+		m.hotkeyError = ""
+		return m, textinput.Blink
 
 	case "ctrl+s":
-		// Ctrl+S：保存快捷键
-		return m.saveCurrentHotkey()
-
-	default:
-		// 其他任何按键：使用新的按键处理逻辑
-		keyName := m.handleModifierKeys(msg)
-		if keyName != "" {
-			switch m.hotkeyFocus {
-			case 0:
-				m.hotkeyBox1 = keyName
-			case 1:
-				m.hotkeyBox2 = keyName
-			case 2:
-				m.hotkeyBox3 = keyName
-			}
-		}
+		// 保存所有快捷键设置
+		m.config.HotkeyToggle = m.hotkeyInputs[0].Value()
+		m.config.HotkeySwitch = m.hotkeyInputs[1].Value()
+		config = *m.config
+		saveConfig()
+		m.testResult = "✅ 快捷键已保存"
+		m.screen = mainScreen
+		m.cursor = 4
 		return m, nil
 	}
+	return m, nil
 }
 
 // handleModifierKeys function is now in build-tagged files:
@@ -2165,86 +2142,15 @@ func showConfigUI() {
 	}
 }
 
-// 加载当前选中功能的快捷键到临时输入框
+// loadCurrentHotkeyToBoxes 已移除 - 不再需要
 func (m *configModel) loadCurrentHotkeyToBoxes() {
-	// 清空输入框
-	m.hotkeyBox1 = ""
-	m.hotkeyBox2 = ""
-	m.hotkeyBox3 = ""
-
-	// 获取当前功能的快捷键配置
-	var currentHotkey string
-	switch m.cursor {
-	case 0:
-		currentHotkey = m.config.HotkeyToggle
-	case 1:
-		currentHotkey = m.config.HotkeySwitch
-	}
-
-	// 解析快捷键到输入框
-	if currentHotkey != "" {
-		parts := strings.Split(currentHotkey, "+")
-		if len(parts) >= 1 {
-			m.hotkeyBox1 = parts[0]
-		}
-		if len(parts) >= 2 {
-			m.hotkeyBox2 = parts[1]
-		}
-		if len(parts) >= 3 {
-			m.hotkeyBox3 = parts[2]
-		}
-	}
+	// 空实现 - 保留以兼容旧代码
 }
 
-// 保存当前快捷键配置
+// saveCurrentHotkey 已移除 - 不再需要
 func (m *configModel) saveCurrentHotkey() (tea.Model, tea.Cmd) {
-	// 构建快捷键字符串（过滤空框）
-	var parts []string
-	if strings.TrimSpace(m.hotkeyBox1) != "" {
-		parts = append(parts, strings.TrimSpace(m.hotkeyBox1))
-	}
-	if strings.TrimSpace(m.hotkeyBox2) != "" {
-		parts = append(parts, strings.TrimSpace(m.hotkeyBox2))
-	}
-	if strings.TrimSpace(m.hotkeyBox3) != "" {
-		parts = append(parts, strings.TrimSpace(m.hotkeyBox3))
-	}
-
-	if len(parts) == 0 {
-		m.testResult = "❌ 快捷键不能为空"
-		return *m, tea.Tick(time.Second*2, func(t time.Time) tea.Msg {
-			return "clear_hotkey_result"
-		})
-	}
-
-	hotkey := strings.Join(parts, "+")
-
-	// 保存到配置
-	switch m.cursor {
-	case 0:
-		m.config.HotkeyToggle = hotkey
-	case 1:
-		m.config.HotkeySwitch = hotkey
-	}
-
-	// 保存配置文件
-	config = *m.config
-	saveConfig()
-
-	// 显示成功消息
-	m.testResult = fmt.Sprintf("✅ %s快捷键已保存: %s",
-		[]string{"监控开关", "切换风格"}[m.cursor], hotkey)
-
-	// 清空临时输入框
-	m.hotkeyBox1 = ""
-	m.hotkeyBox2 = ""
-	m.hotkeyBox3 = ""
-	m.hotkeyFocus = 0
-
-	// 2秒后清除提示消息
-	return *m, tea.Tick(time.Second*2, func(t time.Time) tea.Msg {
-		return "clear_hotkey_result"
-	})
+	// 空实现 - 保留以兼容旧代码
+	return m, nil
 }
 
 // startGoHookRecording and stopGoHookRecording functions are now in build-tagged files:
