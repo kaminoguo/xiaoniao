@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/kaminoguo/xiaoniao/internal/i18n"
 )
 
 const (
@@ -75,7 +77,8 @@ func (lb *LogBuffer) ExportToFile() (string, error) {
 	// 获取exe所在目录
 	exePath, err := os.Executable()
 	if err != nil {
-		return "", fmt.Errorf("获取程序路径失败: %v", err)
+		t := i18n.T()
+		return "", fmt.Errorf(t.GetProgramPathFailed+": %v", err)
 	}
 	exeDir := filepath.Dir(exePath)
 	
@@ -84,7 +87,8 @@ func (lb *LogBuffer) ExportToFile() (string, error) {
 	
 	// 创建文件并写入内容
 	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
-		return "", fmt.Errorf("写入日志文件失败: %v", err)
+		t := i18n.T()
+		return "", fmt.Errorf(t.WriteLogFileFailed+": %v", err)
 	}
 	
 	// 自动打开文件
