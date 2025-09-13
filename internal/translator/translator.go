@@ -41,7 +41,6 @@ type Config struct {
 	APIKey        string `json:"apiKey"`
 	Provider      string `json:"provider"`
 	Model         string `json:"model"`
-	FallbackModel string `json:"fallbackModel,omitempty"` // 副模型
 	MaxRetries    int    `json:"maxRetries"`
 	Timeout       int    `json:"timeout"` // seconds
 	HistorySize   int    `json:"historySize"`
@@ -95,11 +94,7 @@ func (t *Translator) SetProvider(providerName, apiKey, model string) error {
 	case "Moonshot":
 		provider = NewMoonshotProvider(apiKey, model)
 	case "OpenRouter":
-		p := NewOpenRouterProvider(apiKey, model)
-		if t.config.FallbackModel != "" {
-			p.SetFallbackModel(t.config.FallbackModel)
-		}
-		provider = p
+		provider = NewOpenRouterProvider(apiKey, model)
 	case "Groq":
 		provider = NewGroqProvider(apiKey, model)
 	case "Together", "TogetherAI":
@@ -151,12 +146,7 @@ func (t *Translator) Translate(text, prompt string) (*TranslationResult, error) 
 
 		translation, lastErr = t.provider.Translate(text, prompt)
 		if lastErr == nil {
-			// Check if the model returned "1" indicating it cannot translate
-			if translation == "1" {
-				lastErr = fmt.Errorf("model unable to perform translation")
-			} else {
-				break
-			}
+			break
 		}
 
 		retryCount++

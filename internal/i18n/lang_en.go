@@ -100,11 +100,9 @@ func getEnglish() *Translations {
 		EnterNewAPIKey:  "Enter new API Key",
 		ChangeAPIKey:    "Change API Key",
 		SelectMainModel: "Select Main Model",
-		SelectFallback:  "Select Fallback Model",
 		SupportedProviders: "Supported Providers",
 		SearchModel:     "Search models...",
 		MainModel:       "Main Model",
-		FallbackModel:   "Fallback Model",
 		NoPromptAvailable: "(No prompts available)",
 		
 		// Usage messages

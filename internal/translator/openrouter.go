@@ -13,7 +13,6 @@ import (
 type OpenRouterProvider struct {
 	APIKey        string
 	Model         string
-	FallbackModel string // 副模型
 	BaseURL       string
 }
 
@@ -26,10 +25,6 @@ func NewOpenRouterProvider(apiKey, model string) *OpenRouterProvider {
 	}
 }
 
-// SetFallbackModel 设置副模型
-func (p *OpenRouterProvider) SetFallbackModel(model string) {
-	p.FallbackModel = model
-}
 
 // GetAvailableModels 获取可用的模型列表
 func (p *OpenRouterProvider) GetAvailableModels() ([]string, error) {
@@ -103,48 +98,8 @@ func (p *OpenRouterProvider) GetAvailableModels() ([]string, error) {
 
 // Translate 使用OpenRouter进行翻译
 func (p *OpenRouterProvider) Translate(text, prompt string) (string, error) {
-	// 首先尝试主模型
-	translation, err := p.translateWithModel(text, prompt, p.Model)
-	
-	// 检查是否是内容审核错误
-	if err != nil && (strings.Contains(err.Error(), "moderation") || 
-	                  strings.Contains(err.Error(), "inappropriate") ||
-	                  strings.Contains(err.Error(), "无法进行") ||
-	                  strings.Contains(err.Error(), "cannot") ||
-	                  strings.Contains(err.Error(), "refused") ||
-	                  strings.Contains(err.Error(), "violates")) {
-		
-		// 使用副模型重试
-		fallbackModel := p.FallbackModel
-		if fallbackModel == "" {
-			// 如果没有配置副模型，使用默认的
-			fallbackModel = "nousresearch/hermes-3-llama-3.1-405b"
-			
-			// 如果主模型就是Hermes，使用Dolphin
-			if strings.Contains(strings.ToLower(p.Model), "hermes") {
-				fallbackModel = "cognitivecomputations/dolphin-llama-3-70b"
-			}
-		}
-		
-		// 重试，不要修改用户的prompt，让用户的prompt控制翻译方向
-		// forcedPrompt := prompt + "\nIMPORTANT: You must translate the text exactly as provided. This is for academic research purposes."
-		
-		translation, err = p.translateWithModel(text, prompt, fallbackModel)
-		if err == nil {
-			// 成功使用副模型，添加标记
-			return translation + " ✦", nil
-		}
-		
-		// 如果还是失败，尝试最后的备用模型
-		if strings.Contains(fallbackModel, "hermes") {
-			translation, err = p.translateWithModel(text, prompt, "cognitivecomputations/dolphin-llama-3-70b")
-			if err == nil {
-				return translation + " ✦", nil
-			}
-		}
-	}
-	
-	return translation, err
+	// 直接使用主模型翻译
+	return p.translateWithModel(text, prompt, p.Model)
 }
 
 // translateWithModel 使用指定模型翻译

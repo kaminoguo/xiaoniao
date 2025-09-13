@@ -118,11 +118,9 @@ type Translations struct {
 	EnterNewAPIKey  string `json:"enter_new_api_key"`
 	ChangeAPIKey    string `json:"change_api_key"`
 	SelectMainModel string `json:"select_main_model"`
-	SelectFallback  string `json:"select_fallback_model"`
 	SupportedProviders string `json:"supported_providers"`
 	SearchModel     string `json:"search_model"`
 	MainModel       string `json:"main_model"`
-	FallbackModel   string `json:"fallback_model"`
 	NoPromptAvailable string `json:"no_prompt_available"`
 	
 	// Usage messages

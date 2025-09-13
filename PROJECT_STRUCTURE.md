@@ -1,4 +1,4 @@
-# Project Structure - Windows专用版 v1.6.6
+# Project Structure - Windows专用版 v1.6.7
 
 ## ⚠️ 技术限制说明
 
@@ -25,7 +25,7 @@ xiaoniao/
 ├── cmd/xiaoniao/               # 应用程序入口点
 │   ├── main.go                 # 主程序（GUI模式）
 │   ├── config_ui.go            # 配置界面（Windows API快捷键录制）
-│   ├── api_config_ui.go        # API配置
+│   ├── api_config_ui.go        # API配置（v1.6.7改进3列布局）
 │   ├── prompts.go              # 提示词管理
 │   ├── system_hotkey.go        # 系统热键处理
 │   ├── windows.go              # Windows特定功能（动态调试窗口）
@@ -40,10 +40,10 @@ xiaoniao/
 │   │   ├── provider_registry.go # 提供商注册表
 │   │   ├── providers_2025.go   # 提供商配置
 │   │   ├── openai_compatible.go # OpenAI兼容提供商
-│   │   ├── openrouter.go       # OpenRouter实现
+│   │   ├── openrouter.go       # OpenRouter实现（已移除副模型）
 │   │   ├── groq_provider.go    # Groq提供商
 │   │   ├── together_provider.go # Together AI提供商
-│   │   ├── base_prompt.go      # 基础提示词模板
+│   │   ├── base_prompt.go      # 基础提示词模板（v1.6.7优化）
 │   │   └── user_prompts.go     # 用户提示词管理
 │   │
 │   ├── i18n/                   # 国际化
