@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/getlantern/systray"
@@ -25,6 +26,7 @@ const (
 
 // Manager manages the system tray
 type Manager struct {
+	mu                sync.RWMutex // Protect shared state
 	status            Status
 	visible           bool
 	isMonitoring      bool
@@ -61,29 +63,34 @@ func NewManager() (*Manager, error) {
 
 // SetStatus sets the tray icon status (changes color)
 func (m *Manager) SetStatus(status Status) {
+	m.mu.Lock()
 	m.status = status
-	
+	isReady := m.isReady
+	isMonitoring := m.isMonitoring
+	promptName := m.currentPromptName
+	translationCount := m.translationCount
+	m.mu.Unlock()
+
 	// Only update if tray is ready
-	if !m.isReady {
+	if !isReady {
 		return
 	}
-	
+
 	// Load appropriate icon based on status
 	configDir, _ := os.UserConfigDir()
 	var iconPath string
-	
+
 	// 获取当前风格名称
 	t := i18n.T()
-	promptName := m.currentPromptName
 	if promptName == "" {
 		promptName = t.NotSet
 	}
-	
+
 	// Determine which color icon to use
 	var iconColor string
-	
+
 	// 如果监控已关闭，显示红色图标
-	if !m.isMonitoring && status != StatusError {
+	if !isMonitoring && status != StatusError {
 		iconPath = filepath.Join(configDir, "xiaoniao", "icon_red.png")
 		iconColor = "red"
 		systray.SetTooltip(fmt.Sprintf("xiaoniao - %s | %s: %s", t.MonitorStopped, t.TranslateStyle, promptName))
@@ -103,7 +110,7 @@ func (m *Manager) SetStatus(status Status) {
 		default: // StatusIdle
 			iconPath = filepath.Join(configDir, "xiaoniao", "icon_blue.png")
 			iconColor = "blue"
-			systray.SetTooltip(fmt.Sprintf("xiaoniao - %s (%s %d %s) | %s: %s", t.Monitoring, t.TotalCount, m.translationCount, t.TranslateCount, t.TranslateStyle, promptName))
+			systray.SetTooltip(fmt.Sprintf("xiaoniao - %s (%s %d %s) | %s: %s", t.Monitoring, t.TotalCount, translationCount, t.TranslateCount, t.TranslateStyle, promptName))
 			systray.SetTitle("")  // 不显示额外标记
 		}
 	}
@@ -119,6 +126,8 @@ func (m *Manager) SetStatus(status Status) {
 
 // GetStatus returns the current status
 func (m *Manager) GetStatus() Status {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	return m.status
 }
 
@@ -189,7 +198,11 @@ func (m *Manager) Initialize() error {
 
 func (m *Manager) onReady() {
 	// Mark as ready before any systray operations
+	m.mu.Lock()
 	m.isReady = true
+	isMonitoring := m.isMonitoring
+	currentPromptName := m.currentPromptName
+	m.mu.Unlock()
 
 	// 只显示图标，不显示标题
 	systray.SetTitle("")
@@ -207,8 +220,8 @@ func (m *Manager) onReady() {
 	
 	// Create menu items
 	t := i18n.T()
-	// fmt.Printf("🏗️ DEBUG: 创建托盘菜单，TrayToggle文本: '%s'，isMonitoring: %v\n", t.TrayToggle, m.isMonitoring)
-	m.mToggle = systray.AddMenuItemCheckbox(t.TrayToggle, t.TrayToggle, m.isMonitoring)
+	// fmt.Printf("🏗️ DEBUG: 创建托盘菜单，TrayToggle文本: '%s'，isMonitoring: %v\n", t.TrayToggle, isMonitoring)
+	m.mToggle = systray.AddMenuItemCheckbox(t.TrayToggle, t.TrayToggle, isMonitoring)
 	if m.mToggle != nil {
 		// fmt.Println("🏗️ DEBUG: mToggle菜单项创建成功")
 		if m.mToggle.ClickedCh != nil {
@@ -221,8 +234,8 @@ func (m *Manager) onReady() {
 	}
 	
 	// 显示当前 prompt
-	promptLabel := fmt.Sprintf("%s: %s", t.TranslateStyle, m.currentPromptName)
-	if m.currentPromptName == "" {
+	promptLabel := fmt.Sprintf("%s: %s", t.TranslateStyle, currentPromptName)
+	if currentPromptName == "" {
 		promptLabel = fmt.Sprintf("%s: %s", t.TranslateStyle, t.NotSet)
 	}
 	m.mPromptInfo = systray.AddMenuItem(promptLabel, t.TranslateStyle)
@@ -235,7 +248,8 @@ func (m *Manager) onReady() {
 	m.mPromptMenu = systray.AddMenuItem(t.TranslateStyle, t.TranslateStyle)
 	m.mDebugConsole = systray.AddMenuItem("导出日志", "导出日志")
 	systray.AddSeparator()
-	
+
+	mTutorial := systray.AddMenuItem(t.Tutorial, t.Tutorial)
 	mAbout := systray.AddMenuItem(t.TrayAbout, t.TrayAbout)
 	mQuit := systray.AddMenuItem(t.TrayQuit, t.TrayQuit)
 	
@@ -256,6 +270,8 @@ func (m *Manager) onReady() {
 			case <-m.mDebugConsole.ClickedCh:
 				// fmt.Println("🔥 DEBUG: 检测到调试控制台菜单点击事件")
 				m.toggleDebugConsole()
+			case <-mTutorial.ClickedCh:
+				m.showTutorial()
 			case <-mAbout.ClickedCh:
 				// fmt.Println("🔥 DEBUG: 检测到关于菜单点击事件")
 				m.showAbout()
@@ -276,7 +292,7 @@ func (m *Manager) onReady() {
 		// After tray is initialized, run the business logic
 		if m.businessLogic != nil {
 			// fmt.Println("🚀 DEBUG: 准备启动业务逻辑goroutine")
-			m.businessLogic() // 直接调用，不再嵌套goroutine
+			go m.businessLogic() // 在新的goroutine中运行，避免阻塞
 		} else {
 			// fmt.Println("❌ DEBUG: businessLogic为nil，跳过业务逻辑启动")
 		}
@@ -291,27 +307,30 @@ func (m *Manager) onExit() {
 
 func (m *Manager) toggleMonitor() {
 	// fmt.Printf("🔧 DEBUG: toggleMonitor() 开始执行，当前监控状态: %v\n", m.isMonitoring)
-	
+
 	// 切换监控状态
+	m.mu.Lock()
 	m.isMonitoring = !m.isMonitoring
-	// fmt.Printf("🔧 DEBUG: 监控状态已切换为: %v\n", m.isMonitoring)
-	
-	if m.isMonitoring {
+	newMonitoringState := m.isMonitoring
+	m.mu.Unlock()
+	// fmt.Printf("🔧 DEBUG: 监控状态已切换为: %v\n", newMonitoringState)
+
+	if newMonitoringState {
 		m.mToggle.Check()
 		// fmt.Println("🔧 DEBUG: 菜单项已设为选中状态")
 	} else {
 		m.mToggle.Uncheck()
 		// fmt.Println("🔧 DEBUG: 菜单项已设为未选中状态")
 	}
-	
+
 	// 更新图标状态
 	m.SetStatus(StatusIdle)
 	// fmt.Println("🔧 DEBUG: 图标状态已更新为StatusIdle")
-	
+
 	// 检查回调函数是否存在
 	if m.onToggleMonitor != nil {
-		// fmt.Printf("🔧 DEBUG: 准备调用onToggleMonitor回调，参数: %v\n", m.isMonitoring)
-		m.onToggleMonitor(m.isMonitoring)
+		// fmt.Printf("🔧 DEBUG: 准备调用onToggleMonitor回调，参数: %v\n", newMonitoringState)
+		m.onToggleMonitor(newMonitoringState)
 		// fmt.Println("🔧 DEBUG: onToggleMonitor回调执行完毕")
 	} else {
 		// fmt.Println("❌ DEBUG: onToggleMonitor回调函数为nil！")
@@ -348,6 +367,31 @@ func (m *Manager) openSettings() {
 	}
 }
 
+func (m *Manager) showTutorial() {
+	// Windows: 获取当前程序路径并直接打开教程页面
+	exePath, err := os.Executable()
+	if err != nil {
+		// 如果获取不到程序路径，使用默认的xiaoniao.exe
+		exePath = "xiaoniao.exe"
+	} else {
+		// 确保Windows下的可执行文件有.exe扩展名
+		if filepath.Ext(exePath) == "" {
+			exePath = exePath + ".exe"
+		}
+	}
+
+	// 创建命令并启动
+	cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", exePath, "tutorial")
+	err = cmd.Start()
+	if err != nil {
+		// 如果启动失败，尝试使用绝对路径
+		if absPath, absErr := filepath.Abs(exePath); absErr == nil {
+			cmd = exec.Command("cmd", "/c", "start", "cmd", "/k", absPath, "tutorial")
+			cmd.Start()
+		}
+	}
+}
+
 func (m *Manager) showAbout() {
 	// Windows: 获取当前程序路径并直接打开关于页面
 	exePath, err := os.Executable()
@@ -360,7 +404,7 @@ func (m *Manager) showAbout() {
 			exePath = exePath + ".exe"
 		}
 	}
-	
+
 	// 创建命令并启动
 	cmd := exec.Command("cmd", "/c", "start", "cmd", "/k", exePath, "about")
 	err = cmd.Start()
@@ -433,17 +477,24 @@ func (m *Manager) ShowNotification(title, message string) {
 
 // IncrementTranslationCount increments the translation counter
 func (m *Manager) IncrementTranslationCount() {
+	m.mu.Lock()
 	m.translationCount++
+	count := m.translationCount
+	status := m.status
+	m.mu.Unlock()
+
 	if m.mStatus != nil {
-		m.mStatus.SetTitle(fmt.Sprintf("状态: 已翻译 %d 次", m.translationCount))
+		m.mStatus.SetTitle(fmt.Sprintf("状态: 已翻译 %d 次", count))
 	}
-	m.SetStatus(m.status) // Update tooltip
+	m.SetStatus(status) // Update tooltip
 }
 
 // UpdateMonitorStatus updates the monitor status in UI
 func (m *Manager) UpdateMonitorStatus(running bool) {
 	t := i18n.T()
+	m.mu.Lock()
 	m.isMonitoring = running
+	m.mu.Unlock()
 	
 	// Only update menu items if they exist
 	if m.mToggle != nil {
@@ -461,7 +512,10 @@ func (m *Manager) UpdateMonitorStatus(running bool) {
 // SetCurrentPrompt 设置当前 prompt 显示
 func (m *Manager) SetCurrentPrompt(promptName string) {
 	t := i18n.T()
+	m.mu.Lock()
 	m.currentPromptName = promptName
+	isMonitoring := m.isMonitoring
+	m.mu.Unlock()
 	if m.mPromptInfo != nil {
 		promptLabel := fmt.Sprintf("%s: %s", t.TranslateStyle, promptName)
 		if promptName == "" {
@@ -476,7 +530,7 @@ func (m *Manager) SetCurrentPrompt(promptName string) {
 		if promptName == "" {
 			promptName = "默认"
 		}
-		if m.isMonitoring {
+		if isMonitoring {
 			systray.SetTooltip(fmt.Sprintf("xiaoniao - 监控中 | 风格: %s", promptName))
 		} else {
 			systray.SetTooltip(fmt.Sprintf("xiaoniao - 已停止 | 风格: %s", promptName))

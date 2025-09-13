@@ -163,7 +163,7 @@ func (m configModel) viewAPIConfigScreen() string {
 func (m configModel) viewModelSelectScreen() string {
 	t := i18n.T()
 	// 导入版本号
-	const VERSION = "v1.4"
+	const VERSION = "v1.0"
 	title := t.SelectMainModel
 	currentModel := m.config.Model
 	s := titleStyle.Render(title + " " + VERSION)

@@ -21,7 +21,7 @@ import (
 	"golang.design/x/hotkey/mainthread"
 )
 
-const version = "1.6.6"
+const version = "1.0"
 
 type Config struct {
 	APIKey        string `json:"api_key"`
@@ -108,14 +108,17 @@ func main() {
 	}
 	
 	// Handle special commands
-	if len(os.Args) >= 2 && (os.Args[1] == "config" || os.Args[1] == "about" || os.Args[1] == "help" || os.Args[1] == "version") {
-		
+	if len(os.Args) >= 2 && (os.Args[1] == "config" || os.Args[1] == "about" || os.Args[1] == "tutorial" || os.Args[1] == "help" || os.Args[1] == "version") {
+
 		command := os.Args[1]
 		switch command {
 		case "config":
 			showConfigUI()
 		case "about":
 			os.Setenv("SHOW_ABOUT", "1")
+			showConfigUI()
+		case "tutorial":
+			os.Setenv("SHOW_TUTORIAL", "1")
 			showConfigUI()
 		case "version", "--version", "-v":
 			fmt.Printf("xiaoniao version %s\n", version)
@@ -443,7 +446,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			}
 		})
 		if err != nil {
-			fmt.Printf("警告: 无法注册快捷键 %s: %v\n", config.HotkeyToggle, err)
+			// fmt.Printf("警告: 无法注册快捷键 %s: %v\n", config.HotkeyToggle, err)
 		}
 		}
 		
@@ -476,7 +479,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			// 不弹窗通知
 		})
 		if err != nil {
-			fmt.Printf("警告: 无法注册快捷键 %s: %v\n", config.HotkeySwitch, err)
+			// fmt.Printf("警告: 无法注册快捷键 %s: %v\n", config.HotkeySwitch, err)
 		}
 	}
 	
