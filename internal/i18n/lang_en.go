@@ -84,7 +84,34 @@ func getEnglish() *Translations {
 		Step4:           "Auto-translate and replace clipboard",
 		Step5:           "Paste after hearing notification (Ctrl+V)",
 		Warning:         "Note: Translation will overwrite clipboard content!",
-		
+
+		// Tutorial
+		Tutorial:        "Tutorial",
+		TutorialContent: `Quick Start Guide:
+
+1. Configure API Key
+   • Select "API Configuration" from main menu
+   • Enter your API key (OpenAI, Anthropic, etc.)
+   • System will auto-detect the provider
+
+2. Select Model
+   • After API setup, select "Select Model"
+   • Choose an AI model from the list
+
+3. Set Hotkeys (Optional)
+   • Select "Hotkey Settings" from main menu
+   • Configure toggle and prompt switch hotkeys
+
+4. Start Using
+   • Ctrl+C to copy text triggers translation
+   • Program auto-replaces clipboard content
+   • Ctrl+V to paste translated result
+   • Some apps may require manual paste
+
+Video Tutorials:
+• Bilibili: (Coming Soon)
+• YouTube: (Coming Soon)`,
+
 		// Error messages
 		NoAPIKey:        "❌ No API key configured",
 		RunConfigFirst:  "Please run: xiaoniao config",
@@ -99,10 +126,10 @@ func getEnglish() *Translations {
 		EnterAPIKey:     "Please enter API Key",
 		EnterNewAPIKey:  "Enter new API Key",
 		ChangeAPIKey:    "Change API Key",
-		SelectMainModel: "Select Main Model",
+		SelectMainModel: "Select Model",
 		SupportedProviders: "Supported Providers",
 		SearchModel:     "Search models...",
-		MainModel:       "Main Model",
+		MainModel:       "Model",
 		NoPromptAvailable: "(No prompts available)",
 		
 		// Usage messages

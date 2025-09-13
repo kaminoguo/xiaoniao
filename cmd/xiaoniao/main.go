@@ -301,17 +301,13 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	
 		// 设置托盘回调
 		trayManager.SetOnToggleMonitor(func(enabled bool) {
-			fmt.Printf("\n🎯 DEBUG: SetOnToggleMonitor回调被调用，参数enabled=%v\n", enabled)
 			if enabled {
-				fmt.Println("🎯 DEBUG: 准备启动monitor.Start()")
 				monitor.Start()
-				fmt.Println("\n✅ 监控已通过托盘启动")
+				fmt.Println("\n▶ 监控已启动")
 			} else {
-				fmt.Println("🎯 DEBUG: 准备停止monitor.Stop()")
 				monitor.Stop()
-				fmt.Println("\n⏸️ 监控已通过托盘停止")
+				fmt.Println("\n⏸ 监控已暂停")
 			}
-			fmt.Println("🎯 DEBUG: SetOnToggleMonitor回调执行完成")
 		})
 	
 	trayManager.SetOnSettings(func() {
@@ -485,23 +481,23 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	}
 	
 	// Console mode startup info
-	fmt.Println("xiaoniao console mode started")
-	fmt.Printf("%s: %s | %s: %s\n", t.Provider, config.Provider, t.Model, config.Model)
-	fmt.Printf("%s: %s\n", t.TranslateStyle, getPromptName(config.PromptID))
-	fmt.Printf("%s: ✅ %s\n", t.AutoPaste, t.Enabled)
+	fmt.Println("\n=== xiaoniao v" + version + " ===")
+	fmt.Printf("提供商: %s | 模型: %s\n", config.Provider, config.Model)
+	fmt.Printf("翻译风格: %s\n", getPromptName(config.PromptID))
+	fmt.Printf("自动粘贴: ✅ 已启用")
 	
 	// 记录快捷键信息
 	if config.HotkeyToggle != "" || config.HotkeySwitch != "" {
-		fmt.Printf("%s\n", t.HotkeysLabel)
+		fmt.Printf("\n快捷键:\n")
 		if config.HotkeyToggle != "" {
-			fmt.Printf("  %s\n", fmt.Sprintf(t.MonitorToggleKey, config.HotkeyToggle))
+			fmt.Printf("  监控开关: %s\n", config.HotkeyToggle)
 		}
 		if config.HotkeySwitch != "" {
-			fmt.Printf("  %s\n", fmt.Sprintf(t.SwitchStyleKey, config.HotkeySwitch))
+			fmt.Printf("  切换风格: %s\n", config.HotkeySwitch)
 		}
 	}
 	
-	fmt.Println("监控开始 - 复制文字即可翻译")
+	fmt.Println("\n✅ 监控已启动 - 复制文字即可翻译")
 	
 	// 不播放启动提示音
 	// sound.PlayStart()
@@ -516,7 +512,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			return
 		}
 		
-		fmt.Printf("\n[%s] %s", time.Now().Format("15:04:05"), t.Translating)
+		fmt.Printf("\n[%s] %s...", time.Now().Format("15:04:05"), t.Translating)
 		trayManager.SetStatus(tray.StatusTranslating)
 		
 		// 每次翻译前重新获取prompt（以防配置文件被修改）
@@ -527,7 +523,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		// 执行翻译
 		result, err := trans.Translate(text, currentPrompt)
 		if err != nil {
-			fmt.Printf(" ❌ %s: %v\n", t.Failed, err)
+			fmt.Printf(" ❌\n  错误: %v\n", err)
 			// sound.PlayError() // 错误提示音已禁用
 			trayManager.SetStatus(tray.StatusError)
 			// 3秒后恢复正常状态
@@ -546,11 +542,11 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			clipboard.SetClipboard(result.Translation)
 			translationCount++
 			
-			fmt.Printf(" ✅ %s #%d\n", t.Complete, translationCount)
+			fmt.Printf(" ✅ (#%d)\n", translationCount)
 			trayManager.IncrementTranslationCount()
 			trayManager.SetStatus(tray.StatusIdle)
-			fmt.Printf("   %s: %s\n", t.Original, truncate(text, 50))
-			fmt.Printf("   %s: %s\n", t.Translation, truncate(result.Translation, 50))
+			fmt.Printf("  原文: %s\n", truncate(text, 60))
+			fmt.Printf("  译文: %s\n", truncate(result.Translation, 60))
 			
 			// 自动粘贴
 			{
