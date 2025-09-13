@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
-	"os/exec"
 	
 	"github.com/kaminoguo/xiaoniao/internal/clipboard"
 	"github.com/kaminoguo/xiaoniao/internal/hotkey"
@@ -161,10 +162,9 @@ func showUsage() {
 
 func showHelp() {
 	t := i18n.T()
-	fmt.Println("╔════════════════════════════════════════╗")
-	fmt.Printf("║       %s v%s       ║\n", t.HelpTitle, version)
-	fmt.Printf("║         %s         ║\n", t.HelpDesc)
-	fmt.Println("╚════════════════════════════════════════╝")
+	fmt.Printf("\n%s v%s\n", t.HelpTitle, version)
+	fmt.Printf("%s\n", t.HelpDesc)
+	fmt.Println(strings.Repeat("-", 40))
 	fmt.Println()
 	fmt.Printf("%s:\n", t.Commands)
 	fmt.Printf("  %s\n", t.RunCommand)
@@ -256,7 +256,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 				loadConfig()
 				if config.APIKey != "" && config.APIKey != oldAPIKey {
 					// API配置完成，重新初始化业务逻辑
-					fmt.Println("\n✅ API配置已完成，重新启动翻译服务...")
+					fmt.Println("\nAPI配置已完成，重新启动翻译服务...")
 					go runDaemonBusinessLogic(trayManager)
 					return
 				}
@@ -303,10 +303,10 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		trayManager.SetOnToggleMonitor(func(enabled bool) {
 			if enabled {
 				monitor.Start()
-				fmt.Println("\n▶ 监控已启动")
+				fmt.Println("\n监控已启动")
 			} else {
 				monitor.Stop()
-				fmt.Println("\n⏸ 监控已暂停")
+				fmt.Println("\n监控已暂停")
 			}
 		})
 	
@@ -369,7 +369,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			newTrans, err := translator.NewTranslator(translatorConfig)
 			if err == nil {
 				trans = newTrans
-				fmt.Printf("\n✅ 配置已刷新: %s | %s | %s\n", 
+				fmt.Printf("\n配置已刷新: %s | %s | %s\n", 
 					config.Provider, config.Model, getPromptName(config.PromptID))
 				
 				// 如果切换了模型或Provider，进行预热
@@ -377,7 +377,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 					go prewarmModel(trans)
 				}
 			} else {
-				fmt.Printf("\n❌ 刷新配置失败: %v\n", err)
+				fmt.Printf("\n刷新配置失败: %v\n", err)
 			}
 		})
 	
@@ -433,17 +433,17 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			if monitoring {
 				monitor.Stop()
 				trayManager.UpdateMonitorStatus(false)
-				fmt.Println("\n⏸ 监控已暂停")
+				fmt.Println("\n监控已暂停")
 				monitoring = false
 			} else {
 				monitor.Start()
 				trayManager.UpdateMonitorStatus(true)
-				fmt.Println("\n▶ 监控已恢复")
+				fmt.Println("\n监控已恢复")
 				monitoring = true
 			}
 		})
 		if err != nil {
-			fmt.Printf("⚠️ 无法注册快捷键 %s: %v\n", config.HotkeyToggle, err)
+			fmt.Printf("警告: 无法注册快捷键 %s: %v\n", config.HotkeyToggle, err)
 		}
 		}
 		
@@ -476,15 +476,15 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			// 不弹窗通知
 		})
 		if err != nil {
-			fmt.Printf("⚠️ 无法注册快捷键 %s: %v\n", config.HotkeySwitch, err)
+			fmt.Printf("警告: 无法注册快捷键 %s: %v\n", config.HotkeySwitch, err)
 		}
 	}
 	
 	// Console mode startup info
-	fmt.Println("\n=== xiaoniao v" + version + " ===")
+	fmt.Printf("\nxiaoniao v%s\n", version)
 	fmt.Printf("提供商: %s | 模型: %s\n", config.Provider, config.Model)
 	fmt.Printf("翻译风格: %s\n", getPromptName(config.PromptID))
-	fmt.Printf("自动粘贴: ✅ 已启用")
+	fmt.Printf("自动粘贴: 已启用")
 	
 	// 记录快捷键信息
 	if config.HotkeyToggle != "" || config.HotkeySwitch != "" {
@@ -497,7 +497,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		}
 	}
 	
-	fmt.Println("\n✅ 监控已启动 - 复制文字即可翻译")
+	fmt.Println("\n监控已启动 - 复制文字即可翻译")
 	
 	// 不播放启动提示音
 	// sound.PlayStart()
@@ -523,7 +523,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 		// 执行翻译
 		result, err := trans.Translate(text, currentPrompt)
 		if err != nil {
-			fmt.Printf(" ❌\n  错误: %v\n", err)
+			fmt.Printf(" 失败\n  错误: %v\n", err)
 			// sound.PlayError() // 错误提示音已禁用
 			trayManager.SetStatus(tray.StatusError)
 			// 3秒后恢复正常状态
@@ -542,7 +542,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 			clipboard.SetClipboard(result.Translation)
 			translationCount++
 			
-			fmt.Printf(" ✅ (#%d)\n", translationCount)
+			fmt.Printf(" 完成 (#%d)\n", translationCount)
 			trayManager.IncrementTranslationCount()
 			trayManager.SetStatus(tray.StatusIdle)
 			fmt.Printf("  原文: %s\n", truncate(text, 60))
@@ -581,12 +581,12 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 				if monitoring {
 					monitor.Stop()
 					trayManager.UpdateMonitorStatus(false)
-					fmt.Println("\n⏸ 监控已暂停 (通过快捷键)")
+					fmt.Println("\n监控已暂停 (通过快捷键)")
 					monitoring = false
 				} else {
 					monitor.Start()
 					trayManager.UpdateMonitorStatus(true)
-					fmt.Println("\n▶ 监控已恢复 (通过快捷键)")
+					fmt.Println("\n监控已恢复 (通过快捷键)")
 					monitoring = true
 				}
 				
@@ -720,10 +720,10 @@ func prewarmModel(trans *translator.Translator) {
 	fmt.Print("预热模型中...")
 	err := translator.PrewarmConnection(trans)
 	if err == nil {
-		fmt.Println(" ✅")
+		fmt.Println(" 成功")
 	} else {
 		// 预热失败不影响使用，只是警告
-		fmt.Printf(" ⚠️ (可忽略: %v)\n", err)
+		fmt.Printf(" 跳过 (可忽略: %v)\n", err)
 	}
 }
 
@@ -758,7 +758,7 @@ func monitorRefreshSignal(trans **translator.Translator) {
 			newTrans, err := translator.NewTranslator(translatorConfig)
 			if err == nil {
 				*trans = newTrans
-				fmt.Printf("\n✅ 翻译器已刷新: %s | %s\n", config.Provider, config.Model)
+				fmt.Printf("\n翻译器已刷新: %s | %s\n", config.Provider, config.Model)
 				
 				// 检查是否切换了模型或Provider，如果是则预热
 				if config.Model != lastModel || config.Provider != lastProvider {
@@ -767,7 +767,7 @@ func monitorRefreshSignal(trans **translator.Translator) {
 					lastProvider = config.Provider
 				}
 			} else {
-				fmt.Printf("\n❌ 翻译器刷新失败: %v\n", err)
+				fmt.Printf("\n翻译器刷新失败: %v\n", err)
 			}
 		}
 	}
