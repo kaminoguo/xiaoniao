@@ -4,32 +4,30 @@
 
 Windows 클립보드 번역 도구
 
-## 기능
+## 빠른 시작
 
-- 클립보드 모니터링 및 자동 번역
-- 다국어 UI 지원 (중/영/일/한/불/서/독/러/아랍어)
-- 시스템 트레이 통합
+### 1. API 키 설정
+- 메인 메뉴에서 "API 설정" 선택
+- API 키 입력 (OpenAI, Anthropic 등)
+- 시스템이 자동으로 제공업체 식별
 
-## 설치
+### 2. 모델 선택
+- API 설정 후 "모델 선택" 선택
+- 목록에서 적합한 AI 모델 선택
 
-[xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) 다운로드 후 실행
+### 3. 단축키 설정 (선택사항)
+- 메인 메뉴에서 "단축키 설정" 선택
+- 모니터링 토글 및 프롬프트 전환 단축키 설정
 
-## 사용법
+### 4. 사용 시작
+- Ctrl+C로 텍스트 복사하여 번역 시작
+- 프로그램이 자동으로 클립보드 내용 교체
+- Ctrl+V로 번역 결과 붙여넣기
 
-1. xiaoniao.exe 실행
-2. 텍스트 복사 (Ctrl+C)
-3. 자동 번역 및 클립보드 교체
-4. 붙여넣기 (Ctrl+V)로 번역 결과 얻기
+## 다운로드
 
-트레이 아이콘 상태: 파란색-모니터링 / 녹색-번역중 / 빨간색-중지
+[xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) - Windows 10/11 (64-bit)
 
-## 설정
-
-```cmd
-xiaoniao.exe config
-```
-
-OpenAI, Anthropic, Google, DeepSeek 등 API 지원
 
 ## 빌드
 
@@ -42,6 +40,16 @@ cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
 
 요구사항: Go 1.20+, Windows
 
+### 비디오 튜토리얼
+
+- Bilibili: (공개 예정)
+- YouTube: (공개 예정)
+
 ## 라이선스
 
 MIT
+
+## 후원
+
+- Ko-fi: (공개 예정)
+- WeChat: (공개 예정)

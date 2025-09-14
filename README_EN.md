@@ -4,32 +4,30 @@
 
 Windows Clipboard Translation Tool
 
-## Features
+## Quick Start
 
-- Monitor clipboard and auto-translate
-- Multi-language UI support (CN/EN/JP/KR/FR/ES/DE/RU/AR)
-- System tray integration
+### 1. Configure API Key
+- Select "API Configuration" from main menu
+- Enter your API key (OpenAI, Anthropic, etc.)
+- System will auto-detect the provider
 
-## Installation
+### 2. Select Model
+- After setting API, select "Choose Model"
+- Pick an AI model from the list
 
-Download [xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) and run
+### 3. Set Hotkeys (Optional)
+- Select "Hotkey Settings" from main menu
+- Configure hotkeys for monitoring toggle and prompt switching
 
-## Usage
+### 4. Start Using
+- Ctrl+C to copy text triggers translation
+- Program auto-replaces clipboard content
+- Ctrl+V to paste translated result
 
-1. Run xiaoniao.exe
-2. Copy text (Ctrl+C)
-3. Auto-translate and replace clipboard
-4. Paste (Ctrl+V) to get translation
+## Download
 
-Tray icon status: Blue-Monitoring / Green-Translating / Red-Stopped
+[xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) - Windows 10/11 (64-bit)
 
-## Configuration
-
-```cmd
-xiaoniao.exe config
-```
-
-Supports OpenAI, Anthropic, Google, DeepSeek and other APIs
 
 ## Build
 
@@ -42,6 +40,16 @@ cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
 
 Requirements: Go 1.20+, Windows
 
+### Video Tutorials
+
+- Bilibili: (Coming soon)
+- YouTube: (Coming soon)
+
 ## License
 
 MIT
+
+## Support
+
+- Ko-fi: (Coming soon)
+- WeChat: (Coming soon)
