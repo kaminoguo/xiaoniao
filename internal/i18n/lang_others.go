@@ -87,7 +87,30 @@ func getChineseTraditional() *Translations {
 
 		// Tutorial
 		Tutorial:        "使用教程",
-		TutorialContent: "請參考主菜單中的使用教程",
+		TutorialContent: `快速上手指南：
+
+1. 配置API密鑰
+   • 在主菜單選擇「API配置」
+   • 輸入你的API密鑰（如OpenAI、Anthropic等）
+   • 系統會自動識別提供商
+
+2. 選擇模型
+   • 設置API後，選擇「選擇模型」
+   • 從列表中選擇合適的AI模型
+
+3. 設置快捷鍵（可選）
+   • 在主菜單選擇「快捷鍵設置」
+   • 設置監控開關和切換prompt的快捷鍵
+
+4. 開始使用
+   • Ctrl+C 複製文本觸發翻譯
+   • 程序會自動替換剪貼板內容
+   • Ctrl+V 粘貼翻譯結果
+   • 某些應用可能需要手動粘貼
+
+視頻教程：
+• Bilibili: （即將發布）
+• YouTube: （即將發布）`,
 
 		// Error messages
 		NoAPIKey:        "❌ 未配置API密鑰",
@@ -364,6 +387,114 @@ func getChineseTraditional() *Translations {
 		CommonExamples: "常用範例",
 		InputFormat: "輸入格式",
 		ModifierPlusKey: "修飾鍵+主鍵",
+
+		// Critical missing fields from main.go
+		ProgramAlreadyRunning: "程式已在運行中。請檢查系統托盤圖標。\n如果看不到托盤圖標，請嘗試結束所有xiaoniao進程後重新啟動。",
+		TrayManagerInitFailed: "托盤管理器初始化失敗: %v\n\n請檢查系統是否支持系統托盤功能。",
+		SystemTrayStartFailed: "系統托盤啟動失敗: %v\n\n可能的原因:\n1. 系統托盤功能被禁用\n2. 權限不足\n3. 系統資源不足\n\n請檢查系統設置後重試。",
+		NotConfiguredStatus: "未配置",
+		PleaseConfigureAPIFirst: "請先配置API",
+		APIConfigCompleted: "API配置完成，重新初始化翻譯服務...",
+		MonitorStartedConsole: "監控已啟動",
+		MonitorPausedConsole: "監控已暫停",
+		ExportLogsFailed: "導出日誌失敗: %v",
+		LogsExportedTo: "日誌已導出到: %s",
+		ConfigRefreshedDetail: "配置已刷新: %s | %s | %s",
+		RefreshConfigFailed: "刷新配置失敗: %v",
+		SwitchedTo: "已切換到: %s",
+		ConfigRefreshedAndReinit: "配置已刷新，翻譯器將重新初始化",
+		MonitorPausedMsg: "監控已暫停",
+		MonitorResumedMsg: "監控已恢復",
+		SwitchPromptMsg: "🔄 切換提示詞: %s",
+		TranslationStyle: "翻譯風格: %s",
+		AutoPasteEnabledMsg: "自動粘貼: 已啟用",
+		HotkeysColon: "快捷鍵:",
+		MonitorToggleLabel: "  監控開關: %s",
+		SwitchStyleLabel: "  切換風格: %s",
+		MonitorStartedCopyToTranslate: "監控已啟動 - 複製文本即可翻譯",
+		StartTranslating: "開始翻譯: %s",
+		UsingPrompt: "使用提示詞: %s (內容長度: %d)",
+		TranslationFailedError: " 失敗\n  錯誤: %v",
+		TranslationComplete: " 完成 (#%d)",
+		OriginalText: "  原文: %s",
+		TranslatedText: "  譯文: %s",
+		MonitorPausedViaHotkey: "監控已暫停 (通過快捷鍵)",
+		MonitorResumedViaHotkey: "監控已恢復 (通過快捷鍵)",
+		SwitchPromptViaHotkey: "🔄 切換提示詞: %s (通過快捷鍵)",
+		PrewarmingModel: "預熱模型中...",
+		PrewarmSuccess2: " 成功",
+		PrewarmSkip: " 跳過 (可忽略: %v)",
+		TranslatorRefreshed: "翻譯器已刷新: %s | %s",
+		TranslatorRefreshFailed: "翻譯器刷新失敗: %v",
+
+		// Missing from config_ui.go
+		ConfigRefreshedReinit: "✅ 配置已刷新，翻譯器將重新初始化",
+		MainModelChanged: "✅ 主模型已更改為: %s",
+		TestingModelMsg: "🔄 正在測試模型...",
+		ModelInitFailed: "模型 %s 初始化失敗: %v",
+		TranslateToChineseOnly: "請僅將以下內容翻譯成中文，不要回答或解釋，只輸出翻譯內容:",
+		ModelTestFailedMsg: "模型 %s 測試失敗: %v",
+		ModelAvailable: "✅ 模型 %s 可用! 翻譯: %s",
+		ModelNoResponse: "❌ 模型 %s 無響應",
+		DeleteFailed: "刪除失敗: %v",
+		SaveFailed: "保存失敗: %v",
+		UpdateFailed: "更新失敗: %v",
+		TestingConnectionMsg: "正在測試連接...",
+		TestingMsg: "正在測試...",
+		CreateTranslatorFailedMsg: "❌ 創建翻譯器失敗: %v",
+		TranslationFailedMsg: "❌ 翻譯失敗: %v",
+		TranslationResultMsg: "✅ 翻譯結果:\n原文: %s\n譯文: %s\n模型: %s\n提示詞: %s",
+		PreviewColon: "預覽:",
+		VersionFormat: "版本: %s",
+		MonitorStatusActiveMsg: "監控狀態: 活躍",
+		MonitorStatusPausedMsg: "監控狀態: 暫停",
+		TranslationCountMsg: "翻譯次數: %d",
+		StatusActive: "活躍",
+		StatusPaused: "暫停",
+		ModelLabel: "模型: ",
+		APILabel: "API: ",
+		TryAgainMsg: " (按回車重試)",
+		StatsFormat: " | 輸入: %d | 輸出: %d | 總計: %d",
+
+		// Tray and logs
+		ExportLogs: "導出日誌",
+		GetProgramPathFailed: "獲取程式路徑失敗",
+		WriteLogFileFailed: "寫入日誌文件失敗",
+
+		// Additional missing fields
+		AuthorLabel: "作者:",
+		ClassicBlueFallback: "經典藍色主題",
+		CleanBWFallback: "簡潔黑白主題",
+		ConnectionFailedFormat: "連接失敗: %v",
+		CreatePromptsJsonFailed: "創建 prompts.json 失敗:",
+		DarkThemeTokyoNightFallback: "東京之夜暗色主題",
+		DefaultThemeNameFallback: "默認",
+		DeleteBuiltinPromptError: "刪除內置提示詞錯誤:",
+		DetectedProvider: "檢測到提供商:",
+		EnterYourAPIKey: "請輸入您的 API 密鑰",
+		HotkeySettingsTitle: "快捷鍵設置",
+		HotkeysSaved: "✅ 快捷鍵已保存",
+		LicenseLabel: "許可證:",
+		LoadUserPromptsFailed: "加載用戶提示詞失敗:",
+		MinimalThemeNameFallback: "極簡",
+		ModelAvailableTranslation: "✅ %s 可用！翻譯: %s",
+		ModelUnavailable: "❌ %s 不可用: %v",
+		MonitorToggleHotkey: "監控開關",
+		PleaseSelectModel: "請選擇一個模型",
+		ProjectUrlLabel: "項目網址:",
+		SelectAIModel: "選擇 AI 模型",
+		SelectedBrackets: "[已選擇]",
+		SoftPastelFallback: "柔和粉彩主題",
+		StatusTranslatedCount: "狀態: 已翻譯 %d 次",
+		Success: "成功！",
+		SwitchStyleHotkey: "切換風格",
+		TestingConnectionDots: "正在測試連接...",
+		TestingModelFormat: "正在測試 %s...",
+		TranslateToChineseProvider: "翻譯為中文",
+		UnknownProviderDefault: "未知提供商（默認為 OpenAI）",
+		UnsupportedOS: "不支持的操作系統: %s",
+		XiaoniaoMonitoring: "xiaoniao - 監控中 | 風格: %s",
+		XiaoniaoStopped: "xiaoniao - 已停止 | 風格: %s",
 	}
 }
 
@@ -727,6 +858,137 @@ func getJapanese() *Translations {
 		InvalidMainKey: "無効なメインキー: %s",
 		CommonExamples: "よく使う例",
 		ModifierPlusKey: "修飾キー+メインキー",
+
+		// Critical missing fields from main.go
+		ProgramAlreadyRunning: "プログラムは既に実行中です。システムトレイアイコンを確認してください。\nトレイアイコンが表示されない場合は、すべてのxiaoniaoプロセスを終了してから再起動してください。",
+		TrayManagerInitFailed: "トレイマネージャーの初期化に失敗しました: %v\n\nシステムがシステムトレイ機能をサポートしているか確認してください。",
+		SystemTrayStartFailed: "システムトレイの起動に失敗しました: %v\n\n考えられる原因:\n1. システムトレイ機能が無効になっている\n2. 権限が不足している\n3. システムリソースが不足している\n\nシステム設定を確認してから再試行してください。",
+		NotConfiguredStatus: "未設定",
+		PleaseConfigureAPIFirst: "最初にAPIを設定してください",
+		APIConfigCompleted: "API設定が完了しました。翻訳サービスを再初期化しています...",
+		MonitorStartedConsole: "監視を開始しました",
+		MonitorPausedConsole: "監視を一時停止しました",
+		ExportLogsFailed: "ログのエクスポートに失敗しました: %v",
+		LogsExportedTo: "ログをエクスポートしました: %s",
+		ConfigRefreshedDetail: "設定を更新しました: %s | %s | %s",
+		RefreshConfigFailed: "設定の更新に失敗しました: %v",
+		SwitchedTo: "切り替えました: %s",
+		ConfigRefreshedAndReinit: "設定が更新され、翻訳機能が再初期化されます",
+		MonitorPausedMsg: "監視を一時停止しました",
+		MonitorResumedMsg: "監視を再開しました",
+		SwitchPromptMsg: "🔄 プロンプトを切り替え: %s",
+		TranslationStyle: "翻訳スタイル: %s",
+		AutoPasteEnabledMsg: "自動貼り付け: 有効",
+		HotkeysColon: "ホットキー:",
+		MonitorToggleLabel: "  監視の切り替え: %s",
+		SwitchStyleLabel: "  スタイルの切り替え: %s",
+		MonitorStartedCopyToTranslate: "監視を開始しました - テキストをコピーして翻訳",
+		StartTranslating: "翻訳を開始: %s",
+		UsingPrompt: "プロンプトを使用: %s (コンテンツの長さ: %d)",
+		TranslationFailedError: " 失敗\n  エラー: %v",
+		TranslationComplete: " 完了 (#%d)",
+		OriginalText: "  原文: %s",
+		TranslatedText: "  翻訳: %s",
+		MonitorPausedViaHotkey: "監視を一時停止しました (ホットキー経由)",
+		MonitorResumedViaHotkey: "監視を再開しました (ホットキー経由)",
+		SwitchPromptViaHotkey: "🔄 プロンプトを切り替え: %s (ホットキー経由)",
+		PrewarmingModel: "モデルをウォームアップ中...",
+		PrewarmSuccess2: " 成功",
+		PrewarmSkip: " スキップ (無視可能: %v)",
+		TranslatorRefreshed: "翻訳機能を更新しました: %s | %s",
+		TranslatorRefreshFailed: "翻訳機能の更新に失敗しました: %v",
+
+		// Missing from config_ui.go
+		ConfigRefreshedReinit: "✅ 設定が更新され、翻訳機能が再初期化されます",
+		MainModelChanged: "✅ メインモデルを変更しました: %s",
+		TestingModelMsg: "🔄 モデルをテスト中...",
+		ModelInitFailed: "モデル %s の初期化に失敗しました: %v",
+		TranslateToChineseOnly: "以下の内容を中国語に翻訳してください。回答や説明は不要で、翻訳のみを出力してください:",
+		ModelTestFailedMsg: "モデル %s のテストに失敗しました: %v",
+		ModelAvailable: "✅ モデル %s が利用可能です! 翻訳: %s",
+		ModelNoResponse: "❌ モデル %s が応答しません",
+		DeleteFailed: "削除に失敗しました: %v",
+		SaveFailed: "保存に失敗しました: %v",
+		UpdateFailed: "更新に失敗しました: %v",
+		TestingConnectionMsg: "接続をテスト中...",
+		TestingMsg: "テスト中...",
+		CreateTranslatorFailedMsg: "❌ 翻訳機能の作成に失敗しました: %v",
+		TranslationFailedMsg: "❌ 翻訳に失敗しました: %v",
+		TranslationResultMsg: "✅ 翻訳結果:\n原文: %s\n翻訳: %s\nモデル: %s\nプロンプト: %s",
+		PreviewColon: "プレビュー:",
+		VersionFormat: "バージョン: %s",
+		MonitorStatusActiveMsg: "監視ステータス: アクティブ",
+		MonitorStatusPausedMsg: "監視ステータス: 一時停止",
+		TranslationCountMsg: "翻訳回数: %d",
+		StatusActive: "アクティブ",
+		StatusPaused: "一時停止",
+		ModelLabel: "モデル: ",
+		APILabel: "API: ",
+		TryAgainMsg: " (Enterで再試行)",
+		StatsFormat: " | 入力: %d | 出力: %d | 合計: %d",
+
+		// Additional missing fields
+		AuthorLabel: "作者:",
+		ClassicBlueFallback: "クラシックブルーテーマ",
+		CleanBWFallback: "クリーンな白黒テーマ",
+		ConnectionFailedFormat: "接続失敗: %v",
+		CreatePromptsJsonFailed: "prompts.jsonの作成に失敗しました:",
+		DarkThemeTokyoNightFallback: "東京の夜にインスパイアされたダークテーマ",
+		DefaultThemeNameFallback: "デフォルト",
+		DeleteBuiltinPromptError: "組み込みプロンプトの削除エラー:",
+		DetectedProvider: "検出されたプロバイダー:",
+		EnterYourAPIKey: "APIキーを入力してください",
+		ExportLogs: "ログをエクスポート",
+		GetProgramPathFailed: "プログラムパスの取得に失敗しました",
+		HotkeySettingsTitle: "ホットキー設定",
+		HotkeysSaved: "✅ ホットキーが保存されました",
+		LicenseLabel: "ライセンス:",
+		LoadUserPromptsFailed: "ユーザープロンプトの読み込みに失敗しました:",
+		MinimalThemeNameFallback: "ミニマル",
+		ModelAvailableTranslation: "✅ %s 利用可能！翻訳: %s",
+		ModelUnavailable: "❌ %s 利用不可: %v",
+		MonitorToggleHotkey: "監視切り替え",
+		PleaseSelectModel: "モデルを選択してください",
+		ProjectUrlLabel: "プロジェクトURL:",
+		SelectAIModel: "AIモデルを選択",
+		SelectedBrackets: "[選択済み]",
+		SoftPastelFallback: "ソフトパステルテーマ",
+		StatusTranslatedCount: "ステータス: %d 回翻訳済み",
+		Success: "成功！",
+		SwitchStyleHotkey: "スタイル切り替え",
+		TestingConnectionDots: "接続をテスト中...",
+		TestingModelFormat: "%s をテスト中...",
+		TranslateToChineseProvider: "中国語に翻訳",
+		Tutorial: "チュートリアル",
+		TutorialContent: `クイックスタートガイド：
+
+1. APIキーの設定
+   • メインメニューから「API設定」を選択
+   • APIキーを入力（OpenAI、Anthropicなど）
+   • システムが自動的にプロバイダーを検出
+
+2. モデルの選択
+   • API設定後、「モデルを選択」を選択
+   • リストからAIモデルを選択
+
+3. ホットキーの設定（オプション）
+   • メインメニューから「ホットキー設定」を選択
+   • 監視の切り替えとプロンプト切り替えのホットキーを設定
+
+4. 使用開始
+   • Ctrl+C でテキストをコピーすると翻訳が開始
+   • プログラムが自動的にクリップボードの内容を置き換え
+   • Ctrl+V で翻訳結果を貼り付け
+   • 一部のアプリでは手動での貼り付けが必要
+
+ビデオチュートリアル：
+• Bilibili: （近日公開）
+• YouTube: （近日公開）`,
+		UnknownProviderDefault: "不明なプロバイダー（デフォルトはOpenAI）",
+		UnsupportedOS: "サポートされていないOS: %s",
+		WriteLogFileFailed: "ログファイルの書き込みに失敗しました",
+		XiaoniaoMonitoring: "xiaoniao - 監視中 | スタイル: %s",
+		XiaoniaoStopped: "xiaoniao - 停止中 | スタイル: %s",
 	}
 }
 
@@ -1090,6 +1352,137 @@ func getKorean() *Translations {
 		InvalidMainKey: "잘못된 메인 키: %s",
 		SingleKey: "단일 키",
 		SwitchFunction: "기능 전환",
+
+		// Critical missing fields from main.go
+		ProgramAlreadyRunning: "프로그램이 이미 실행 중입니다. 시스템 트레이 아이콘을 확인하세요.\n트레이 아이콘이 보이지 않으면 모든 xiaoniao 프로세스를 종료한 후 다시 시작하세요.",
+		TrayManagerInitFailed: "트레이 관리자 초기화 실패: %v\n\n시스템이 시스템 트레이 기능을 지원하는지 확인하세요.",
+		SystemTrayStartFailed: "시스템 트레이 시작 실패: %v\n\n가능한 원인:\n1. 시스템 트레이 기능이 비활성화됨\n2. 권한 부족\n3. 시스템 리소스 부족\n\n시스템 설정을 확인한 후 다시 시도하세요.",
+		NotConfiguredStatus: "구성되지 않음",
+		PleaseConfigureAPIFirst: "먼저 API를 구성하세요",
+		APIConfigCompleted: "API 구성 완료, 번역 서비스 재초기화 중...",
+		MonitorStartedConsole: "모니터링 시작됨",
+		MonitorPausedConsole: "모니터링 일시 중지됨",
+		ExportLogsFailed: "로그 내보내기 실패: %v",
+		LogsExportedTo: "로그가 내보내졌습니다: %s",
+		ConfigRefreshedDetail: "구성이 새로 고쳐졌습니다: %s | %s | %s",
+		RefreshConfigFailed: "구성 새로 고침 실패: %v",
+		SwitchedTo: "전환됨: %s",
+		ConfigRefreshedAndReinit: "구성이 새로 고쳐졌으며 번역기가 다시 초기화됩니다",
+		MonitorPausedMsg: "모니터링 일시 중지됨",
+		MonitorResumedMsg: "모니터링 재개됨",
+		SwitchPromptMsg: "🔄 프롬프트 전환: %s",
+		TranslationStyle: "번역 스타일: %s",
+		AutoPasteEnabledMsg: "자동 붙여넣기: 활성화됨",
+		HotkeysColon: "단축키:",
+		MonitorToggleLabel: "  모니터링 전환: %s",
+		SwitchStyleLabel: "  스타일 전환: %s",
+		MonitorStartedCopyToTranslate: "모니터링 시작됨 - 텍스트를 복사하여 번역",
+		StartTranslating: "번역 시작: %s",
+		UsingPrompt: "프롬프트 사용: %s (콘텐츠 길이: %d)",
+		TranslationFailedError: " 실패\n  오류: %v",
+		TranslationComplete: " 완료 (#%d)",
+		OriginalText: "  원문: %s",
+		TranslatedText: "  번역: %s",
+		MonitorPausedViaHotkey: "모니터링 일시 중지됨 (단축키를 통해)",
+		MonitorResumedViaHotkey: "모니터링 재개됨 (단축키를 통해)",
+		SwitchPromptViaHotkey: "🔄 프롬프트 전환: %s (단축키를 통해)",
+		PrewarmingModel: "모델 예열 중...",
+		PrewarmSuccess2: " 성공",
+		PrewarmSkip: " 건너뛰기 (무시 가능: %v)",
+		TranslatorRefreshed: "번역기가 새로 고쳐졌습니다: %s | %s",
+		TranslatorRefreshFailed: "번역기 새로 고침 실패: %v",
+
+		// Missing from config_ui.go
+		ConfigRefreshedReinit: "✅ 구성이 새로 고쳐졌으며 번역기가 다시 초기화됩니다",
+		MainModelChanged: "✅ 기본 모델이 변경되었습니다: %s",
+		TestingModelMsg: "🔄 모델 테스트 중...",
+		ModelInitFailed: "모델 %s 초기화 실패: %v",
+		TranslateToChineseOnly: "다음 내용을 중국어로만 번역하세요. 답변이나 설명 없이 번역만 출력하세요:",
+		ModelTestFailedMsg: "모델 %s 테스트 실패: %v",
+		ModelAvailable: "✅ 모델 %s 사용 가능! 번역: %s",
+		ModelNoResponse: "❌ 모델 %s 응답 없음",
+		DeleteFailed: "삭제 실패: %v",
+		SaveFailed: "저장 실패: %v",
+		UpdateFailed: "업데이트 실패: %v",
+		TestingConnectionMsg: "연결 테스트 중...",
+		TestingMsg: "테스트 중...",
+		CreateTranslatorFailedMsg: "❌ 번역기 생성 실패: %v",
+		TranslationFailedMsg: "❌ 번역 실패: %v",
+		TranslationResultMsg: "✅ 번역 결과:\n원문: %s\n번역: %s\n모델: %s\n프롬프트: %s",
+		PreviewColon: "미리보기:",
+		VersionFormat: "버전: %s",
+		MonitorStatusActiveMsg: "모니터링 상태: 활성",
+		MonitorStatusPausedMsg: "모니터링 상태: 일시 중지",
+		TranslationCountMsg: "번역 횟수: %d",
+		StatusActive: "활성",
+		StatusPaused: "일시 중지",
+		ModelLabel: "모델: ",
+		APILabel: "API: ",
+		TryAgainMsg: " (Enter로 재시도)",
+		StatsFormat: " | 입력: %d | 출력: %d | 총계: %d",
+
+		// Additional missing fields
+		AuthorLabel: "작성자:",
+		ClassicBlueFallback: "클래식 블루 테마",
+		CleanBWFallback: "깔끔한 흑백 테마",
+		ConnectionFailedFormat: "연결 실패: %v",
+		CreatePromptsJsonFailed: "prompts.json 생성 실패:",
+		DarkThemeTokyoNightFallback: "도쿄 나이트 다크 테마",
+		DefaultThemeNameFallback: "기본",
+		DeleteBuiltinPromptError: "내장 프롬프트 삭제 오류:",
+		DetectedProvider: "감지된 제공자:",
+		EnterYourAPIKey: "API 키를 입력하세요",
+		ExportLogs: "로그 내보내기",
+		GetProgramPathFailed: "프로그램 경로 가져오기 실패",
+		HotkeySettingsTitle: "단축키 설정",
+		HotkeysSaved: "✅ 단축키가 저장되었습니다",
+		LicenseLabel: "라이선스:",
+		LoadUserPromptsFailed: "사용자 프롬프트 로드 실패:",
+		MinimalThemeNameFallback: "미니멀",
+		ModelAvailableTranslation: "✅ %s 사용 가능! 번역: %s",
+		ModelUnavailable: "❌ %s 사용 불가: %v",
+		MonitorToggleHotkey: "모니터 토글",
+		PleaseSelectModel: "모델을 선택하세요",
+		ProjectUrlLabel: "프로젝트 URL:",
+		SelectAIModel: "AI 모델 선택",
+		SelectedBrackets: "[선택됨]",
+		SoftPastelFallback: "소프트 파스텔 테마",
+		StatusTranslatedCount: "상태: %d 번 번역됨",
+		Success: "성공!",
+		SwitchStyleHotkey: "스타일 전환",
+		TestingConnectionDots: "연결 테스트 중...",
+		TestingModelFormat: "%s 테스트 중...",
+		TranslateToChineseProvider: "중국어로 번역",
+		Tutorial: "튜토리얼",
+		TutorialContent: `빠른 시작 가이드:
+
+1. API 키 설정
+   • 메인 메뉴에서 "API 설정" 선택
+   • API 키 입력 (OpenAI, Anthropic 등)
+   • 시스템이 자동으로 제공자 감지
+
+2. 모델 선택
+   • API 설정 후 "모델 선택" 선택
+   • 목록에서 AI 모델 선택
+
+3. 단축키 설정 (선택사항)
+   • 메인 메뉴에서 "단축키 설정" 선택
+   • 모니터 토글 및 프롬프트 전환 단축키 설정
+
+4. 사용 시작
+   • Ctrl+C로 텍스트 복사 시 번역 시작
+   • 프로그램이 자동으로 클립보드 내용 교체
+   • Ctrl+V로 번역 결과 붙여넣기
+   • 일부 앱에서는 수동 붙여넣기 필요
+
+비디오 튜토리얼:
+• Bilibili: (곧 출시)
+• YouTube: (곧 출시)`,
+		UnknownProviderDefault: "알 수 없는 제공자 (기본값: OpenAI)",
+		UnsupportedOS: "지원되지 않는 OS: %s",
+		WriteLogFileFailed: "로그 파일 쓰기 실패",
+		XiaoniaoMonitoring: "xiaoniao - 모니터링 중 | 스타일: %s",
+		XiaoniaoStopped: "xiaoniao - 중지됨 | 스타일: %s",
 	}
 }
 
@@ -1453,11 +1846,195 @@ func getSpanish() *Translations {
 		SwitchFunction: "Cambiar función",
 		Edit: "Editar",
 		Back: "Atrás",
+
+		// Critical missing fields from main.go
+		ProgramAlreadyRunning: "El programa ya se está ejecutando. Por favor, compruebe el icono de la bandeja del sistema.\nSi no ve el icono de la bandeja, intente finalizar todos los procesos de xiaoniao y reinicie.",
+		TrayManagerInitFailed: "Error al inicializar el administrador de la bandeja: %v\n\nPor favor, verifique si su sistema admite la función de bandeja del sistema.",
+		SystemTrayStartFailed: "Error al iniciar la bandeja del sistema: %v\n\nPosibles razones:\n1. La función de bandeja del sistema está deshabilitada\n2. Permisos insuficientes\n3. Recursos del sistema insuficientes\n\nPor favor, verifique la configuración del sistema e intente nuevamente.",
+		NotConfiguredStatus: "No configurado",
+		PleaseConfigureAPIFirst: "Por favor, configure la API primero",
+		APIConfigCompleted: "Configuración de API completada, reinicializando el servicio de traducción...",
+		MonitorStartedConsole: "Monitor iniciado",
+		MonitorPausedConsole: "Monitor pausado",
+		ExportLogsFailed: "Error al exportar los registros: %v",
+		LogsExportedTo: "Registros exportados a: %s",
+		ConfigRefreshedDetail: "Configuración actualizada: %s | %s | %s",
+		RefreshConfigFailed: "Error al actualizar la configuración: %v",
+		SwitchedTo: "Cambiado a: %s",
+		ConfigRefreshedAndReinit: "Configuración actualizada, el traductor se reinicializará",
+		MonitorPausedMsg: "Monitor pausado",
+		MonitorResumedMsg: "Monitor reanudado",
+		SwitchPromptMsg: "🔄 Cambiar prompt: %s",
+		TranslationStyle: "Estilo de traducción: %s",
+		AutoPasteEnabledMsg: "Pegado automático: Habilitado",
+		HotkeysColon: "Teclas de acceso rápido:",
+		MonitorToggleLabel: "  Alternar monitor: %s",
+		SwitchStyleLabel: "  Cambiar estilo: %s",
+		MonitorStartedCopyToTranslate: "Monitor iniciado - Copiar texto para traducir",
+		StartTranslating: "Iniciando traducción: %s",
+		UsingPrompt: "Usando prompt: %s (longitud del contenido: %d)",
+		TranslationFailedError: " Error\n  Error: %v",
+		TranslationComplete: " Completado (#%d)",
+		OriginalText: "  Original: %s",
+		TranslatedText: "  Traducción: %s",
+		MonitorPausedViaHotkey: "Monitor pausado (mediante tecla de acceso rápido)",
+		MonitorResumedViaHotkey: "Monitor reanudado (mediante tecla de acceso rápido)",
+		SwitchPromptViaHotkey: "🔄 Cambiar prompt: %s (mediante tecla de acceso rápido)",
+		PrewarmingModel: "Precalentando modelo...",
+		PrewarmSuccess2: " Éxito",
+		PrewarmSkip: " Omitir (se puede ignorar: %v)",
+		TranslatorRefreshed: "Traductor actualizado: %s | %s",
+		TranslatorRefreshFailed: "Error al actualizar el traductor: %v",
+
+		// Missing from config_ui.go
+		ConfigRefreshedReinit: "✅ Configuración actualizada, el traductor se reinicializará",
+		MainModelChanged: "✅ Modelo principal cambiado a: %s",
+		TestingModelMsg: "🔄 Probando modelo...",
+		ModelInitFailed: "Error al inicializar el modelo %s: %v",
+		TranslateToChineseOnly: "Por favor, traduzca solo lo siguiente al chino, no responda ni explique, solo muestre la traducción:",
+		ModelTestFailedMsg: "Prueba del modelo %s fallida: %v",
+		ModelAvailable: "✅ ¡Modelo %s disponible! Traducción: %s",
+		ModelNoResponse: "❌ Modelo %s sin respuesta",
+		DeleteFailed: "Error al eliminar: %v",
+		SaveFailed: "Error al guardar: %v",
+		UpdateFailed: "Error al actualizar: %v",
+		TestingConnectionMsg: "Probando conexión...",
+		TestingMsg: "Probando...",
+		CreateTranslatorFailedMsg: "❌ Error al crear el traductor: %v",
+		TranslationFailedMsg: "❌ Error en la traducción: %v",
+		TranslationResultMsg: "✅ Resultado de la traducción:\nOriginal: %s\nTraducción: %s\nModelo: %s\nPrompt: %s",
+		PreviewColon: "Vista previa:",
+		VersionFormat: "Versión: %s",
+		MonitorStatusActiveMsg: "Estado del monitor: Activo",
+		MonitorStatusPausedMsg: "Estado del monitor: Pausado",
+		TranslationCountMsg: "Número de traducciones: %d",
+		StatusActive: "Activo",
+		StatusPaused: "Pausado",
+		ModelLabel: "Modelo: ",
+		APILabel: "API: ",
+		TryAgainMsg: " (Presione Enter para reintentar)",
+		StatsFormat: " | Entrada: %d | Salida: %d | Total: %d",
+
+		// Tray and logs
+		ExportLogs: "Exportar registros",
+		GetProgramPathFailed: "Error al obtener la ruta del programa",
+		WriteLogFileFailed: "Error al escribir el archivo de registro",
+
+		// Additional missing fields
+		AuthorLabel: "Autor:",
+		ClassicBlueFallback: "Tema azul clásico",
+		CleanBWFallback: "Tema blanco y negro limpio",
+		ConnectionFailedFormat: "Conexión fallida: %v",
+		CreatePromptsJsonFailed: "Error al crear prompts.json:",
+		DarkThemeTokyoNightFallback: "Tema oscuro inspirado en Tokyo Night",
+		DefaultThemeNameFallback: "Predeterminado",
+		DeleteBuiltinPromptError: "Error al eliminar prompt integrado:",
+		DetectedProvider: "Proveedor detectado:",
+		EnterYourAPIKey: "Ingrese su clave API",
+		HotkeySettingsTitle: "Configuración de teclas de acceso rápido",
+		HotkeysSaved: "✅ Teclas de acceso rápido guardadas",
+		LicenseLabel: "Licencia:",
+		LoadUserPromptsFailed: "Error al cargar prompts del usuario:",
+		MinimalThemeNameFallback: "Mínimo",
+		ModelAvailableTranslation: "✅ %s disponible! Traducción: %s",
+		ModelUnavailable: "❌ %s no disponible: %v",
+		MonitorToggleHotkey: "Alternar monitor",
+		PleaseSelectModel: "Por favor seleccione un modelo",
+		ProjectUrlLabel: "URL del proyecto:",
+		SelectAIModel: "Seleccionar modelo de IA",
+		SelectedBrackets: "[Seleccionado]",
+		SoftPastelFallback: "Tema pastel suave",
+		StatusTranslatedCount: "Estado: Traducido %d veces",
+		Success: "¡Éxito!",
+		SwitchStyleHotkey: "Cambiar estilo",
+		TestingConnectionDots: "Probando conexión...",
+		TestingModelFormat: "Probando %s...",
+		TranslateToChineseProvider: "Traducir al chino",
+		Tutorial: "Tutorial",
+		TutorialContent: `Guía de inicio rápido:
+
+1. Configurar clave API
+   • Seleccione "Configuración API" del menú principal
+   • Ingrese su clave API (OpenAI, Anthropic, etc.)
+   • El sistema detectará automáticamente el proveedor
+
+2. Seleccionar modelo
+   • Después de configurar la API, seleccione "Seleccionar modelo"
+   • Elija un modelo de IA de la lista
+
+3. Configurar teclas de acceso rápido (Opcional)
+   • Seleccione "Configuración de teclas de acceso rápido" del menú principal
+   • Configure las teclas para alternar monitor y cambiar prompt
+
+4. Comenzar a usar
+   • Ctrl+C para copiar texto activa la traducción
+   • El programa reemplaza automáticamente el contenido del portapapeles
+   • Ctrl+V para pegar el resultado traducido
+   • Algunas aplicaciones pueden requerir pegado manual
+
+Tutoriales en video:
+• Bilibili: (Próximamente)
+• YouTube: (Próximamente)`,
+		UnknownProviderDefault: "Proveedor desconocido (predeterminado: OpenAI)",
+		UnsupportedOS: "Sistema operativo no compatible: %s",
+		XiaoniaoMonitoring: "xiaoniao - Monitoreando | Estilo: %s",
+		XiaoniaoStopped: "xiaoniao - Detenido | Estilo: %s",
 	}
 }
 // getFrench returns French translations
 func getFrench() *Translations {
 	return &Translations{
+		// Critical system messages
+		ProgramAlreadyRunning: "Le programme est déjà en cours d'exécution. Veuillez vérifier l'icône de la barre d'état système.",
+		TrayManagerInitFailed: "Échec de l'initialisation du gestionnaire de la barre d'état système : %v",
+		MonitorStartedConsole: "Surveillance démarrée",
+		MonitorPausedConsole: "Surveillance mise en pause",
+
+		// Config refresh messages
+		ConfigRefreshedReinit: "Configuration actualisée, réinitialisation...",
+
+		// Model testing
+		ModelTestFailed: "Test du modèle échoué: %s - %v",
+		ModelInitFailed: "Erreur d'initialisation du modèle %s: %v",
+		TranslateToChineseOnly: "Veuillez traduire uniquement le texte suivant en chinois, ne répondez pas et n'expliquez pas, montrez seulement la traduction:",
+		ModelTestFailedMsg: "Test du modèle %s échoué: %v",
+		ModelAvailable: "✅ Modèle %s disponible! Traduction: %s",
+		ModelNoResponse: "❌ Modèle %s sans réponse",
+		DeleteFailed: "Échec de la suppression: %v",
+		SaveFailed: "Échec de l'enregistrement: %v",
+		UpdateFailed: "Échec de la mise à jour: %v",
+		TestingConnectionMsg: "Test de connexion...",
+		TestingMsg: "Test en cours...",
+		CreateTranslatorFailedMsg: "❌ Échec de la création du traducteur: %v",
+		TranslationFailedMsg: "❌ Échec de la traduction: %v",
+		TranslationResultMsg: "✅ Résultat de la traduction:\nOriginal: %s\nTraduction: %s\nModèle: %s\nPrompt: %s",
+		PreviewColon: "Aperçu:",
+		VersionFormat: "Version: %s",
+		MonitorStatusActiveMsg: "État de la surveillance: Actif",
+		MonitorStatusPausedMsg: "État de la surveillance: En pause",
+		TranslationCountMsg: "Nombre de traductions: %d",
+		StatusActive: "Actif",
+		StatusPaused: "En pause",
+		ModelLabel: "Modèle: ",
+		APILabel: "API: ",
+		TryAgainMsg: " (Appuyez sur Entrée pour réessayer)",
+		StatsFormat: " | Entrée: %d | Sortie: %d | Total: %d",
+
+		// API config messages
+		ConnectionFailed: "Échec de la connexion",
+		TestingConnection: "Test en cours...",
+		NoModelsFound: "Aucun modèle trouvé",
+		CurrentSuffix: " (Actuel)",
+		UnrecognizedAPIKey: "Impossible de reconnaître la clé API: %v",
+		ConnectionSuccessNoModels: "Connexion réussie (%s) - Impossible d'obtenir la liste des modèles: %v",
+		ConnectionSuccessWithModels: "Connexion réussie (%s) - %d modèles",
+		TestingInProgress: "Test en cours...",
+
+		// Tray and logs
+		ExportLogs: "Exporter les journaux",
+		GetProgramPathFailed: "Échec de l'obtention du chemin du programme",
+		WriteLogFileFailed: "Échec de l'écriture du fichier journal",
+
 		// Main interface
 		Title:           "Configuration xiaoniao",
 		ConfigTitle:     "xiaoniao - Paramètres",
@@ -1646,7 +2223,6 @@ func getFrench() *Translations {
 		ModelsCount:      "%d modèles",
 		SelectModel:      "Sélectionner",
 		TestingModel:     "Test du modèle %s...",
-		ModelTestFailed:  "Échec du test du modèle %s: %v",
 		SearchModels2:    "Rechercher",
 		TotalModelsCount: "Total %d modèles",
 		
@@ -1683,7 +2259,6 @@ func getFrench() *Translations {
 		CancelDelete:     "Appuyez sur une autre touche pour annuler",
 		
 		// Status messages
-		TestingConnection: "Test en cours...",
 		DetectingProvider: "Détection réussie",
 		
 		// About page additions
@@ -1764,13 +2339,6 @@ func getFrench() *Translations {
 		TranslateToChineseColon: "Traduis le contenu suivant en chinois:",
 		
 		// API config messages
-		NoModelsFound: "Aucun modèle trouvé",
-		CurrentSuffix: " (actuel)",
-		UnrecognizedAPIKey: "Impossible de reconnaître la clé API: %v",
-		ConnectionFailed: "Échec de connexion (%s): %v",
-		ConnectionSuccessNoModels: "Connexion réussie (%s) - Impossible d'obtenir la liste des modèles: %v",
-		ConnectionSuccessWithModels: "Connexion réussie (%s) - %d modèles",
-		TestingInProgress: "Test en cours...",
 		
 		// System hotkey
 		SystemHotkeyFormat: "Raccourci système: %s",
@@ -1815,5 +2383,99 @@ func getFrench() *Translations {
 		SingleKey: "Touche unique",
 		Edit: "Modifier",
 		Back: "Retour",
+
+		// Additional missing fields
+		APIConfigCompleted: "Configuration API terminée, réinitialisation du service de traduction...",
+		AuthorLabel: "Auteur:",
+		AutoPasteEnabledMsg: "Collage automatique activé",
+		ClassicBlueFallback: "Thème bleu classique",
+		CleanBWFallback: "Thème noir et blanc épuré",
+		ConfigRefreshedAndReinit: "Configuration actualisée et réinitialisée",
+		ConfigRefreshedDetail: "Configuration actualisée, réinitialisation...",
+		ConnectionFailedFormat: "Échec de la connexion: %v",
+		CreatePromptsJsonFailed: "Échec de la création de prompts.json:",
+		DarkThemeTokyoNightFallback: "Thème sombre inspiré de Tokyo Night",
+		DefaultThemeNameFallback: "Par défaut",
+		DeleteBuiltinPromptError: "Erreur lors de la suppression du prompt intégré:",
+		DetectedProvider: "Fournisseur détecté:",
+		EnterYourAPIKey: "Entrez votre clé API",
+		ExportLogsFailed: "Échec de l'exportation des journaux",
+		HotkeysColon: "Raccourcis:",
+		HotkeySettingsTitle: "Paramètres des raccourcis clavier",
+		HotkeysSaved: "✅ Raccourcis sauvegardés",
+		LicenseLabel: "Licence:",
+		LoadUserPromptsFailed: "Échec du chargement des prompts utilisateur:",
+		LogsExportedTo: "Journaux exportés vers:",
+		MainModelChanged: "Modèle principal changé: %s -> %s",
+		MinimalThemeNameFallback: "Minimal",
+		ModelAvailableTranslation: "✅ %s disponible! Traduction: %s",
+		ModelUnavailable: "❌ %s indisponible: %v",
+		MonitorPausedMsg: "Surveillance mise en pause",
+		MonitorPausedViaHotkey: "Surveillance mise en pause via raccourci",
+		MonitorResumedMsg: "Surveillance reprise",
+		MonitorResumedViaHotkey: "Surveillance reprise via raccourci",
+		MonitorStartedCopyToTranslate: "Surveillance démarrée - Copiez du texte pour traduire",
+		MonitorToggleHotkey: "Basculer la surveillance",
+		MonitorToggleLabel: "Basculer la surveillance",
+		NotConfiguredStatus: "Non configuré",
+		OriginalText: "Texte original",
+		PleaseConfigureAPIFirst: "Veuillez d'abord configurer l'API",
+		PleaseSelectModel: "Veuillez sélectionner un modèle",
+		PrewarmingModel: "Préchauffage du modèle...",
+		PrewarmSkip: "Passer le préchauffage",
+		ProjectUrlLabel: "URL du projet:",
+		RefreshConfigFailed: "Échec de l'actualisation de la configuration",
+		SelectAIModel: "Sélectionner le modèle IA",
+		SelectedBrackets: "[Sélectionné]",
+		SoftPastelFallback: "Thème pastel doux",
+		StartTranslating: "Commencer la traduction",
+		StatusTranslatedCount: "Statut: Traduit %d fois",
+		Success: "Succès!",
+		SwitchedTo: "Basculé vers:",
+		SwitchPromptMsg: "Prompt changé",
+		SwitchPromptViaHotkey: "Prompt changé via raccourci",
+		SwitchStyleHotkey: "Changer de style",
+		SwitchStyleLabel: "Changer de style",
+		SystemTrayStartFailed: "Échec du démarrage de la barre d'état système",
+		TestingConnectionDots: "Test de connexion...",
+		TestingModelFormat: "Test de %s...",
+		TestingModelMsg: "Test du modèle...",
+		TranslatedText: "Texte traduit",
+		TranslateToChineseProvider: "Traduire en chinois",
+		TranslationComplete: "Traduction terminée",
+		TranslationFailedError: "Erreur de traduction",
+		TranslationStyle: "Style de traduction",
+		TranslatorRefreshed: "Traducteur actualisé",
+		TranslatorRefreshFailed: "Échec de l'actualisation du traducteur",
+		Tutorial: "Tutoriel",
+		TutorialContent: `Guide de démarrage rapide :
+
+1. Configurer la clé API
+   • Sélectionnez "Configuration API" dans le menu principal
+   • Entrez votre clé API (OpenAI, Anthropic, etc.)
+   • Le système détectera automatiquement le fournisseur
+
+2. Sélectionner le modèle
+   • Après la configuration API, sélectionnez "Sélectionner le modèle"
+   • Choisissez un modèle IA dans la liste
+
+3. Configurer les raccourcis clavier (Optionnel)
+   • Sélectionnez "Paramètres des raccourcis" dans le menu principal
+   • Configurez les raccourcis pour basculer la surveillance et changer de prompt
+
+4. Commencer à utiliser
+   • Ctrl+C pour copier du texte déclenche la traduction
+   • Le programme remplace automatiquement le contenu du presse-papiers
+   • Ctrl+V pour coller le résultat traduit
+   • Certaines applications peuvent nécessiter un collage manuel
+
+Tutoriels vidéo :
+• Bilibili : (Bientôt disponible)
+• YouTube : (Bientôt disponible)`,
+		UnknownProviderDefault: "Fournisseur inconnu (par défaut: OpenAI)",
+		UnsupportedOS: "Système d'exploitation non pris en charge: %s",
+		UsingPrompt: "Utilisation du prompt:",
+		XiaoniaoMonitoring: "xiaoniao - Surveillance | Style: %s",
+		XiaoniaoStopped: "xiaoniao - Arrêté | Style: %s",
 	}
 }
