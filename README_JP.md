@@ -4,32 +4,30 @@
 
 Windows クリップボード翻訳ツール
 
-## 機能
+## クイックスタート
 
-- クリップボード監視と自動翻訳
-- 多言語UI対応（中/英/日/韓/仏/西/独/露/アラビア語）
-- システムトレイ常駐
+### 1. APIキーの設定
+- メインメニューから「API設定」を選択
+- APIキーを入力（OpenAI、Anthropicなど）
+- システムが自動的にプロバイダーを識別
 
-## インストール
+### 2. モデル選択
+- API設定後、「モデル選択」を選択
+- リストから適切なAIモデルを選択
 
-[xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) をダウンロードして実行
+### 3. ホットキー設定（オプション）
+- メインメニューから「ホットキー設定」を選択
+- 監視切替とプロンプト切替のホットキーを設定
 
-## 使い方
+### 4. 使用開始
+- Ctrl+C でテキストをコピーして翻訳を起動
+- プログラムが自動的にクリップボードを置換
+- Ctrl+V で翻訳結果を貼り付け
 
-1. xiaoniao.exe を実行
-2. テキストをコピー (Ctrl+C)
-3. 自動翻訳されクリップボードを置換
-4. ペースト (Ctrl+V) で翻訳結果を取得
+## ダウンロード
 
-トレイアイコン状態：青-監視中 / 緑-翻訳中 / 赤-停止
+[xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) - Windows 10/11 (64-bit)
 
-## 設定
-
-```cmd
-xiaoniao.exe config
-```
-
-OpenAI、Anthropic、Google、DeepSeek 等のAPIに対応
 
 ## ビルド
 
@@ -42,6 +40,16 @@ cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
 
 要件：Go 1.20+、Windows
 
+### ビデオチュートリアル
+
+- Bilibili: (近日公開)
+- YouTube: (近日公開)
+
 ## ライセンス
 
 MIT
+
+## サポート
+
+- Ko-fi: (近日公開)
+- WeChat: (近日公開)
