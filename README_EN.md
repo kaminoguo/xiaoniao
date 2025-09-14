@@ -1,20 +1,18 @@
-# xiaoniao v1.0
+# xiaoniao
 
-Windows clipboard translation tool. Monitor clipboard, auto-translate, auto-paste.
+[中文](README.md) | [日本語](README_JP.md) | [한국어](README_KR.md)
 
-🎉 **v1.0 Major Update**
-- ✅ Complete internationalization support (7 languages)
-- ✅ Fixed garbled text issues on non-Chinese Windows systems
-- ✅ Supports English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Spanish, French
-- ✅ All UI text and prompts fully translated
+Windows Clipboard Translation Tool
+
+## Features
+
+- Monitor clipboard and auto-translate
+- Multi-language UI support (CN/EN/JP/KR/FR/ES/DE/RU/AR)
+- System tray integration
 
 ## Installation
 
-Download [xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) and run.
-
-Windows SmartScreen warning: Click "More info" → "Run anyway"
-
-First run requires API key configuration.
+Download [xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) and run
 
 ## Usage
 
@@ -23,10 +21,7 @@ First run requires API key configuration.
 3. Auto-translate and replace clipboard
 4. Paste (Ctrl+V) to get translation
 
-System tray icon:
-- Blue: Monitoring
-- Green: Translating
-- Red: Stopped
+Tray icon status: Blue-Monitoring / Green-Translating / Red-Stopped
 
 ## Configuration
 
@@ -34,23 +29,19 @@ System tray icon:
 xiaoniao.exe config
 ```
 
-Config file: `%APPDATA%\xiaoniao\`
-
-Supports OpenAI, Anthropic, Google, DeepSeek and other APIs.
+Supports OpenAI, Anthropic, Google, DeepSeek and other APIs
 
 ## Build
 
 ```bash
-# Basic build
-go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
-
 # With icon
-go generate
-go build -ldflags="-s -w" -o xiaoniao.exe cmd/xiaoniao/*.go
+go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
+cd cmd/xiaoniao && goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
+cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
 ```
 
-Requirements: Go 1.21+, Windows
+Requirements: Go 1.20+, Windows
 
 ## License
 
-MIT License
+MIT
