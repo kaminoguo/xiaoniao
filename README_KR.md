@@ -51,5 +51,5 @@ MIT
 
 ## 후원
 
-- Ko-fi: (공개 예정)
-- WeChat: (공개 예정)
+- Ko-fi: [ko-fi.com/gogogod](https://ko-fi.com/gogogod)
+- WeChat: [QR 코드](assets/wechat-pay.jpg)

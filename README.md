@@ -50,5 +50,5 @@ MIT
 
 ## 支持作者
 
-- Ko-fi: （即将发布）
-- 微信赞赏: （即将发布）
+- Ko-fi: [ko-fi.com/gogogod](https://ko-fi.com/gogogod)
+- 微信赞赏: [查看赞赏码](assets/wechat-pay.jpg)

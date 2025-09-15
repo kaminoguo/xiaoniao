@@ -51,5 +51,5 @@ MIT
 
 ## サポート
 
-- Ko-fi: (近日公開)
-- WeChat: (近日公開)
+- Ko-fi: [ko-fi.com/gogogod](https://ko-fi.com/gogogod)
+- WeChat: [QRコード](assets/wechat-pay.jpg)

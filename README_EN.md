@@ -51,5 +51,5 @@ MIT
 
 ## Support
 
-- Ko-fi: (Coming soon)
-- WeChat: (Coming soon)
+- Ko-fi: [ko-fi.com/gogogod](https://ko-fi.com/gogogod)
+- WeChat: [View QR Code](assets/wechat-pay.jpg)
