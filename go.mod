@@ -1,6 +1,6 @@
 module github.com/kaminoguo/xiaoniao
 
-go 1.20
+go 1.23.0
 
 toolchain go1.24.6
 
@@ -9,7 +9,6 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.6
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/getlantern/systray v1.2.2
-	github.com/robotn/gohook v0.42.2
 	golang.design/x/hotkey v0.4.1
 )
 
@@ -38,7 +37,6 @@ require (
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
-	github.com/vcaesar/keycode v0.10.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.design/x/mainthread v0.3.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
