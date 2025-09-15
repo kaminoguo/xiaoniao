@@ -1844,10 +1844,11 @@ func (m configModel) viewAboutScreen() string {
 	s += successStyle.Render("xiaoniao "+APP_VERSION) + "\n\n"
 
 	s += normalStyle.Render(t.AuthorLabel) + mutedStyle.Render("梨梨果") + "\n"
-	s += normalStyle.Render(t.LicenseLabel) + mutedStyle.Render("GPL-3.0 License") + "\n"
+	s += normalStyle.Render(t.LicenseLabel) + mutedStyle.Render("MIT License") + "\n"
 	s += normalStyle.Render(t.ProjectUrlLabel) + mutedStyle.Render("https://github.com/kaminoguo/xiaoniao") + "\n\n"
 
 	s += warningStyle.Render(t.SupportAuthor) + "\n"
+	s += mutedStyle.Render("https://github.com/kaminoguo/xiaoniao?tab=readme-ov-file#%E6%94%AF%E6%8C%81%E4%BD%9C%E8%80%85") + "\n"
 	s += mutedStyle.Render(t.PriceNote) + "\n"
 	s += mutedStyle.Render(t.ShareNote) + "\n\n"
 
