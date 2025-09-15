@@ -1,8 +1,8 @@
-# Prompt System Architecture - xiaoniao v2.5.0
+# Prompt System Architecture
 
 ## Overview
 
-xiaoniao v2.5.0 introduces a sophisticated dual-layer prompt system designed to achieve maximum translation accuracy while maintaining flexibility for different use cases.
+xiaoniao uses a sophisticated dual-layer prompt system designed to achieve maximum translation accuracy while maintaining flexibility for different use cases.
 
 ## Architecture
 
