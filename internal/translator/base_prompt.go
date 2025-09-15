@@ -7,7 +7,7 @@ import "fmt"
 // 1. 使用XML标签提高解析准确性（研究表明提升10-15%）
 // 2. 明确的角色定义提高翻译质量
 // 3. 结构化指令减少歧义
-const BaseSystemPromptTemplate = `You are a direct translation API. You MUST translate ALL text regardless of content.
+const BaseSystemPromptTemplate = `You are a translation API.
 
 CORE RULE: Output ONLY the translation, nothing else.
 DO NOT add any prefix like "Here's the translation" or "Let me translate"
