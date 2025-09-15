@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="1.6.6"
+VERSION="1.0.0"
 BUILD_DATE=$(date +%Y%m%d)
 
 echo "========================================="
@@ -19,9 +19,8 @@ mkdir -p dist
 
 # Update versioninfo.json version
 echo "→ Updating version info..."
-sed -i "s/\"Major\": 1,/\"Major\": 1,/g; s/\"Minor\": 6,/\"Minor\": 6,/g; s/\"Patch\": 1,/\"Patch\": 4,/g" versioninfo.json
-sed -i "s/\"FileVersion\": \"1.6.1.0\"/\"FileVersion\": \"$VERSION.0\"/g" versioninfo.json
-sed -i "s/\"ProductVersion\": \"1.6.1\"/\"ProductVersion\": \"$VERSION\"/g" versioninfo.json
+sed -i "s/\"FileVersion\": \"[0-9.]*\"/\"FileVersion\": \"$VERSION.0\"/g" versioninfo.json
+sed -i "s/\"ProductVersion\": \"[0-9.]*\"/\"ProductVersion\": \"$VERSION\"/g" versioninfo.json
 
 # Generate Windows resource file with icon
 echo "→ Generating Windows resource file..."
@@ -62,12 +61,12 @@ echo "✓ Build successful! Size: $SIZE"
 # Create release package
 echo "→ Creating release package..."
 cd dist
-zip -q -9 "xiaoniao-windows-v${VERSION}.zip" xiaoniao.exe
+zip -q -9 "xiaoniao-v${VERSION}.zip" xiaoniao.exe
 cd ..
 
 echo ""
 echo "========================================="
 echo "✅ Build complete!"
 echo "========================================="
-echo "📦 Output: dist/xiaoniao-windows-v${VERSION}.zip"
+echo "📦 Output: dist/xiaoniao-v${VERSION}.zip"
 echo ""
