@@ -1,5 +1,5 @@
-# Windows PowerShell 安装脚本
 # xiaoniao Windows Installation Script
+# Installs xiaoniao to Windows system
 
 param(
     [string]$InstallPath = "$env:ProgramFiles\xiaoniao",
