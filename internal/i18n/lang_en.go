@@ -493,7 +493,7 @@ Video Tutorials:
 		Back: "Back",
 
 		// Missing from hotkey_input.go
-		FormatError: "Format error: Please use 'Modifier+Key' format, like 'Ctrl+C'",
+		FormatError: "Format error: Please use 'Modifier+Key' format, like 'Ctrl+Q'",
 		InvalidModifier: "Invalid modifier: %s",
 		InvalidMainKey: "Invalid main key: %s",
 

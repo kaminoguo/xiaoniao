@@ -476,7 +476,7 @@ func getChineseSimplified() *Translations {
 		Back: "返回",
 
 		// Missing from hotkey_input.go
-		FormatError: "格式错误：请使用 '修饰键+主键' 格式，如 'Ctrl+C'",
+		FormatError: "格式错误：请使用 '修饰键+主键' 格式，如 'Ctrl+Q'",
 		InvalidModifier: "无效的修饰键: %s",
 		InvalidMainKey: "无效的主键: %s",
 

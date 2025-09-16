@@ -380,7 +380,7 @@ func getChineseTraditional() *Translations {
 		SwitchFunction: "切換功能",
 		Edit: "編輯",
 		Save: "保存",
-		FormatError: "格式錯誤：請使用 '修飾鍵+主鍵' 格式，如 'Ctrl+C'",
+		FormatError: "格式錯誤：請使用 '修飾鍵+主鍵' 格式，如 'Ctrl+Q'",
 		SingleKey: "單個按鍵",
 		Back: "返回",
 		InvalidModifier: "無效的修飾鍵: %s",
@@ -857,7 +857,7 @@ func getJapanese() *Translations {
 		SwitchFunction: "機能切り替え",
 		Edit: "編集",
 		Back: "戻る",
-		FormatError: "フォーマットエラー：'修飾キー+メインキー' 形式を使用してください（例：'Ctrl+C'）",
+		FormatError: "フォーマットエラー：'修飾キー+メインキー' 形式を使用してください（例：'Ctrl+Q'）",
 		InvalidModifier: "無効な修飾キー: %s",
 		InvalidMainKey: "無効なメインキー: %s",
 		CommonExamples: "よく使う例",
@@ -1346,7 +1346,7 @@ func getKorean() *Translations {
 
 		// New i18n fields for v1.0
 		Back: "뒤로",
-		FormatError: "형식 오류: '수정자+키' 형식을 사용하세요 (예: 'Ctrl+C')",
+		FormatError: "형식 오류: '수정자+키' 형식을 사용하세요 (예: 'Ctrl+Q')",
 		ProviderLabel: "제공자: ",
 		CommonExamples: "자주 사용하는 예",
 		InputFormat: "입력 형식",
@@ -1842,7 +1842,7 @@ func getSpanish() *Translations {
 
 		// New i18n fields for v1.0
 		Save: "Guardar",
-		FormatError: "Error de formato: Use el formato 'Modificador+Tecla', como 'Ctrl+C'",
+		FormatError: "Error de formato: Use el formato 'Modificador+Tecla', como 'Ctrl+Q'",
 		InvalidModifier: "Modificador inválido: %s",
 		InvalidMainKey: "Tecla principal inválida: %s",
 		ProviderLabel: "Proveedor: ",
@@ -2380,7 +2380,7 @@ func getFrench() *Translations {
 		StyleLabel: "Style",
 
 		// New i18n fields for v1.0
-		FormatError: "Erreur de format : Utilisez le format 'Modificateur+Touche', comme 'Ctrl+C'",
+		FormatError: "Erreur de format : Utilisez le format 'Modificateur+Touche', comme 'Ctrl+Q'",
 		InvalidModifier: "Modificateur invalide : %s",
 		ProviderLabel: "Fournisseur : ",
 		CommonExamples: "Exemples courants",

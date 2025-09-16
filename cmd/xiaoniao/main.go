@@ -21,7 +21,7 @@ import (
 	"golang.design/x/hotkey/mainthread"
 )
 
-const version = "1.0"
+const version = "1.0.1"
 
 type Config struct {
 	APIKey        string `json:"api_key"`
@@ -490,8 +490,7 @@ func runDaemonBusinessLogic(trayManager *tray.Manager) {
 	fmt.Printf("\nxiaoniao v%s\n", version)
 	fmt.Printf(t.ProviderLabel+"%s | "+t.ModelLabel+"%s\n", config.Provider, config.Model)
 	fmt.Printf(t.TranslationStyle+"\n", getPromptName(config.PromptID))
-	fmt.Printf(t.AutoPasteEnabledMsg)
-	
+
 	// 记录快捷键信息
 	if config.HotkeyToggle != "" || config.HotkeySwitch != "" {
 		fmt.Printf("\n"+t.HotkeysColon+"\n")
