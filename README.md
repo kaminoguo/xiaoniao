@@ -47,8 +47,8 @@ cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
 
 ### 视频教程
 
-- Bilibili: （即将发布）
-- YouTube: （即将发布）
+- Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## License
 

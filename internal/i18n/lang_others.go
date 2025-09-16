@@ -109,8 +109,8 @@ func getChineseTraditional() *Translations {
    • 某些應用可能需要手動粘貼
 
 視頻教程：
-• Bilibili: （即將發布）
-• YouTube: （即將發布）`,
+• Bilibili: https://www.bilibili.com/video/BV13zpUzhEeK/
+• YouTube: https://www.youtube.com/watch?v=iPye0tYkBaY`,
 
 		// Error messages
 		NoAPIKey:        "❌ 未配置API密鑰",

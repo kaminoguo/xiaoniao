@@ -109,8 +109,8 @@ func getChineseSimplified() *Translations {
    • 某些应用可能需要手动粘贴
 
 视频教程：
-• Bilibili: （即将发布）
-• YouTube: （即将发布）`,
+• Bilibili: https://www.bilibili.com/video/BV13zpUzhEeK/
+• YouTube: https://www.youtube.com/watch?v=iPye0tYkBaY`,
 
 		// Error messages
 		NoAPIKey:        "❌ 未配置API密钥",

@@ -109,8 +109,8 @@ func getEnglish() *Translations {
    • Some apps may require manual paste
 
 Video Tutorials:
-• Bilibili: (Coming Soon)
-• YouTube: (Coming Soon)`,
+• Bilibili: https://www.bilibili.com/video/BV13zpUzhEeK/
+• YouTube: https://www.youtube.com/watch?v=iPye0tYkBaY`,
 
 		// Error messages
 		NoAPIKey:        "❌ No API key configured",

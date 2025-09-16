@@ -1845,7 +1845,9 @@ func (m configModel) viewAboutScreen() string {
 
 	s += normalStyle.Render(t.AuthorLabel) + mutedStyle.Render("梨梨果") + "\n"
 	s += normalStyle.Render(t.LicenseLabel) + mutedStyle.Render("MIT License") + "\n"
-	s += normalStyle.Render(t.ProjectUrlLabel) + mutedStyle.Render("https://github.com/kaminoguo/xiaoniao") + "\n\n"
+	s += normalStyle.Render(t.ProjectUrlLabel) + mutedStyle.Render("https://github.com/kaminoguo/xiaoniao") + "\n"
+	s += normalStyle.Render("Bilibili: ") + mutedStyle.Render("https://www.bilibili.com/video/BV13zpUzhEeK/") + "\n"
+	s += normalStyle.Render("YouTube: ") + mutedStyle.Render("https://www.youtube.com/watch?v=iPye0tYkBaY") + "\n\n"
 
 	s += warningStyle.Render(t.SupportAuthor) + "\n"
 	s += mutedStyle.Render("https://github.com/kaminoguo/xiaoniao?tab=readme-ov-file#%E6%94%AF%E6%8C%81%E4%BD%9C%E8%80%85") + "\n"

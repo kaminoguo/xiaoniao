@@ -48,8 +48,8 @@ Requirements: Go 1.20+, Windows
 
 ### Video Tutorials
 
-- Bilibili: (Coming soon)
-- YouTube: (Coming soon)
+- Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## License
 
