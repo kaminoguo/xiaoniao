@@ -103,7 +103,7 @@ func getEnglish() *Translations {
    • Configure toggle and prompt switch hotkeys
 
 4. Start Using
-   • Ctrl+C to copy text triggers translation
+   • Ctrl+X to cut or Ctrl+C to copy text triggers translation
    • Program auto-replaces clipboard content
    • Ctrl+V to paste translated result
    • Some apps may require manual paste

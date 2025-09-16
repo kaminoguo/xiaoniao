@@ -103,7 +103,7 @@ func getChineseSimplified() *Translations {
    • 设置监控开关和切换prompt的快捷键
 
 4. 开始使用
-   • Ctrl+C 复制文本触发翻译
+   • Ctrl+X 剪切或 Ctrl+C 复制文本触发翻译
    • 程序会自动替换剪贴板内容
    • Ctrl+V 粘贴翻译结果
    • 某些应用可能需要手动粘贴

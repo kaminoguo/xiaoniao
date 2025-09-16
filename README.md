@@ -20,13 +20,19 @@ Windows 剪贴板翻译工具
 - 设置监控开关和切换prompt的快捷键
 
 ### 4. 开始使用
-- Ctrl+C 复制文本触发翻译
+- Ctrl+X 剪切或 Ctrl+C 复制文本触发翻译
 - 程序会自动替换剪贴板内容
 - Ctrl+V 粘贴翻译结果
 
 ## 下载
 
 [xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) - Windows 10/11 (64-bit)
+
+## 更新方法
+
+1. 删除旧版本的 xiaoniao.exe
+2. 下载新版本的 xiaoniao.exe
+3. 配置文件自动保存在电脑，不会丢失
 
 ## 构建
 

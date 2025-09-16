@@ -20,13 +20,19 @@ Windows Clipboard Translation Tool
 - Configure hotkeys for monitoring toggle and prompt switching
 
 ### 4. Start Using
-- Ctrl+C to copy text triggers translation
+- Ctrl+X to cut or Ctrl+C to copy text triggers translation
 - Program auto-replaces clipboard content
 - Ctrl+V to paste translated result
 
 ## Download
 
 [xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) - Windows 10/11 (64-bit)
+
+## How to Update
+
+1. Delete old xiaoniao.exe
+2. Download new xiaoniao.exe
+3. Configuration files are saved automatically, won't be lost
 
 
 ## Build

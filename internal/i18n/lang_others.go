@@ -976,7 +976,7 @@ func getJapanese() *Translations {
    • 監視の切り替えとプロンプト切り替えのホットキーを設定
 
 4. 使用開始
-   • Ctrl+C でテキストをコピーすると翻訳が開始
+   • Ctrl+X で切り取りまたは Ctrl+C でコピーすると翻訳が開始
    • プログラムが自動的にクリップボードの内容を置き換え
    • Ctrl+V で翻訳結果を貼り付け
    • 一部のアプリでは手動での貼り付けが必要
@@ -1470,7 +1470,7 @@ func getKorean() *Translations {
    • 모니터 토글 및 프롬프트 전환 단축키 설정
 
 4. 사용 시작
-   • Ctrl+C로 텍스트 복사 시 번역 시작
+   • Ctrl+X로 잘라내기 또는 Ctrl+C로 복사 시 번역 시작
    • 프로그램이 자동으로 클립보드 내용 교체
    • Ctrl+V로 번역 결과 붙여넣기
    • 일부 앱에서는 수동 붙여넣기 필요
@@ -1967,7 +1967,7 @@ func getSpanish() *Translations {
    • Configure las teclas para alternar monitor y cambiar prompt
 
 4. Comenzar a usar
-   • Ctrl+C para copiar texto activa la traducción
+   • Ctrl+X para cortar o Ctrl+C para copiar texto activa la traducción
    • El programa reemplaza automáticamente el contenido del portapapeles
    • Ctrl+V para pegar el resultado traducido
    • Algunas aplicaciones pueden requerir pegado manual
@@ -2464,7 +2464,7 @@ func getFrench() *Translations {
    • Configurez les raccourcis pour basculer la surveillance et changer de prompt
 
 4. Commencer à utiliser
-   • Ctrl+C pour copier du texte déclenche la traduction
+   • Ctrl+X pour couper ou Ctrl+C pour copier du texte déclenche la traduction
    • Le programme remplace automatiquement le contenu du presse-papiers
    • Ctrl+V pour coller le résultat traduit
    • Certaines applications peuvent nécessiter un collage manuel
