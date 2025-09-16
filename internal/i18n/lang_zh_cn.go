@@ -234,6 +234,8 @@ func getChineseSimplified() *Translations {
 		HelpTTest:        "T 测试",
 		HelpSearchSlash:  "/ 搜索",
 		HelpTranslate:    "Enter: 翻译",
+		HelpCtrlSSaveExit: "Ctrl+S 保存并退出",
+		HelpCtrlSSave:    "Ctrl+S 保存",
 		
 		// Theme descriptions
 		DarkThemeTokyoNight: "暗色主题，灵感来自东京夜景",

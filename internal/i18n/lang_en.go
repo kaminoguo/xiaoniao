@@ -234,6 +234,8 @@ Video Tutorials:
 		HelpTTest:        "T Test",
 		HelpSearchSlash:  "/ Search",
 		HelpTranslate:    "Enter: Translate",
+		HelpCtrlSSaveExit: "Ctrl+S Save & Exit",
+		HelpCtrlSSave:    "Ctrl+S Save",
 		
 		// Theme descriptions
 		DarkThemeTokyoNight: "Dark theme, inspired by Tokyo night",

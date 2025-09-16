@@ -234,6 +234,8 @@ func getChineseTraditional() *Translations {
 		HelpTTest:        "T 測試",
 		HelpSearchSlash:  "/ 搜索",
 		HelpTranslate:    "Enter: 翻譯",
+		HelpCtrlSSaveExit: "Ctrl+S 保存並退出",
+		HelpCtrlSSave:    "Ctrl+S 保存",
 		
 		// Theme descriptions
 		DarkThemeTokyoNight: "暗色主題，靈感來自東京夜景",
@@ -705,6 +707,8 @@ func getJapanese() *Translations {
 		HelpTTest:        "T テスト",
 		HelpSearchSlash:  "/ 検索",
 		HelpTranslate:    "Enter: 翻訳",
+		HelpCtrlSSaveExit: "Ctrl+S 保存して終了",
+		HelpCtrlSSave:    "Ctrl+S 保存",
 		
 		// Theme descriptions
 		DarkThemeTokyoNight: "東京の夜景にインスパイアされたダークテーマ",
@@ -1199,6 +1203,8 @@ func getKorean() *Translations {
 		HelpTTest:        "T 테스트",
 		HelpSearchSlash:  "/ 검색",
 		HelpTranslate:    "Enter: 번역",
+		HelpCtrlSSaveExit: "Ctrl+S 저장 및 종료",
+		HelpCtrlSSave:    "Ctrl+S 저장",
 		
 		// Theme descriptions
 		DarkThemeTokyoNight: "도쿄 야경에서 영감을 받은 다크 테마",
@@ -1693,6 +1699,8 @@ func getSpanish() *Translations {
 		HelpTTest:        "T Probar",
 		HelpSearchSlash:  "/ Buscar",
 		HelpTranslate:    "Enter: Traducir",
+		HelpCtrlSSaveExit: "Ctrl+S Guardar y salir",
+		HelpCtrlSSave:    "Ctrl+S Guardar",
 		
 		// Theme descriptions
 		DarkThemeTokyoNight: "Tema oscuro inspirado en el paisaje nocturno de Tokio",
@@ -2238,6 +2246,8 @@ func getFrench() *Translations {
 		HelpTTest:        "T Tester",
 		HelpSearchSlash:  "/ Rechercher",
 		HelpTranslate:    "Entrée: Traduire",
+		HelpCtrlSSaveExit: "Ctrl+S Enregistrer et quitter",
+		HelpCtrlSSave:    "Ctrl+S Enregistrer",
 		
 		// Theme descriptions
 		DarkThemeTokyoNight: "Thème sombre inspiré du paysage nocturne de Tokyo",

@@ -1172,8 +1172,8 @@ func (m configModel) viewPromptEditScreen() string {
 	s += t.PromptContent + ":\n"
 	s += m.promptContentInput.View() + "\n\n"
 
-	s += helpStyle.Render(fmt.Sprintf("Ctrl+S 保存并退出 | %s | %s",
-		t.HelpTab, t.HelpBack))
+	s += helpStyle.Render(fmt.Sprintf("%s | %s | %s",
+		t.HelpCtrlSSaveExit, t.HelpTab, t.HelpBack))
 
 	return boxStyle.Render(s)
 }
@@ -1760,7 +1760,7 @@ func (m configModel) viewHotkeyScreen() string {
 	s += mutedStyle.Render("• "+t.SingleKey+": F1-F12, A-Z, 0-9") + "\n"
 
 	// 帮助信息
-	s += "\n" + helpStyle.Render("↑↓ "+t.SwitchFunction+" | Enter "+t.Edit+" | Ctrl+S "+t.Save+" | Esc "+t.Back)
+	s += "\n" + helpStyle.Render("↑↓ "+t.SwitchFunction+" | Enter "+t.Edit+" | "+t.HelpCtrlSSave+" | Esc "+t.Back)
 
 	return boxStyle.Render(s)
 }

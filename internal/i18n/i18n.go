@@ -229,6 +229,8 @@ type Translations struct {
 	HelpTTest        string `json:"help_t_test"`
 	HelpSearchSlash  string `json:"help_search_slash"`
 	HelpTranslate    string `json:"help_translate"`
+	HelpCtrlSSaveExit string `json:"help_ctrl_s_save_exit"`
+	HelpCtrlSSave    string `json:"help_ctrl_s_save"`
 	
 	// Theme descriptions
 	DarkThemeTokyoNight string `json:"dark_theme_tokyo_night"`
