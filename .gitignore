@@ -2,6 +2,7 @@
 xiaoniao
 xiaoniao_test
 *.exe
+!release/*.exe
 *.dll
 *.so
 *.dylib
