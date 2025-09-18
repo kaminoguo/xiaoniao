@@ -144,7 +144,7 @@ func parseModifier(s string) (hotkey.Modifier, error) {
 	case "CTRL", "CONTROL":
 		return hotkey.ModCtrl, nil
 	case "ALT", "OPTION":
-		return hotkey.ModAlt, nil
+		return hotkey.ModOption, nil
 	case "SHIFT":
 		return hotkey.ModShift, nil
 	default:
