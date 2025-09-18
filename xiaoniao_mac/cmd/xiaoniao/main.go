@@ -207,7 +207,7 @@ func onClipboardChange(text string) {
 	trayManager.SetStatus(tray.StatusTranslating)
 
 	// Translate
-	result, err := trans.Translate(context.Background(), text, "")
+	result, err := trans.Translate(text, "")
 	if err != nil {
 		log.Printf("翻译失败: %v", err)
 		trayManager.SetStatus(tray.StatusError)
