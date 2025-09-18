@@ -1,0 +1,247 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  GO_VERSION: '1.21'
+  ZIG_VERSION: '0.11.0'
+
+jobs:
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Install Zig
+      run: |
+        wget https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz
+        tar -xf zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz
+        echo "$PWD/zig-linux-x86_64-${{ env.ZIG_VERSION }}" >> $GITHUB_PATH
+
+    - name: Install rsrc for Windows icon
+      run: |
+        go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
+
+    - name: Build Windows amd64
+      working-directory: ./xiaoniao
+      run: |
+        # Generate Windows resource with icon
+        ~/go/bin/goversioninfo -manifest=xiaoniao.exe.manifest -icon=assets/icon.ico versioninfo.json
+
+        # Build with Zig as C compiler
+        CGO_ENABLED=0 \
+        GOOS=windows \
+        GOARCH=amd64 \
+        go build -ldflags="-s -w -H windowsgui -X main.version=${{ github.ref_name }}" \
+        -o ../dist/xiaoniao-windows-amd64.exe \
+        ./cmd/xiaoniao
+
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: xiaoniao-windows-amd64
+        path: dist/xiaoniao-windows-amd64.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Install Zig
+      run: |
+        wget https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz
+        tar -xf zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz
+        echo "$PWD/zig-linux-x86_64-${{ env.ZIG_VERSION }}" >> $GITHUB_PATH
+
+    - name: Build Linux ${{ matrix.arch }}
+      working-directory: ./xiaoniao
+      run: |
+        # Linux doesn't need GUI libraries for xiaoniao (terminal based)
+        CGO_ENABLED=0 \
+        GOOS=linux \
+        GOARCH=${{ matrix.arch }} \
+        go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" \
+        -o ../dist/xiaoniao-linux-${{ matrix.arch }} \
+        ./cmd/xiaoniao
+
+    - name: Upload Linux artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: xiaoniao-linux-${{ matrix.arch }}
+        path: dist/xiaoniao-linux-${{ matrix.arch }}
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Install dependencies
+      working-directory: ./xiaoniao_mac
+      run: |
+        go mod download
+
+    - name: Build macOS ${{ matrix.arch }}
+      working-directory: ./xiaoniao_mac
+      run: |
+        # Build for specific architecture
+        CGO_ENABLED=1 \
+        GOOS=darwin \
+        GOARCH=${{ matrix.arch }} \
+        go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" \
+        -o xiaoniao-mac-${{ matrix.arch }} \
+        ./cmd/xiaoniao
+
+    - name: Create macOS app bundle
+      working-directory: ./xiaoniao_mac
+      run: |
+        APP_DIR="xiaoniao.app"
+        rm -rf "$APP_DIR"
+        mkdir -p "$APP_DIR/Contents/MacOS"
+        mkdir -p "$APP_DIR/Contents/Resources"
+
+        # Copy binary
+        cp xiaoniao-mac-${{ matrix.arch }} "$APP_DIR/Contents/MacOS/xiaoniao"
+        chmod +x "$APP_DIR/Contents/MacOS/xiaoniao"
+
+        # Create Info.plist
+        cat > "$APP_DIR/Contents/Info.plist" << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleExecutable</key>
+            <string>xiaoniao</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.lyrica.xiaoniao</string>
+            <key>CFBundleName</key>
+            <string>小鸟翻译</string>
+            <key>CFBundleDisplayName</key>
+            <string>小鸟翻译</string>
+            <key>CFBundleVersion</key>
+            <string>${{ github.ref_name }}</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${{ github.ref_name }}</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.12</string>
+            <key>LSUIElement</key>
+            <true/>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+            <key>NSAppleEventsUsageDescription</key>
+            <string>小鸟翻译需要控制其他应用程序以实现自动粘贴功能。</string>
+            <key>NSAccessibilityUsageDescription</key>
+            <string>小鸟翻译需要辅助功能权限以监听全局快捷键。</string>
+        </dict>
+        </plist>
+        EOF
+
+        # Create ZIP
+        zip -r xiaoniao-mac-${{ matrix.arch }}.zip xiaoniao.app
+
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: xiaoniao-mac-${{ matrix.arch }}
+        path: xiaoniao_mac/xiaoniao-mac-${{ matrix.arch }}.zip
+
+  release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Prepare release files
+      run: |
+        mkdir -p release
+
+        # Windows
+        cp artifacts/xiaoniao-windows-amd64/xiaoniao-windows-amd64.exe release/
+
+        # Linux
+        cp artifacts/xiaoniao-linux-amd64/xiaoniao-linux-amd64 release/
+        cp artifacts/xiaoniao-linux-arm64/xiaoniao-linux-arm64 release/
+        chmod +x release/xiaoniao-linux-*
+
+        # macOS
+        cp artifacts/xiaoniao-mac-amd64/xiaoniao-mac-amd64.zip release/
+        cp artifacts/xiaoniao-mac-arm64/xiaoniao-mac-arm64.zip release/
+
+        # Create universal macOS binary (optional)
+        # This would require both binaries to be combined using lipo
+
+        # Generate checksums
+        cd release
+        sha256sum * > checksums.txt
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release/*
+        generate_release_notes: true
+        body: |
+          ## 下载说明 / Download Instructions
+
+          ### Windows
+          - `xiaoniao-windows-amd64.exe` - Windows 10/11 (64-bit)
+
+          ### Linux
+          - `xiaoniao-linux-amd64` - Linux x64
+          - `xiaoniao-linux-arm64` - Linux ARM64
+
+          ### macOS
+          - `xiaoniao-mac-amd64.zip` - Intel Mac
+          - `xiaoniao-mac-arm64.zip` - Apple Silicon (M1/M2/M3)
+
+          ### 安装说明 / Installation
+
+          **Windows:**
+          1. 下载 `xiaoniao-windows-amd64.exe`
+          2. 双击运行
+
+          **Linux:**
+          1. 下载对应架构版本
+          2. `chmod +x xiaoniao-linux-*`
+          3. `./xiaoniao-linux-amd64`
+
+          **macOS:**
+          1. 下载对应架构的 .zip 文件
+          2. 解压得到 xiaoniao.app
+          3. 拖动到 Applications 文件夹
+          4. 首次运行右键选择"打开"
+          5. 授予辅助功能权限
+        draft: false
+        prerelease: false

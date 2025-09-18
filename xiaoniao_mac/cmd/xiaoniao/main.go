@@ -1,8 +1,8 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -42,7 +42,7 @@ var (
 	trayManager      *tray.Manager
 	trans            *translator.Translator
 	isMonitoring     = false
-	logBuffer        = logbuffer.New(1000)
+	logBuffer        = logbuffer.GetInstance()
 )
 
 func init() {
@@ -62,7 +62,7 @@ func init() {
 
 	// Initialize i18n
 	if cfg.Language != "" {
-		i18n.SetLanguage(cfg.Language)
+		i18n.SetLanguage(i18n.Language(cfg.Language))
 	}
 }
 
@@ -76,7 +76,16 @@ func run() {
 
 	// Initialize translator
 	if cfg.APIKey != "" && cfg.Provider != "" && cfg.Model != "" {
-		trans = translator.New(cfg.Provider, cfg.APIKey, cfg.Model, cfg.PromptID)
+		config := &translator.Config{
+			APIKey:   cfg.APIKey,
+			Provider: cfg.Provider,
+			Model:    cfg.Model,
+		}
+		var err error
+		trans, err = translator.NewTranslator(config)
+		if err != nil {
+			log.Printf("Failed to create translator: %v", err)
+		}
 	}
 
 	// Initialize tray
@@ -136,7 +145,16 @@ func setupTrayCallbacks() {
 	trayManager.SetOnRefresh(func() {
 		loadConfig()
 		if trans != nil {
-			trans = translator.New(cfg.Provider, cfg.APIKey, cfg.Model, cfg.PromptID)
+			config := &translator.Config{
+			APIKey:   cfg.APIKey,
+			Provider: cfg.Provider,
+			Model:    cfg.Model,
+		}
+		var err error
+		trans, err = translator.NewTranslator(config)
+		if err != nil {
+			log.Printf("Failed to create translator: %v", err)
+		}
 		}
 		log.Println("配置已刷新")
 	})
@@ -145,7 +163,7 @@ func setupTrayCallbacks() {
 		cfg.PromptID = promptID
 		saveConfig()
 		if trans != nil {
-			trans.SetPromptID(promptID)
+			// trans.SetPromptID(promptID) // TODO: Implement prompt ID support
 		}
 		trayManager.SetCurrentPrompt(promptID)
 	})
@@ -189,7 +207,7 @@ func onClipboardChange(text string) {
 	trayManager.SetStatus(tray.StatusTranslating)
 
 	// Translate
-	translated, err := trans.Translate(text)
+	result, err := trans.Translate(context.Background(), text, "")
 	if err != nil {
 		log.Printf("翻译失败: %v", err)
 		trayManager.SetStatus(tray.StatusError)
@@ -198,14 +216,14 @@ func onClipboardChange(text string) {
 	}
 
 	// Set translated text back to clipboard
-	clipboardMonitor.SetLastTranslation(translated)
-	if err := clipboard.SetClipboard(translated); err != nil {
+	clipboardMonitor.SetLastTranslation(result.Translation)
+	if err := clipboard.SetClipboard(result.Translation); err != nil {
 		log.Printf("设置剪贴板失败: %v", err)
 		trayManager.SetStatus(tray.StatusError)
 		return
 	}
 
-	log.Printf("翻译成功: %d 字符", len(translated))
+	log.Printf("翻译成功: %d 字符", len(result.Translation))
 	trayManager.SetStatus(tray.StatusIdle)
 	trayManager.IncrementTranslationCount()
 	sound.PlaySuccess()
