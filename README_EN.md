@@ -1,5 +1,7 @@
 # xiaoniao
 
+![Demo](assets/demo.gif)
+
 [中文](README.md) | [日本語](README_JP.md) | [한국어](README_KR.md)
 
 Windows Clipboard Translation Tool

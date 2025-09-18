@@ -1,5 +1,7 @@
 # xiaoniao
 
+![Demo](assets/demo.gif)
+
 [中文](README.md) | [English](README_EN.md) | [日本語](README_JP.md)
 
 Windows 클립보드 번역 도구

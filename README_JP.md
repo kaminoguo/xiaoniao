@@ -1,5 +1,7 @@
 # xiaoniao
 
+![Demo](assets/demo.gif)
+
 [中文](README.md) | [English](README_EN.md) | [한국어](README_KR.md)
 
 Windows クリップボード翻訳ツール
