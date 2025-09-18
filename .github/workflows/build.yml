@@ -53,41 +53,6 @@ jobs:
         name: xiaoniao-windows-amd64
         path: dist/xiaoniao-windows-amd64.exe
 
-  build-linux:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ env.GO_VERSION }}
-
-    - name: Install Zig
-      run: |
-        wget https://ziglang.org/download/${{ env.ZIG_VERSION }}/zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz
-        tar -xf zig-linux-x86_64-${{ env.ZIG_VERSION }}.tar.xz
-        echo "$PWD/zig-linux-x86_64-${{ env.ZIG_VERSION }}" >> $GITHUB_PATH
-
-    - name: Build Linux ${{ matrix.arch }}
-      run: |
-        # Linux doesn't need GUI libraries for xiaoniao (terminal based)
-        CGO_ENABLED=0 \
-        GOOS=linux \
-        GOARCH=${{ matrix.arch }} \
-        go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" \
-        -o ../dist/xiaoniao-linux-${{ matrix.arch }} \
-        ./cmd/xiaoniao
-
-    - name: Upload Linux artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: xiaoniao-linux-${{ matrix.arch }}
-        path: dist/xiaoniao-linux-${{ matrix.arch }}
-
   build-macos:
     runs-on: macos-latest
     strategy:
@@ -173,7 +138,7 @@ jobs:
         path: xiaoniao_mac/xiaoniao-mac-${{ matrix.arch }}.zip
 
   release:
-    needs: [build-windows, build-linux, build-macos]
+    needs: [build-windows, build-macos]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
