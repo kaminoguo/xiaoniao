@@ -35,7 +35,6 @@ jobs:
         go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
 
     - name: Build Windows amd64
-      working-directory: ./xiaoniao
       run: |
         # Generate Windows resource with icon
         ~/go/bin/goversioninfo -manifest=xiaoniao.exe.manifest -icon=assets/icon.ico versioninfo.json
@@ -74,7 +73,6 @@ jobs:
         echo "$PWD/zig-linux-x86_64-${{ env.ZIG_VERSION }}" >> $GITHUB_PATH
 
     - name: Build Linux ${{ matrix.arch }}
-      working-directory: ./xiaoniao
       run: |
         # Linux doesn't need GUI libraries for xiaoniao (terminal based)
         CGO_ENABLED=0 \
