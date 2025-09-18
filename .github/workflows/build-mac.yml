@@ -1,0 +1,100 @@
+name: Build macOS Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v1.1.0)'
+        required: true
+        default: 'v1.1.0'
+
+jobs:
+  build:
+    name: Build macOS ${{ matrix.arch }}
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            name: intel
+          - arch: arm64
+            name: arm
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Build for macOS ${{ matrix.arch }}
+        working-directory: ./xiaoniao_mac
+        env:
+          CGO_ENABLED: 1
+          GOOS: darwin
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          # Install dependencies
+          go mod download
+
+          # Build
+          go build -ldflags="-s -w -X main.version=${{ github.event.inputs.version || 'v1.1.0' }}" \
+            -o xiaoniao-${{ matrix.name }} \
+            ./cmd/xiaoniao
+
+      - name: Create app bundle
+        working-directory: ./xiaoniao_mac
+        run: |
+          APP_NAME="xiaoniao.app"
+          rm -rf "$APP_NAME"
+          mkdir -p "$APP_NAME/Contents/MacOS"
+          mkdir -p "$APP_NAME/Contents/Resources"
+
+          # Copy binary
+          cp xiaoniao-${{ matrix.name }} "$APP_NAME/Contents/MacOS/xiaoniao"
+          chmod +x "$APP_NAME/Contents/MacOS/xiaoniao"
+
+          # Create Info.plist
+          cat > "$APP_NAME/Contents/Info.plist" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>xiaoniao</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.lyrica.xiaoniao</string>
+              <key>CFBundleName</key>
+              <string>小鸟翻译</string>
+              <key>CFBundleDisplayName</key>
+              <string>小鸟翻译</string>
+              <key>CFBundleVersion</key>
+              <string>${{ github.event.inputs.version || 'v1.1.0' }}</string>
+              <key>CFBundleShortVersionString</key>
+              <string>${{ github.event.inputs.version || 'v1.1.0' }}</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>10.12</string>
+              <key>LSUIElement</key>
+              <true/>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+              <key>NSAppleEventsUsageDescription</key>
+              <string>小鸟翻译需要控制其他应用程序以实现自动粘贴功能。</string>
+              <key>NSAccessibilityUsageDescription</key>
+              <string>小鸟翻译需要辅助功能权限以监听全局快捷键。</string>
+          </dict>
+          </plist>
+          EOF
+
+          # Create ZIP
+          zip -r "xiaoniao-mac-${{ matrix.name }}.zip" "$APP_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xiaoniao-mac-${{ matrix.name }}
+          path: xiaoniao_mac/xiaoniao-mac-${{ matrix.name }}.zip
