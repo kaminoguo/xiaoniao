@@ -4,7 +4,7 @@
 
 [English](README_EN.md) | [日本語](README_JP.md) | [한국어](README_KR.md)
 
-Windows 剪贴板翻译工具
+跨平台剪贴板翻译工具（支持 Windows 和 macOS）
 
 ## 快速上手
 
@@ -28,24 +28,61 @@ Windows 剪贴板翻译工具
 
 ## 下载
 
+### Windows
 [xiaoniao.exe](https://github.com/kaminoguo/xiaoniao/releases/latest) - Windows 10/11 (64-bit)
+
+### macOS
+- [xiaoniao-macos-intel.zip](https://github.com/kaminoguo/xiaoniao/releases/latest) - Intel Mac
+- [xiaoniao-macos-arm.zip](https://github.com/kaminoguo/xiaoniao/releases/latest) - Apple Silicon (M1/M2/M3)
+
+## 安装说明
+
+### Windows
+1. 下载 xiaoniao.exe
+2. 双击运行即可
+
+### macOS
+1. 下载对应架构的版本
+2. 解压 ZIP 文件
+3. 将 xiaoniao.app 拖到应用程序文件夹
+4. 首次运行需要右键选择"打开"
+5. 在系统设置→隐私与安全性→辅助功能中授权（用于快捷键）
 
 ## 更新方法
 
+### Windows
 1. 删除旧版本的 xiaoniao.exe
 2. 下载新版本的 xiaoniao.exe
-3. 配置文件自动保存在电脑，不会丢失
+3. 配置文件自动保存，不会丢失
+
+### macOS
+1. 删除应用程序文件夹中的旧版 xiaoniao.app
+2. 安装新版本
+3. 配置文件保存在 ~/Library/Application Support/xiaoniao/，不会丢失
 
 ## 构建
 
+### Windows
 ```bash
 # 带图标
 go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
 cd cmd/xiaoniao && goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
-cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
+cd ../.. && go build -ldflags="-s -w -H windowsgui" -o xiaoniao.exe ./cmd/xiaoniao
 ```
 
-要求：Go 1.20+, Windows
+### macOS
+```bash
+# Intel Mac
+GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o xiaoniao-darwin-amd64 ./cmd/xiaoniao
+
+# Apple Silicon
+GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o xiaoniao-darwin-arm64 ./cmd/xiaoniao
+
+# 或使用构建脚本
+./build-mac.sh
+```
+
+要求：Go 1.20+
 
 ### 视频教程
 

@@ -1,0 +1,225 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v1.1.0)'
+        required: true
+        default: 'v1.1.0'
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          # Windows builds
+          - os: windows
+            runner: ubuntu-latest
+            goos: windows
+            goarch: amd64
+            binary: xiaoniao.exe
+            build_flags: '-ldflags="-s -w -H windowsgui -X main.version=${{ github.ref_name || github.event.inputs.version }}"'
+
+          # macOS Intel build
+          - os: macos-intel
+            runner: macos-latest
+            goos: darwin
+            goarch: amd64
+            binary: xiaoniao-darwin-amd64
+            build_flags: '-ldflags="-s -w -X main.version=${{ github.ref_name || github.event.inputs.version }}"'
+
+          # macOS Apple Silicon build
+          - os: macos-arm
+            runner: macos-latest
+            goos: darwin
+            goarch: arm64
+            binary: xiaoniao-darwin-arm64
+            build_flags: '-ldflags="-s -w -X main.version=${{ github.ref_name || github.event.inputs.version }}"'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Install rsrc for Windows icon (Windows only)
+        if: matrix.os == 'windows'
+        run: |
+          go install github.com/akavel/rsrc@latest
+          rsrc -ico assets/icon.ico -o cmd/xiaoniao/resource.syso
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 1
+        run: |
+          go build ${{ matrix.build_flags }} -o dist/${{ matrix.binary }} ./cmd/xiaoniao
+
+      - name: Create macOS app bundle (macOS only)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          APP_NAME="xiaoniao.app"
+          APP_DIR="dist/$APP_NAME"
+          mkdir -p "$APP_DIR/Contents/MacOS"
+          mkdir -p "$APP_DIR/Contents/Resources"
+
+          # Move binary to app bundle
+          mv dist/${{ matrix.binary }} "$APP_DIR/Contents/MacOS/xiaoniao"
+          chmod +x "$APP_DIR/Contents/MacOS/xiaoniao"
+
+          # Create Info.plist
+          cat > "$APP_DIR/Contents/Info.plist" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleExecutable</key>
+            <string>xiaoniao</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.lyrica.xiaoniao</string>
+            <key>CFBundleName</key>
+            <string>小鸟翻译</string>
+            <key>CFBundleDisplayName</key>
+            <string>小鸟翻译</string>
+            <key>CFBundleVersion</key>
+            <string>${{ github.ref_name || github.event.inputs.version }}</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${{ github.ref_name || github.event.inputs.version }}</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.12</string>
+            <key>LSUIElement</key>
+            <true/>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          # Copy icon if exists
+          if [ -f "assets/icon.icns" ]; then
+            cp assets/icon.icns "$APP_DIR/Contents/Resources/"
+          fi
+
+          # Create ZIP archive
+          cd dist
+          zip -r "xiaoniao-${{ matrix.os }}.zip" "$APP_NAME"
+          cd ..
+
+      - name: Create ZIP archive (Windows only)
+        if: matrix.os == 'windows'
+        run: |
+          cd dist
+          zip xiaoniao-windows.zip xiaoniao.exe
+          cd ..
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: xiaoniao-${{ matrix.os }}
+          path: |
+            dist/*.exe
+            dist/*.zip
+            dist/xiaoniao-darwin-*
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## 小鸟翻译 ${{ github.ref_name }}
+
+            ### 下载
+            - **Windows**: xiaoniao-windows.zip
+            - **macOS Intel**: xiaoniao-macos-intel.zip
+            - **macOS Apple Silicon**: xiaoniao-macos-arm.zip
+
+            ### 安装说明
+
+            #### Windows
+            1. 下载并解压 xiaoniao-windows.zip
+            2. 运行 xiaoniao.exe
+
+            #### macOS
+            1. 下载对应架构的版本（Intel或Apple Silicon）
+            2. 解压 ZIP 文件
+            3. 将 xiaoniao.app 拖到应用程序文件夹
+            4. 首次运行需要右键点击选择"打开"
+            5. 在系统设置中授予辅助功能权限（用于快捷键）
+
+            ### 更新内容
+            - 新增 macOS 支持
+            - 优化跨平台兼容性
+            - 改进系统托盘图标
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const release = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: context.ref.replace('refs/tags/', '')
+            });
+
+            const artifactsDir = 'artifacts';
+            const files = [
+              'xiaoniao-windows/xiaoniao-windows.zip',
+              'xiaoniao-macos-intel/xiaoniao-macos-intel.zip',
+              'xiaoniao-macos-arm/xiaoniao-macos-arm.zip'
+            ];
+
+            for (const file of files) {
+              const filePath = path.join(artifactsDir, file);
+              if (fs.existsSync(filePath)) {
+                const data = fs.readFileSync(filePath);
+                const fileName = path.basename(file);
+                await github.rest.repos.uploadReleaseAsset({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: release.data.id,
+                  name: fileName,
+                  data: data
+                });
+              }
+            }

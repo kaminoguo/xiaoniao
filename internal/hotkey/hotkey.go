@@ -1,5 +1,5 @@
-//go:build !windows
-// +build !windows
+//go:build !windows && !darwin
+// +build !windows,!darwin
 
 // Package hotkey provides hotkey registration functionality
 // This is a stub implementation for non-Windows platforms

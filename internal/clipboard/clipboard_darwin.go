@@ -1,22 +1,24 @@
-//go:build !windows && !darwin
-// +build !windows,!darwin
+//go:build darwin
+// +build darwin
 
-// Package clipboard provides clipboard monitoring functionality
-// This is a stub implementation for non-Windows platforms
+// Package clipboard provides clipboard monitoring functionality for macOS
 package clipboard
 
 import (
-	"runtime"
+	"fmt"
+	"os/exec"
+	"strings"
 	"time"
 )
 
-// Monitor represents a clipboard monitor
+// Monitor represents a clipboard monitor for macOS
 type Monitor struct {
-	running        bool
-	onChange       func(string)
-	lastText       string
+	running         bool
+	onChange        func(string)
+	lastText        string
 	lastTranslation string
-	stopChan       chan bool
+	stopChan        chan bool
+	lastChangeCount int
 }
 
 // NewMonitor creates a new clipboard monitor
@@ -37,19 +39,28 @@ func (m *Monitor) Start() {
 		return
 	}
 	m.running = true
-	
+
 	go func() {
 		ticker := time.NewTicker(500 * time.Millisecond)
 		defer ticker.Stop()
-		
+
 		for {
 			select {
 			case <-m.stopChan:
 				return
 			case <-ticker.C:
-				// On non-Windows platforms, just continue without actual monitoring
-				// This is a stub implementation
-				continue
+				text, err := GetClipboard()
+				if err != nil {
+					continue
+				}
+
+				// Check if clipboard content has changed
+				if text != "" && text != m.lastText && text != m.lastTranslation {
+					m.lastText = text
+					if m.onChange != nil {
+						m.onChange(text)
+					}
+				}
 			}
 		}
 	}()
@@ -72,17 +83,22 @@ func (m *Monitor) SetLastTranslation(text string) {
 	m.lastTranslation = text
 }
 
-// GetClipboard returns the current clipboard content (stub)
+// GetClipboard returns the current clipboard content using pbpaste
 func GetClipboard() (string, error) {
-	return "", nil
+	cmd := exec.Command("pbpaste")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get clipboard: %v", err)
+	}
+	return string(output), nil
 }
 
-// SetClipboard sets the clipboard content (stub)
+// SetClipboard sets the clipboard content using pbcopy
 func SetClipboard(text string) error {
-	// Print to console since we can't actually set clipboard on non-Windows
-	if runtime.GOOS != "windows" {
-		// This is a stub - actual implementation would depend on the platform
-		return nil
+	cmd := exec.Command("pbcopy")
+	cmd.Stdin = strings.NewReader(text)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to set clipboard: %v", err)
 	}
 	return nil
 }
