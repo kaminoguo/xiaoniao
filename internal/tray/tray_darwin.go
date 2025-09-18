@@ -304,6 +304,8 @@ func (m *Manager) IsReady() bool {
 }
 
 // Placeholder icon data (will be replaced with actual icons)
+var iconDefaultData = []byte{0x00} // Minimal placeholder icon
+
 var (
 	iconBlueData  = iconDefaultData // Use default icon for now
 	iconGreenData = iconDefaultData

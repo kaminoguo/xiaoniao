@@ -57,8 +57,8 @@ func (m *Manager) RegisterFromString(name, hotkeyStr string, callback func()) er
 	hk := hotkey.New(mods, key)
 
 	// Register the hotkey on the main thread
-	err = mainthread.Call(func() error {
-		return hk.Register()
+	mainthread.Call(func() {
+		err = hk.Register()
 	})
 
 	if err != nil {
@@ -90,8 +90,9 @@ func (m *Manager) Unregister(name string) error {
 		return fmt.Errorf("hotkey %s not found", name)
 	}
 
-	err := mainthread.Call(func() error {
-		return hk.Unregister()
+	var err error
+	mainthread.Call(func() {
+		err = hk.Unregister()
 	})
 
 	if err != nil {
@@ -110,8 +111,8 @@ func (m *Manager) Stop() {
 	defer m.mu.Unlock()
 
 	for name, hk := range m.registeredHotkeys {
-		mainthread.Call(func() error {
-			return hk.Unregister()
+		mainthread.Call(func() {
+			hk.Unregister()
 		})
 		delete(m.registeredHotkeys, name)
 		delete(m.callbacks, name)
@@ -157,7 +158,7 @@ func parseModifier(s string) (hotkey.Modifier, error) {
 	case "CTRL", "CONTROL":
 		return hotkey.ModCtrl, nil
 	case "ALT", "OPTION":
-		return hotkey.ModAlt, nil
+		return hotkey.Mod2, nil // Alt/Option on macOS
 	case "SHIFT":
 		return hotkey.ModShift, nil
 	case "CMD", "COMMAND", "SUPER", "WIN", "WINDOWS":
