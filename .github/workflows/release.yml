@@ -37,7 +37,6 @@ jobs:
         shell: bash
         run: |
           prev="${{ env.prev_tag }}"
-          # decode commit message safely
           msg=$(echo "${{ env.commit_msg }}" | base64 -d)
 
           if [[ -z "$prev" || "$prev" == "" ]]; then
@@ -119,29 +118,40 @@ jobs:
           go env
           go mod download
 
+      # Windows 构建前生成版本信息和图标
+      - name: Install goversioninfo
+        if: matrix.goos == 'windows'
+        run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
+
+      - name: Generate Windows version info and icon
+        if: matrix.goos == 'windows'
+        run: |
+          cd cmd/xiaoniao
+          goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
+          cd ../..
+
       - name: Build binary
         shell: bash
         run: |
           mkdir -p dist
-          ENTRY_FILES="./main.go ./imageutil.go ./render.go"
 
-          for f in $ENTRY_FILES; do
-            if [ ! -f "$f" ]; then
-              echo "ERROR: $f not found"
-              exit 1
+          OUTPUT_FILE="dist/${APP_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+              go build -ldflags="-s -w" \
+              -o "$OUTPUT_FILE" ./cmd/xiaoniao
+          else
+            ldflags="${COMMON_LDFLAGS}"
+            if [ "${{ matrix.goos }}" = "linux" ]; then
+              ldflags="$ldflags -extldflags \"-static\""
             fi
-          done
 
-          ldflags="${COMMON_LDFLAGS}"
-          if [ "${{ matrix.goos }}" = "linux" ]; then
-            ldflags="$ldflags -extldflags \"-static\""
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+              go build -trimpath -tags "${BUILD_TAGS}" \
+              -ldflags "$ldflags" \
+              -o "$OUTPUT_FILE" ./cmd/xiaoniao
           fi
-
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-            go build -trimpath -tags "${BUILD_TAGS}" \
-            -ldflags "$ldflags" \
-            -o "dist/${APP_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext}}" \
-            $ENTRY_FILES
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
