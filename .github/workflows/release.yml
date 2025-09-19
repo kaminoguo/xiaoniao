@@ -1,0 +1,199 @@
+name: Build and Release Go Binaries
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  get_version:
+    runs-on: ubuntu-latest
+    outputs:
+      next_tag: ${{ steps.calc.outputs.next_tag }}
+      release_notes: ${{ steps.notes.outputs.release_notes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch tags
+        run: git fetch --tags
+
+      - name: Get previous tag
+        id: prev
+        run: |
+          prev=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "prev_tag=$prev" >> $GITHUB_ENV
+
+      - name: Read latest commit message safely (base64 encoded)
+        id: msg
+        run: |
+          msg="$(git log -1 --pretty=%B | base64 -w0)"
+          echo "commit_msg=$msg" >> $GITHUB_ENV
+
+      - name: Calculate next version
+        id: calc
+        shell: bash
+        run: |
+          prev="${{ env.prev_tag }}"
+          # decode commit message safely
+          msg=$(echo "${{ env.commit_msg }}" | base64 -d)
+
+          if [[ -z "$prev" || "$prev" == "" ]]; then
+            next="v0.1.0"
+          elif [[ "$prev" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            major=${BASH_REMATCH[1]}
+            minor=${BASH_REMATCH[2]}
+            patch=${BASH_REMATCH[3]}
+
+            if grep -qi "BREAKING CHANGE:" <<< "$msg"; then
+              major=$((major+1))
+              minor=0
+              patch=0
+            elif grep -qi "^feat:" <<< "$msg"; then
+              minor=$((minor+1))
+              patch=0
+            else
+              patch=$((patch+1))
+            fi
+
+            next="v$major.$minor.$patch"
+          else
+            echo "Invalid previous tag format: $prev"
+            exit 1
+          fi
+
+          echo "next_tag=$next" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes (base64 encoded)
+        id: notes
+        shell: bash
+        run: |
+          if [[ -z "${{ env.prev_tag }}" || "${{ env.prev_tag }}" == "" ]]; then
+            range="$(git rev-list --max-parents=0 HEAD)..HEAD"
+          else
+            range="${{ env.prev_tag }}..HEAD"
+          fi
+          notes="$(git log $range --pretty=format:'- %s (%an)' | base64 -w0)"
+          echo "release_notes=$notes" >> $GITHUB_ENV
+
+  build:
+    needs: get_version
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ""
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: ".exe"
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ""
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ""
+    runs-on: ${{ matrix.os }}
+    env:
+      APP_NAME: xiaoniao
+      CGO_ENABLED: "0"
+      BUILD_TAGS: "netgo osusergo"
+      COMMON_LDFLAGS: "-s -w -buildid="
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Go env & deps
+        run: |
+          go env
+          go mod download
+
+      - name: Build binary
+        shell: bash
+        run: |
+          mkdir -p dist
+          ENTRY_FILES="./main.go ./imageutil.go ./render.go"
+
+          for f in $ENTRY_FILES; do
+            if [ ! -f "$f" ]; then
+              echo "ERROR: $f not found"
+              exit 1
+            fi
+          done
+
+          ldflags="${COMMON_LDFLAGS}"
+          if [ "${{ matrix.goos }}" = "linux" ]; then
+            ldflags="$ldflags -extldflags \"-static\""
+          fi
+
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+            go build -trimpath -tags "${BUILD_TAGS}" \
+            -ldflags "$ldflags" \
+            -o "dist/${APP_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext}}" \
+            $ENTRY_FILES
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+
+  release:
+    needs: [get_version, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-linux-amd64
+          path: dist
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-windows-amd64
+          path: dist
+
+      - name: Download macOS amd64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-darwin-amd64
+          path: dist
+
+      - name: Download macOS arm64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-darwin-arm64
+          path: dist
+
+      - name: Decode release notes
+        id: decode_notes
+        run: |
+          decoded="$(echo "${{ env.release_notes }}" | base64 -d)"
+          {
+            echo 'body<<EOF'
+            echo "$decoded"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.get_version.outputs.next_tag }}
+          name: Release ${{ needs.get_version.outputs.next_tag }}
+          body: ${{ steps.decode_notes.outputs.body }}
+          files: dist/*
+        env:
+          # 必须使用有 repo 权限的 token
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
