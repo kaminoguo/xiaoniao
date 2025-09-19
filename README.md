@@ -1,5 +1,7 @@
 # xiaoniao
 
+![Demo](assets/demo.gif)
+
 [English](README_EN.md) | [日本語](README_JP.md) | [한국어](README_KR.md)
 
 Windows 剪贴板翻译工具

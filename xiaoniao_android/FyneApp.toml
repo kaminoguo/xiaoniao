@@ -1,0 +1,17 @@
+[Details]
+Icon = "assets/icons/icon.png"
+Name = "xiaoniao"
+ID = "com.liliguo.xiaoniao"
+Version = "1.0.0"
+Build = 1
+
+[Android]
+MinSDK = 21
+TargetSDK = 34
+Permissions = [
+    "android.permission.INTERNET",
+    "android.permission.BIND_ACCESSIBILITY_SERVICE",
+    "android.permission.SYSTEM_ALERT_WINDOW",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.POST_NOTIFICATIONS"
+]
