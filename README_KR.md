@@ -1,5 +1,9 @@
 # xiaoniao
 
+[![GitHub Actions Workflow Status](https://github.com/kaminoguo/xiaoniao/actions/workflows/release.yml/badge.svg)](https://github.com/kaminoguo/xiaoniao/blob/main/.github/workflows/release.yml)
+[![GitHub last commit](https://img.shields.io/github/last-commit/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/commits/main/)
+[![GitHub License](https://img.shields.io/github/license/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/blob/main/LICENSE)
+
 ![Demo](assets/demo.gif)
 
 [中文](README.md) | [English](README_EN.md) | [日本語](README_JP.md)
@@ -9,19 +13,23 @@ Windows 클립보드 번역 도구
 ## 빠른 시작
 
 ### 1. API 키 설정
+
 - 메인 메뉴에서 "API 설정" 선택
 - API 키 입력 (OpenAI, Anthropic 등)
 - 시스템이 자동으로 제공업체 식별
 
 ### 2. 모델 선택
+
 - API 설정 후 "모델 선택" 선택
 - 목록에서 적합한 AI 모델 선택
 
 ### 3. 단축키 설정 (선택사항)
+
 - 메인 메뉴에서 "단축키 설정" 선택
 - 모니터링 토글 및 프롬프트 전환 단축키 설정
 
 ### 4. 사용 시작
+
 - Ctrl+X로 잘라내기 또는 Ctrl+C로 복사하여 번역 시작
 - 프로그램이 자동으로 클립보드 내용 교체
 - Ctrl+V로 번역 결과 붙여넣기
@@ -35,7 +43,6 @@ Windows 클립보드 번역 도구
 1. 기존 xiaoniao.exe 삭제
 2. 새 xiaoniao.exe 다운로드
 3. 설정 파일은 자동 저장되어 손실되지 않음
-
 
 ## 빌드
 
