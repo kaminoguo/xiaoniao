@@ -9,97 +9,22 @@ jobs:
   get_version:
     runs-on: ubuntu-latest
     outputs:
-      next_tag: ${{ steps.calc.outputs.next_tag }}
-      release_notes: ${{ steps.notes.outputs.release_notes }}
+      release_tag: ${{ steps.read_ver.outputs.release_tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Fetch tags
-        run: git fetch --tags
-
-      - name: Get previous tag
-        id: prev
-        run: |
-          prev=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          echo "prev_tag=$prev" >> $GITHUB_ENV
-
-      - name: Read latest commit message safely (base64 encoded)
-        id: msg
-        run: |
-          msg="$(git log -1 --pretty=%B | base64 -w0)"
-          echo "commit_msg=$msg" >> $GITHUB_ENV
-
-      - name: Calculate next version
-        id: calc
+      - name: Read versioninfo.json
+        id: read_ver
         shell: bash
         run: |
-          prev="${{ env.prev_tag }}"
-          msg=$(echo "${{ env.commit_msg }}" | base64 -d)
-
-          if [[ -z "$prev" || "$prev" == "" ]]; then
-            next="v0.1.0"
-          elif [[ "$prev" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            major=${BASH_REMATCH[1]}
-            minor=${BASH_REMATCH[2]}
-            patch=${BASH_REMATCH[3]}
-
-            if grep -qi "BREAKING CHANGE:" <<< "$msg"; then
-              major=$((major+1))
-              minor=0
-              patch=0
-            elif grep -qi "^feat:" <<< "$msg"; then
-              minor=$((minor+1))
-              patch=0
-            else
-              patch=$((patch+1))
-            fi
-
-            next="v$major.$minor.$patch"
-          else
-            echo "Invalid previous tag format: $prev"
-            exit 1
-          fi
-
-          echo "next_tag=$next" >> "$GITHUB_OUTPUT"
-
-      - name: Generate release notes (base64 encoded)
-        id: notes
-        shell: bash
-        run: |
-          if [[ -z "${{ env.prev_tag }}" || "${{ env.prev_tag }}" == "" ]]; then
-            range="$(git rev-list --max-parents=0 HEAD)..HEAD"
-          else
-            range="${{ env.prev_tag }}..HEAD"
-          fi
-          notes="$(git log $range --pretty=format:'- %s (%an)' | base64 -w0)"
-          echo "release_notes=$notes" >> $GITHUB_ENV
+          version=$(jq -r '.FixedFileInfo.FileVersion | "\(.Major).\(.Minor).\(.Patch).\(.Build)"' versioninfo.json)
+          echo "Release version from versioninfo.json: $version"
+          echo "release_tag=v$version" >> "$GITHUB_OUTPUT"
 
   build:
     needs: get_version
-    strategy:
-      matrix:
-        include:
-          # 如需启用其他平台，取消下面的注释
-          # - os: ubuntu-latest
-          #   goos: linux
-          #   goarch: amd64
-          #   ext: ""
-          - os: windows-latest
-            goos: windows
-            goarch: amd64
-            ext: ".exe"
-          # - os: macos-latest
-          #   goos: darwin
-          #   goarch: amd64
-          #   ext: ""
-          # - os: macos-latest
-          #   goos: darwin
-          #   goarch: arm64
-          #   ext: ""
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     env:
       APP_NAME: xiaoniao
       CGO_ENABLED: "0"
@@ -119,17 +44,11 @@ jobs:
           go env
           go mod download
 
-      # Windows 构建前生成版本信息和图标
       - name: Install goversioninfo
-        if: matrix.goos == 'windows'
         run: go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
 
       - name: Generate Windows version info and icon
-        if: matrix.goos == 'windows'
         run: |
-          echo "Current workspace: ${{ github.workspace }}"
-          ls -R ${{ github.workspace }}
-
           goversioninfo `
             -o "${{ github.workspace }}/cmd/xiaoniao/versioninfo.syso" `
             -manifest="${{ github.workspace }}/xiaoniao.exe.manifest" `
@@ -140,64 +59,41 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
+          OUTPUT_FILE="dist/${APP_NAME}-windows-amd64.exe"
 
-          OUTPUT_FILE="dist/${APP_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
-
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-              go build -ldflags="-s -w" \
-              -o "$OUTPUT_FILE" ./cmd/xiaoniao
-          else
-            ldflags="${COMMON_LDFLAGS}"
-            if [ "${{ matrix.goos }}" = "linux" ]; then
-              ldflags="$ldflags -extldflags \"-static\""
-            fi
-
-            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-              go build -trimpath -tags "${BUILD_TAGS}" \
-              -ldflags "$ldflags" \
-              -o "$OUTPUT_FILE" ./cmd/xiaoniao
-          fi
+          GOOS=windows GOARCH=amd64 \
+            go build -trimpath -tags "${BUILD_TAGS}" \
+            -ldflags "${COMMON_LDFLAGS}" \
+            -o "$OUTPUT_FILE" ./cmd/xiaoniao
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: binaries-windows-amd64
           path: dist/*
 
   release:
-    needs: [get_version, build]
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Debug start
-        run: echo "Starting release job..."
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # 关键改动：动态下载所有已上传的 artifact
+      # 下载所有已上传的 artifact
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
 
       - name: Debug downloaded files
-        run: ls -R dist
-
-      - name: Decode release notes
-        id: decode_notes
-        run: |
-          decoded="$(echo "${{ needs.get_version.outputs.release_notes }}" | base64 -d)"
-          {
-            echo 'body<<EOF'
-            echo "$decoded"
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
+        run: ls -l dist
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.get_version.outputs.next_tag }}
-          name: Release ${{ needs.get_version.outputs.next_tag }}
-          body: ${{ steps.decode_notes.outputs.body }}
+          tag_name: ${{ needs.get_version.outputs.release_tag }}
+          name: Release ${{ needs.get_version.outputs.release_tag }}
+          body: "Windows xiaoniao binary release"
           files: dist/*
         env:
-          # 必须使用有 repo 权限的 token
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
