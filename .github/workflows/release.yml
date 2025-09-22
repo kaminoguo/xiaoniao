@@ -82,22 +82,23 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-            ext: ""
+          # 如需启用其他平台，取消下面的注释
+          # - os: ubuntu-latest
+          #   goos: linux
+          #   goarch: amd64
+          #   ext: ""
           - os: windows-latest
             goos: windows
             goarch: amd64
             ext: ".exe"
-          - os: macos-latest
-            goos: darwin
-            goarch: amd64
-            ext: ""
-          - os: macos-latest
-            goos: darwin
-            goarch: arm64
-            ext: ""
+          # - os: macos-latest
+          #   goos: darwin
+          #   goarch: amd64
+          #   ext: ""
+          # - os: macos-latest
+          #   goos: darwin
+          #   goarch: arm64
+          #   ext: ""
     runs-on: ${{ matrix.os }}
     env:
       APP_NAME: xiaoniao
@@ -126,7 +127,7 @@ jobs:
       - name: Generate Windows version info and icon
         if: matrix.goos == 'windows'
         run: |
-          echo "Workspace: ${{ github.workspace }}"
+          echo "Current workspace: ${{ github.workspace }}"
           ls -R ${{ github.workspace }}
 
           goversioninfo `
@@ -139,6 +140,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
+
           OUTPUT_FILE="dist/${APP_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
 
           if [ "${{ matrix.goos }}" = "windows" ]; then
@@ -167,48 +169,29 @@ jobs:
     needs: [get_version, build]
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare release folder
-        run: mkdir -p dist
+      - name: Debug start
+        run: echo "Starting release job..."
 
-      # 下载四个平台的产物
-      - name: Download Linux artifact
+      # 关键改动：动态下载所有已上传的 artifact
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: binaries-linux-amd64
           path: dist
 
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries-windows-amd64
-          path: dist
-
-      - name: Download macOS amd64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries-darwin-amd64
-          path: dist
-
-      - name: Download macOS arm64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries-darwin-arm64
-          path: dist
-
-      - name: Debug all release files
-        run: ls -lh dist
+      - name: Debug downloaded files
+        run: ls -R dist
 
       - name: Decode release notes
         id: decode_notes
         run: |
-          decoded="$(echo "${{ env.release_notes }}" | base64 -d)"
+          decoded="$(echo "${{ needs.get_version.outputs.release_notes }}" | base64 -d)"
           {
             echo 'body<<EOF'
             echo "$decoded"
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.get_version.outputs.next_tag }}
@@ -216,4 +199,5 @@ jobs:
           body: ${{ steps.decode_notes.outputs.body }}
           files: dist/*
         env:
+          # 必须使用有 repo 权限的 token
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
