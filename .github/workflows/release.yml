@@ -9,7 +9,7 @@ jobs:
   get_version:
     runs-on: ubuntu-latest
     outputs:
-      file_version_tag: ${{ steps.read_version.outputs.file_version_tag }}
+      next_tag: ${{ steps.read_version.outputs.next_tag }}
       release_notes: ${{ steps.notes.outputs.release_notes }}
     steps:
       - name: Checkout
@@ -20,11 +20,11 @@ jobs:
       - name: Fetch tags
         run: git fetch --tags
 
-      - name: Read versioninfo.json
+      - name: Read version from versioninfo.json
         id: read_version
         run: |
           version=$(jq -r '.FixedFileInfo.FileVersion | "\(.Major).\(.Minor).\(.Patch).\(.Build)"' versioninfo.json)
-          echo "file_version_tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "next_tag=v$version" >> "$GITHUB_OUTPUT"
 
       - name: Read latest commit message safely (base64 encoded)
         id: msg
@@ -36,7 +36,12 @@ jobs:
         id: notes
         shell: bash
         run: |
-          range="$(git rev-list --max-parents=0 HEAD)..HEAD"
+          prev_tag="${{ needs.get_version.outputs.next_tag }}"
+          if [[ -z "$prev_tag" ]]; then
+            range="$(git rev-list --max-parents=0 HEAD)..HEAD"
+          else
+            range="$prev_tag..HEAD"
+          fi
           notes="$(git log $range --pretty=format:'- %s (%an)' | base64 -w0)"
           echo "release_notes=$notes" >> $GITHUB_ENV
 
@@ -76,20 +81,21 @@ jobs:
       - name: Generate Windows version info and icon
         if: matrix.goos == 'windows'
         run: |
-          goversioninfo \
-            -o "${{ github.workspace }}/cmd/xiaoniao/versioninfo.syso" \
-            -manifest="${{ github.workspace }}/xiaoniao.exe.manifest" \
-            -icon="${{ github.workspace }}/assets/icon.ico" \
+          goversioninfo `
+            -o "${{ github.workspace }}/cmd/xiaoniao/versioninfo.syso" `
+            -manifest="${{ github.workspace }}/xiaoniao.exe.manifest" `
+            -icon="${{ github.workspace }}/assets/icon.ico" `
             "${{ github.workspace }}/versioninfo.json"
 
       - name: Build binary
         shell: bash
         run: |
           mkdir -p dist
+
           OUTPUT_FILE="dist/${APP_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-            go build -trimpath -tags "${BUILD_TAGS}" \
-            -ldflags "${COMMON_LDFLAGS}" \
+            go build -ldflags="-s -w" \
             -o "$OUTPUT_FILE" ./cmd/xiaoniao
 
       - name: Upload artifact
@@ -102,10 +108,16 @@ jobs:
     needs: [get_version, build]
     runs-on: ubuntu-latest
     steps:
+      - name: Debug start
+        run: echo "Starting release job..."
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
+
+      - name: Debug downloaded files
+        run: ls -R dist
 
       - name: Decode release notes
         id: decode_notes
@@ -120,8 +132,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.get_version.outputs.file_version_tag }}
-          name: Release ${{ needs.get_version.outputs.file_version_tag }}
+          tag_name: ${{ needs.get_version.outputs.next_tag }}
+          name: Release ${{ needs.get_version.outputs.next_tag }}
           body: ${{ steps.decode_notes.outputs.body }}
           files: dist/*
         env:
