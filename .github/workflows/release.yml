@@ -82,6 +82,7 @@ jobs:
     strategy:
       matrix:
         include:
+          # Linux 构建示例，如需启用取消注释
           # - os: ubuntu-latest
           #   goos: linux
           #   goarch: amd64
@@ -126,9 +127,14 @@ jobs:
       - name: Generate Windows version info and icon
         if: matrix.goos == 'windows'
         run: |
-          cd ./cmd/xiaoniao
-          goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
-          cd ../..
+          echo "Current workspace: ${{ github.workspace }}"
+          ls -R ${{ github.workspace }}
+
+          goversioninfo `
+            -o "${{ github.workspace }}/cmd/xiaoniao/versioninfo.syso" `
+            -manifest="${{ github.workspace }}/xiaoniao.exe.manifest" `
+            -icon="${{ github.workspace }}/assets/icon.ico" `
+            "${{ github.workspace }}/versioninfo.json"
 
       - name: Build binary
         shell: bash
@@ -163,6 +169,10 @@ jobs:
     needs: [get_version, build]
     runs-on: ubuntu-latest
     steps:
+      # 调试所有文件是否存在
+      - name: Debug downloaded files
+        run: ls -R
+
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
