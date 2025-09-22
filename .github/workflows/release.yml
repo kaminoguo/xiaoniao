@@ -82,23 +82,22 @@ jobs:
     strategy:
       matrix:
         include:
-          # Linux 构建示例，如需启用取消注释
-          # - os: ubuntu-latest
-          #   goos: linux
-          #   goarch: amd64
-          #   ext: ""
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ""
           - os: windows-latest
             goos: windows
             goarch: amd64
             ext: ".exe"
-          # - os: macos-latest
-          #   goos: darwin
-          #   goarch: amd64
-          #   ext: ""
-          # - os: macos-latest
-          #   goos: darwin
-          #   goarch: arm64
-          #   ext: ""
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ""
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ""
     runs-on: ${{ matrix.os }}
     env:
       APP_NAME: xiaoniao
@@ -127,7 +126,7 @@ jobs:
       - name: Generate Windows version info and icon
         if: matrix.goos == 'windows'
         run: |
-          echo "Current workspace: ${{ github.workspace }}"
+          echo "Workspace: ${{ github.workspace }}"
           ls -R ${{ github.workspace }}
 
           goversioninfo `
@@ -140,7 +139,6 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
-
           OUTPUT_FILE="dist/${APP_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
 
           if [ "${{ matrix.goos }}" = "windows" ]; then
@@ -169,10 +167,10 @@ jobs:
     needs: [get_version, build]
     runs-on: ubuntu-latest
     steps:
-      # 调试所有文件是否存在
-      - name: Debug downloaded files
-        run: ls -R
+      - name: Prepare release folder
+        run: mkdir -p dist
 
+      # 下载四个平台的产物
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
@@ -197,6 +195,9 @@ jobs:
           name: binaries-darwin-arm64
           path: dist
 
+      - name: Debug all release files
+        run: ls -lh dist
+
       - name: Decode release notes
         id: decode_notes
         run: |
@@ -207,7 +208,7 @@ jobs:
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.get_version.outputs.next_tag }}
@@ -215,5 +216,4 @@ jobs:
           body: ${{ steps.decode_notes.outputs.body }}
           files: dist/*
         env:
-          # 必须使用有 repo 权限的 token
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
