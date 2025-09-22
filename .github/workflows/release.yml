@@ -126,7 +126,7 @@ jobs:
       - name: Generate Windows version info and icon
         if: matrix.goos == 'windows'
         run: |
-          cd cmd/xiaoniao
+          cd ./cmd/xiaoniao
           goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
           cd ../..
 
