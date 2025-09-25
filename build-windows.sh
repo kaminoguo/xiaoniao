@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 BUILD_DATE=$(date +%Y%m%d)
 
 echo "========================================="

@@ -1,10 +1,13 @@
 package translator
 
 import (
+	"sort"
 	"strings"
 )
 
-// Provider模型定义 - 2025年8月最新
+// Provider模型定义 - 这里只保留作为后备/示例
+// 实际应该通过各provider的API实时获取模型列表
+// 注意：这些列表可能已过时，仅作参考
 var ProviderModels = map[string][]string{
 	"OpenAI": {
 		// GPT-5 系列 (2025年8月发布)
@@ -375,5 +378,7 @@ func GetSupportedProviders() []string {
 	for provider := range ProviderModels {
 		providers = append(providers, provider)
 	}
+	// 排序以确保顺序一致
+	sort.Strings(providers)
 	return providers
 }

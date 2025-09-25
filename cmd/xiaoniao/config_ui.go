@@ -18,7 +18,7 @@ import (
 )
 
 // 版本号定义
-const APP_VERSION = "v1.0"
+const APP_VERSION = "v1.1.0"
 
 var (
 	// 修复颜色问题 - 使用高对比度配色
@@ -139,6 +139,8 @@ type configModel struct {
 	selectedTheme      int             // 选中的主题索引
 	modelsLoaded       bool            // 模型是否已加载
 	changingAPIKey     bool            // 是否正在更改API密钥
+	providerCursor     int             // Provider选择的光标位置
+	selectingProvider  bool            // 是否在选择Provider
 
 	// 新的快捷键输入状态
 	hotkeyInputs    []textinput.Model // 快捷键输入框数组
@@ -276,6 +278,8 @@ func initialModel() configModel {
 		selectedPrompt:     getPromptIndex(config.PromptID),
 		config:             &config,
 		promptMode:         "select",
+		providerCursor:     0,
+		selectingProvider:  config.Provider == "",  // 如果Provider为空，默认显示选择界面
 	}
 }
 
@@ -467,20 +471,26 @@ func (m configModel) updateLanguageScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	t := i18n.T()
-	// 动态获取当前provider的模型列表
+
+	// 只在第一次进入时获取模型列表
+	if !m.modelsLoaded {
+		m.cachedModels = m.getAvailableModels()
+		m.modelsLoaded = true
+	}
+
+	// 使用缓存的模型列表
 	var models []string
 	if m.promptNameInput.Value() != "" {
 		// 搜索模型
-		allModels := m.getAvailableModels()
 		searchTerm := strings.ToLower(m.promptNameInput.Value())
-		for _, model := range allModels {
+		for _, model := range m.cachedModels {
 			if strings.Contains(strings.ToLower(model), searchTerm) {
 				models = append(models, model)
 			}
 		}
 	} else {
-		// 获取所有模型
-		models = m.getAvailableModels()
+		// 使用缓存的模型列表
+		models = m.cachedModels
 	}
 
 	totalModels := len(models)
@@ -547,18 +557,24 @@ func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd
 		return m, nil
 
 	case "up", "k":
-		if m.selectedPrompt > 0 {
-			m.selectedPrompt--
-		} else if totalModels > 0 {
-			m.selectedPrompt = totalModels - 1 // 循环到底部
+		if totalModels > 0 {
+			if m.selectedPrompt > 0 {
+				m.selectedPrompt--
+			} else {
+				m.selectedPrompt = totalModels - 1 // 循环到底部
+			}
 		}
+		return m, nil
 
 	case "down", "j":
-		if m.selectedPrompt < totalModels-1 {
-			m.selectedPrompt++
-		} else {
-			m.selectedPrompt = 0 // 循环到顶部
+		if totalModels > 0 {
+			if m.selectedPrompt < totalModels-1 {
+				m.selectedPrompt++
+			} else {
+				m.selectedPrompt = 0 // 循环到顶部
+			}
 		}
+		return m, nil
 
 	case "/":
 		// 开始搜索
@@ -749,116 +765,8 @@ func (m configModel) updatePromptEditScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd)
 }
 
 func (m configModel) updateAPIKeyScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	t := i18n.T()
-	// 添加调试信息到testResult中
-	keyPressed := msg.String()
-
-	// 直接在这里处理API配置逻辑
-	if m.config.APIKey == "" || m.changingAPIKey {
-		// 没有API Key或正在更改，显示输入界面
-		switch msg.String() {
-		case "enter":
-			apiKey := m.apiKeyInput.Value()
-			if apiKey != "" {
-				m.config.APIKey = apiKey
-				m.testing = true
-				m.changingAPIKey = false // 重置标志
-				return m, m.detectAndTestAPI(apiKey)
-			}
-		case "esc":
-			if m.changingAPIKey {
-				m.changingAPIKey = false
-				// API密钥保持不变
-			} else {
-				m.screen = mainScreen
-			}
-			return m, nil
-		default:
-			var cmd tea.Cmd
-			m.apiKeyInput, cmd = m.apiKeyInput.Update(msg)
-			return m, cmd
-		}
-	} else {
-		// 已有API Key，显示配置菜单
-		// 确保输入框失焦
-		if m.apiKeyInput.Focused() {
-			m.apiKeyInput.Blur()
-		}
-
-		// 显示按键调试信息
-		if keyPressed != "up" && keyPressed != "down" && keyPressed != "k" && keyPressed != "j" {
-			m.testResult = fmt.Sprintf("%s: [%s], %s: %d, %s: %v", i18n.T().KeyPressed, keyPressed, i18n.T().CursorPosition, m.cursor, i18n.T().InputFocus, m.apiKeyInput.Focused())
-		}
-
-		switch msg.String() {
-		case "enter":
-			switch m.cursor {
-			case 0:
-				// 测试连接
-				m.testing = true
-				m.testResult = i18n.T().TestingConnection + "..."
-				return m, func() tea.Msg {
-					success, result, _ := testAPIConnectionStandalone(m.config.APIKey, m.config.Provider)
-					if success {
-						return fmt.Sprintf("✅ %s", result)
-					}
-					return fmt.Sprintf("❌ %s", result)
-				}
-			case 1:
-				// 选择主模型
-				return m.showModelSelector()
-			case 2:
-				// 更改API密钥
-				m.changingAPIKey = true
-				m.apiKeyInput.SetValue(m.config.APIKey)
-				m.apiKeyInput.Focus()
-				return m, nil
-			}
-
-		case "1":
-			// 测试连接
-			m.cursor = 0
-			m.testing = true
-			m.testResult = t.TestingMsg
-			return m, func() tea.Msg {
-				success, result, _ := testAPIConnectionStandalone(m.config.APIKey, m.config.Provider)
-				if success {
-					return fmt.Sprintf("✅ %s", result)
-				}
-				return fmt.Sprintf("❌ %s", result)
-			}
-
-		case "2":
-			// 选择主模型
-			m.cursor = 1
-			return m.showModelSelector()
-
-		case "3":
-			// 更改API密钥
-			m.cursor = 3
-			m.changingAPIKey = true
-			m.apiKeyInput.SetValue(m.config.APIKey)
-			m.apiKeyInput.Focus()
-			return m, nil
-
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-
-		case "down", "j":
-			if m.cursor < 3 { // 现在有4个选项
-				m.cursor++
-			}
-
-		case "esc":
-			m.screen = mainScreen
-			m.cursor = 0
-			return m, nil
-		}
-	}
-
-	return m, nil
+	// 使用新的API配置更新逻辑，将KeyMsg作为tea.Msg传递
+	return m.updateAPIConfigWithMsg(tea.Msg(msg))
 }
 
 func (m configModel) updateTestScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -1286,28 +1194,63 @@ func (m *configModel) maskAPIKey(key string) string {
 
 // getAvailableModels 动态获取可用模型列表
 func (m *configModel) getAvailableModels() []string {
-	// 如果已经加载了模型，直接返回缓存
-	if m.modelsLoaded && len(m.cachedModels) > 0 {
-		return m.cachedModels
+	// 检查是否有API Key
+	if m.config.APIKey == "" {
+		// 没有API Key，返回空列表或默认列表
+		if m.config.Model != "" {
+			return []string{m.config.Model}
+		}
+		return []string{"Please configure API key first"}
 	}
 
 	// 创建provider实例
 	var p translator.Provider
+
 	switch m.config.Provider {
-	case "OpenRouter":
-		p = translator.NewOpenRouterProvider(m.config.APIKey, "")
-	case "Groq":
-		p = translator.NewGroqProvider(m.config.APIKey, "")
-	case "Together", "TogetherAI":
-		p = translator.NewTogetherProvider(m.config.APIKey, "")
 	case "OpenAI":
 		p = translator.NewOpenAIProvider(m.config.APIKey, "")
 	case "Anthropic":
 		p = translator.NewAnthropicProvider(m.config.APIKey, "")
+	case "Google":
+		p = translator.NewGoogleProvider(m.config.APIKey, "")
 	case "DeepSeek":
 		p = translator.NewDeepSeekProvider(m.config.APIKey, "")
 	case "Moonshot":
 		p = translator.NewMoonshotProvider(m.config.APIKey, "")
+	case "Alibaba":
+		p = translator.NewAlibabaProvider(m.config.APIKey, "")
+	case "Baidu":
+		p = translator.NewBaiduProvider(m.config.APIKey, "")
+	case "ByteDance":
+		p = translator.NewByteDanceProvider(m.config.APIKey, "")
+	case "Zhipu":
+		p = translator.NewZhipuProvider(m.config.APIKey, "")
+	case "01AI":
+		p = translator.New01AIProvider(m.config.APIKey, "")
+	case "Mistral":
+		p = translator.NewMistralProvider(m.config.APIKey, "")
+	case "Cohere":
+		p = translator.NewCohereProvider(m.config.APIKey, "")
+	case "Perplexity":
+		p = translator.NewPerplexityProvider(m.config.APIKey, "")
+	case "xAI":
+		p = translator.NewXAIProvider(m.config.APIKey, "")
+	case "Meta":
+		p = translator.NewMetaProvider(m.config.APIKey, "")
+	case "OpenRouter":
+		p = translator.NewOpenRouterProvider(m.config.APIKey, "")
+	case "Groq":
+		p = translator.NewGroqProvider(m.config.APIKey, "")
+	case "Together":
+		p = translator.NewTogetherProvider(m.config.APIKey, "")
+	case "Replicate":
+		p = translator.NewReplicateProvider(m.config.APIKey, "")
+	case "HuggingFace":
+		p = translator.NewHuggingFaceProvider(m.config.APIKey, "")
+	case "AWS":
+		p = translator.NewAWSProvider(m.config.APIKey, "")
+	case "Azure":
+		p = translator.NewAzureProvider(m.config.APIKey, "")
 	default:
 		// 对于其他provider，尝试使用OpenAI兼容接口
 		p = translator.NewOpenAICompatibleProvider(m.config.Provider, m.config.APIKey, "", "")
@@ -1316,17 +1259,14 @@ func (m *configModel) getAvailableModels() []string {
 	// 尝试获取模型列表
 	models, err := p.ListModels()
 	if err != nil {
-		// 如果失败，返回硬编码的列表作为备用
-		if fallback, exists := translator.ProviderModels[m.config.Provider]; exists {
-			return fallback
+		// 如果失败，返回当前模型
+		if m.config.Model != "" {
+			return []string{m.config.Model + " (offline)"}
 		}
-		return []string{m.config.Model} // 至少返回当前模型
+		return []string{"Failed to fetch models"}
 	}
 
-	// 缓存结果
-	m.cachedModels = models
-	m.modelsLoaded = true
-
+	// 返回获取到的模型列表
 	return models
 }
 
