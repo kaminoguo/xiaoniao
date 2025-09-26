@@ -582,9 +582,19 @@ func (m configModel) updateModelSelectScreen(msg tea.KeyMsg) (tea.Model, tea.Cmd
 		m.promptNameInput.Focus()
 		return m, textinput.Blink
 
-	default:
-		// 处理搜索输入
+	case "backspace", "ctrl+h":
+		// 处理删除键
 		if m.promptNameInput.Focused() {
+			var cmd tea.Cmd
+			m.promptNameInput, cmd = m.promptNameInput.Update(msg)
+			m.selectedPrompt = 0
+			return m, cmd
+		}
+		return m, nil
+
+	default:
+		// 处理搜索输入 - 只处理字母数字等字符输入
+		if m.promptNameInput.Focused() && len(msg.String()) == 1 {
 			var cmd tea.Cmd
 			m.promptNameInput, cmd = m.promptNameInput.Update(msg)
 			// 重置选择索引

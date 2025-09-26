@@ -252,20 +252,19 @@ func (m configModel) viewModelSelectScreen() string {
 	s += t.SearchModels2 + ": " + m.promptNameInput.View() + "\n"
 	s += strings.Repeat("─", 50) + "\n"
 	
-	// 动态获取模型列表
+	// 使用缓存的模型列表，避免重复网络请求
 	var models []string
 	if m.promptNameInput.Value() != "" {
-		// 搜索模型
-		allModels := m.getAvailableModels()
+		// 搜索模型 - 使用缓存的模型列表
 		searchTerm := strings.ToLower(m.promptNameInput.Value())
-		for _, model := range allModels {
+		for _, model := range m.cachedModels {
 			if strings.Contains(strings.ToLower(model), searchTerm) {
 				models = append(models, model)
 			}
 		}
 	} else {
-		// 获取所有模型
-		models = m.getAvailableModels()
+		// 使用缓存的模型列表
+		models = m.cachedModels
 	}
 	
 	// 显示模型列表（优化的滚动）
@@ -700,16 +699,16 @@ func (m configModel) showModelSelector() (tea.Model, tea.Cmd) {
 	m.selectedPrompt = 0 // 重置选择索引
 	m.cursor = 0 // 重置光标
 
-	// 清除模型缓存，强制重新加载
-	m.cachedModels = nil
-	m.modelsLoaded = false
-	
+	// 立即加载模型列表，而不是等到Update
+	m.cachedModels = m.getAvailableModels()
+	m.modelsLoaded = true
+
 	// 初始化搜索框
 	if m.promptNameInput.Value() != "" {
 		m.promptNameInput.SetValue("")
 	}
 	m.promptNameInput.Focus()
-	
+
 	return m, textinput.Blink
 }
 
