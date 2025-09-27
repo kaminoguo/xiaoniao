@@ -188,7 +188,7 @@ func (m *Monitor) Start() {
 			close(m.doneCh)
 		}()
 		
-		ticker := time.NewTicker(500 * time.Millisecond)
+		ticker := time.NewTicker(100 * time.Millisecond)
 		defer ticker.Stop()
 		
 		for {
