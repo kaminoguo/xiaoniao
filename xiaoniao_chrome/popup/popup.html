@@ -36,21 +36,21 @@
           <div class="mode-icon">✨</div>
           <div class="mode-info">
             <div class="mode-name">Built-in AI</div>
-            <div class="mode-desc">Fast & Private (Gemini Nano)</div>
+            <div class="mode-desc">Free & Private (Gemini Nano)</div>
           </div>
         </button>
         <button class="mode-btn" data-mode="openrouter">
           <div class="mode-icon">🌐</div>
           <div class="mode-info">
             <div class="mode-name">OpenRouter</div>
-            <div class="mode-desc">Free Gemini 2.0 Flash</div>
+            <div class="mode-desc">Gemini 2.5 Flash via OpenRouter</div>
           </div>
         </button>
         <button class="mode-btn" data-mode="gemini">
           <div class="mode-icon">🚀</div>
           <div class="mode-info">
             <div class="mode-name">Gemini API</div>
-            <div class="mode-desc">Direct Gemini 2.5 Flash</div>
+            <div class="mode-desc">Direct Gemini 2.0 Flash</div>
           </div>
         </button>
       </div>
@@ -86,6 +86,27 @@
         </svg>
         Add Custom Style
       </button>
+    </section>
+
+    <!-- Built-in AI Warning (hidden by default) -->
+    <section class="section" id="builtinAIWarning" style="display: none;">
+      <div class="warning-card">
+        <div style="font-size: 20px; margin-bottom: 8px;">⚠️</div>
+        <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Chrome Built-in AI Not Available</h3>
+        <p style="margin: 0 0 12px 0; font-size: 13px; color: #666; line-height: 1.5;">
+          To use Built-in AI mode, please enable these flags in Chrome:
+        </p>
+        <ol style="margin: 0 0 12px 0; padding-left: 20px; font-size: 12px; color: #666; line-height: 1.6;">
+          <li>Open <code>chrome://flags/#optimization-guide-on-device-model</code></li>
+          <li>Set to "Enabled BypassPerfRequirement"</li>
+          <li>Open <code>chrome://flags/#prompt-api-for-gemini-nano</code></li>
+          <li>Set to "Enabled"</li>
+          <li>Restart Chrome</li>
+        </ol>
+        <p style="margin: 0; font-size: 12px; color: #999;">
+          Or switch to OpenRouter/Gemini API mode above.
+        </p>
+      </div>
     </section>
 
     <!-- Status -->
