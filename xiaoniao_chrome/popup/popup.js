@@ -40,8 +40,19 @@ async function loadSettings() {
       }
     });
 
-    // API key section visibility
-    apiKeySection.style.display = mode === 'gemini' ? 'block' : 'none';
+    // API key section visibility and labels
+    if (mode === 'openrouter') {
+      apiKeySection.style.display = 'block';
+      document.getElementById('apiKeyTitle').textContent = 'OpenRouter API Key';
+      document.getElementById('apiKeyHint').innerHTML = 'Get your free API key from <a href="https://openrouter.ai/keys" target="_blank" id="apiKeyLink">openrouter.ai/keys</a>';
+    } else if (mode === 'gemini') {
+      apiKeySection.style.display = 'block';
+      document.getElementById('apiKeyTitle').textContent = 'Gemini API Key';
+      document.getElementById('apiKeyHint').innerHTML = 'Get your free API key from <a href="https://ai.google.dev" target="_blank" id="apiKeyLink">ai.google.dev</a>';
+    } else {
+      apiKeySection.style.display = 'none';
+    }
+
     if (settings.geminiApiKey) {
       apiKeyInput.value = settings.geminiApiKey;
     }
@@ -148,8 +159,18 @@ modeBtns.forEach(btn => {
     // Save to storage
     await chrome.storage.sync.set({ translationMode: mode });
 
-    // Show/hide API key section
-    apiKeySection.style.display = mode === 'gemini' ? 'block' : 'none';
+    // Show/hide and update API key section
+    if (mode === 'openrouter') {
+      apiKeySection.style.display = 'block';
+      document.getElementById('apiKeyTitle').textContent = 'OpenRouter API Key';
+      document.getElementById('apiKeyHint').innerHTML = 'Get your free API key from <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a>';
+    } else if (mode === 'gemini') {
+      apiKeySection.style.display = 'block';
+      document.getElementById('apiKeyTitle').textContent = 'Gemini API Key';
+      document.getElementById('apiKeyHint').innerHTML = 'Get your free API key from <a href="https://ai.google.dev" target="_blank">ai.google.dev</a>';
+    } else {
+      apiKeySection.style.display = 'none';
+    }
 
     console.log('[Xiaoniao Popup] Mode changed to', mode);
   });

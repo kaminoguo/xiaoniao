@@ -39,31 +39,38 @@
             <div class="mode-desc">Fast & Private (Gemini Nano)</div>
           </div>
         </button>
+        <button class="mode-btn" data-mode="openrouter">
+          <div class="mode-icon">🌐</div>
+          <div class="mode-info">
+            <div class="mode-name">OpenRouter</div>
+            <div class="mode-desc">Free Gemini 2.0 Flash</div>
+          </div>
+        </button>
         <button class="mode-btn" data-mode="gemini">
           <div class="mode-icon">🚀</div>
           <div class="mode-info">
             <div class="mode-name">Gemini API</div>
-            <div class="mode-desc">Higher Quality (Gemini 2.5 Flash)</div>
+            <div class="mode-desc">Direct Gemini 2.5 Flash</div>
           </div>
         </button>
       </div>
     </section>
 
-    <!-- API Key (only show when Gemini mode) -->
+    <!-- API Key (show when OpenRouter or Gemini mode) -->
     <section class="section api-key-section" id="apiKeySection" style="display: none;">
-      <h2 class="section-title">Gemini API Key</h2>
+      <h2 class="section-title" id="apiKeyTitle">API Key</h2>
       <div class="input-group">
         <input
           type="password"
           id="apiKeyInput"
           class="input"
-          placeholder="Enter your Gemini API key"
+          placeholder="Enter your API key"
         >
         <button id="testApiKey" class="btn btn-secondary">Test</button>
       </div>
-      <p class="hint">
+      <p class="hint" id="apiKeyHint">
         Get your free API key from
-        <a href="https://ai.google.dev" target="_blank">ai.google.dev</a>
+        <a href="https://ai.google.dev" target="_blank" id="apiKeyLink">ai.google.dev</a>
       </p>
     </section>
 

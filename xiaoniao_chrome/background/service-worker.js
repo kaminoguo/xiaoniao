@@ -30,24 +30,15 @@ async function updateIcon(state, tabId) {
   const iconPath = `icons/icon_${state}.png`;
 
   try {
+    const iconConfig = {
+      path: iconPath
+    };
+
     if (tabId) {
-      await chrome.action.setIcon({
-        path: {
-          16: iconPath,
-          48: iconPath,
-          128: iconPath
-        },
-        tabId: tabId
-      });
-    } else {
-      await chrome.action.setIcon({
-        path: {
-          16: iconPath,
-          48: iconPath,
-          128: iconPath
-        }
-      });
+      iconConfig.tabId = tabId;
     }
+
+    await chrome.action.setIcon(iconConfig);
     console.log(`[Xiaoniao] Icon updated to ${state}`);
   } catch (error) {
     console.error('[Xiaoniao] Error updating icon:', error);
