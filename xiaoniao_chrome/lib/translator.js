@@ -76,7 +76,7 @@ async function translateWithGeminiAPI(text, systemPrompt, apiKey) {
     throw new Error('Gemini API key not configured');
   }
 
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
   try {
     console.log('[Translator] Sending request to Gemini API...');
@@ -171,9 +171,15 @@ async function translateWithOpenRouter(text, systemPrompt, apiKey) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('[Translator] OpenRouter error response:', errorData);
-      throw new Error(`OpenRouter API error: ${errorData.error?.message || response.statusText}`);
+      const errorText = await response.text();
+      console.error('[Translator] OpenRouter error response:', errorText);
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        throw new Error(`OpenRouter API error: ${response.status} ${response.statusText} - ${errorText.substring(0, 200)}`);
+      }
+      throw new Error(`OpenRouter API error: ${errorData.error?.message || errorData.message || response.statusText}`);
     }
 
     const data = await response.json();
@@ -238,8 +244,15 @@ export async function translate(text) {
  */
 export async function isBuiltinAIAvailable() {
   try {
-    return !!(window.ai && window.ai.languageModel);
+    // Check if API exists
+    if (!self.ai || !self.ai.languageModel) {
+      return false;
+    }
+    // Try to check capabilities
+    const capabilities = await self.ai.languageModel.capabilities();
+    return capabilities.available !== 'no';
   } catch (error) {
+    console.log('[Translator] Built-in AI check error:', error);
     return false;
   }
 }
@@ -252,15 +265,18 @@ export async function isBuiltinAIAvailable() {
  */
 export async function testAPIKey(apiKey, mode) {
   try {
+    console.log('[Translator] Testing API key for mode:', mode);
     if (mode === TranslationMode.OPENROUTER) {
       await translateWithOpenRouter('Hello', 'Translate to Chinese', apiKey);
     } else {
       await translateWithGeminiAPI('Hello', 'Translate to Chinese', apiKey);
     }
+    console.log('[Translator] API key test succeeded');
     return true;
   } catch (error) {
-    console.error('API key test failed:', error);
-    return false;
+    console.error('[Translator] API key test failed:', error);
+    // Throw the error so popup can show it
+    throw error;
   }
 }
 
