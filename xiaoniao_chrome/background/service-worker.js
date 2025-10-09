@@ -31,7 +31,11 @@ async function updateIcon(state, tabId) {
 
   try {
     const iconConfig = {
-      path: iconPath
+      path: {
+        "16": iconPath,
+        "48": iconPath,
+        "128": iconPath
+      }
     };
 
     if (tabId) {

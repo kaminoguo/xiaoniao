@@ -154,7 +154,7 @@ async function translateWithOpenRouter(text, systemPrompt, apiKey) {
         'X-Title': 'Xiaoniao Chrome Extension'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp:free',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
@@ -245,16 +245,30 @@ export async function isBuiltinAIAvailable() {
 }
 
 /**
- * Test Gemini API key
+ * Test API key for current mode
  * @param {string} apiKey - API key to test
+ * @param {string} mode - Translation mode ('gemini' or 'openrouter')
  * @returns {Promise<boolean>} True if valid
  */
-export async function testGeminiAPIKey(apiKey) {
+export async function testAPIKey(apiKey, mode) {
   try {
-    await translateWithGeminiAPI('Hello', 'Translate to Chinese', apiKey);
+    if (mode === TranslationMode.OPENROUTER) {
+      await translateWithOpenRouter('Hello', 'Translate to Chinese', apiKey);
+    } else {
+      await translateWithGeminiAPI('Hello', 'Translate to Chinese', apiKey);
+    }
     return true;
   } catch (error) {
     console.error('API key test failed:', error);
     return false;
   }
+}
+
+/**
+ * Test Gemini API key (backward compatibility)
+ * @param {string} apiKey - API key to test
+ * @returns {Promise<boolean>} True if valid
+ */
+export async function testGeminiAPIKey(apiKey) {
+  return testAPIKey(apiKey, TranslationMode.GEMINI);
 }

@@ -1,6 +1,6 @@
 // Popup UI logic
 import { getAllPrompts, getCurrentPrompt, setActivePrompt, saveCustomPrompt, deleteCustomPrompt } from '../lib/prompts.js';
-import { testGeminiAPIKey, isBuiltinAIAvailable } from '../lib/translator.js';
+import { testAPIKey, testGeminiAPIKey, isBuiltinAIAvailable } from '../lib/translator.js';
 
 console.log('[Xiaoniao Popup] Loaded');
 
@@ -185,11 +185,15 @@ testApiKeyBtn.addEventListener('click', async () => {
     return;
   }
 
+  // Get current mode
+  const settings = await chrome.storage.sync.get(['translationMode']);
+  const mode = settings.translationMode || 'builtin';
+
   testApiKeyBtn.textContent = 'Testing...';
   testApiKeyBtn.disabled = true;
 
   try {
-    const valid = await testGeminiAPIKey(apiKey);
+    const valid = await testAPIKey(apiKey, mode);
 
     if (valid) {
       // Save API key
@@ -239,8 +243,13 @@ loadSettings();
 // Check Built-in AI availability
 (async () => {
   const available = await isBuiltinAIAvailable();
+  const warningSection = document.getElementById('builtinAIWarning');
+
   if (!available) {
     console.warn('[Xiaoniao Popup] Chrome Built-in AI not available');
-    // Could show a warning in the UI
+    // Show warning in UI
+    warningSection.style.display = 'block';
+  } else {
+    warningSection.style.display = 'none';
   }
 })();

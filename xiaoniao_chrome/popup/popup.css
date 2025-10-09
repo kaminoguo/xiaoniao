@@ -344,6 +344,23 @@ body {
   color: var(--text-primary);
 }
 
+/* Warning Card */
+.warning-card {
+  padding: var(--spacing-md);
+  background: #fff9e6;
+  border: 1px solid #f9ab00;
+  border-radius: var(--radius-md);
+  line-height: 1.5;
+}
+
+.warning-card code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
 /* Status Card */
 .status-card {
   padding: var(--spacing-md);
