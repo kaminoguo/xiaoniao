@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xiaoniao Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="title">
+          <svg class="icon-logo" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+          </svg>
+          Xiaoniao
+        </h1>
+        <div class="toggle-container">
+          <label class="toggle">
+            <input type="checkbox" id="extensionToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <p class="subtitle">Type translation for real-time chat</p>
+    </header>
+
+    <!-- Translation Mode -->
+    <section class="section">
+      <h2 class="section-title">Translation Mode</h2>
+      <div class="mode-selector">
+        <button class="mode-btn active" data-mode="builtin">
+          <div class="mode-icon">✨</div>
+          <div class="mode-info">
+            <div class="mode-name">Built-in AI</div>
+            <div class="mode-desc">Fast & Private (Gemini Nano)</div>
+          </div>
+        </button>
+        <button class="mode-btn" data-mode="gemini">
+          <div class="mode-icon">🚀</div>
+          <div class="mode-info">
+            <div class="mode-name">Gemini API</div>
+            <div class="mode-desc">Higher Quality (Gemini 2.5 Flash)</div>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- API Key (only show when Gemini mode) -->
+    <section class="section api-key-section" id="apiKeySection" style="display: none;">
+      <h2 class="section-title">Gemini API Key</h2>
+      <div class="input-group">
+        <input
+          type="password"
+          id="apiKeyInput"
+          class="input"
+          placeholder="Enter your Gemini API key"
+        >
+        <button id="testApiKey" class="btn btn-secondary">Test</button>
+      </div>
+      <p class="hint">
+        Get your free API key from
+        <a href="https://ai.google.dev" target="_blank">ai.google.dev</a>
+      </p>
+    </section>
+
+    <!-- Prompt Selection -->
+    <section class="section">
+      <h2 class="section-title">Translation Style</h2>
+      <div class="prompt-list" id="promptList">
+        <!-- Populated by JavaScript -->
+      </div>
+      <button id="addCustomPrompt" class="btn btn-secondary btn-full">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Add Custom Style
+      </button>
+    </section>
+
+    <!-- Status -->
+    <section class="section">
+      <div class="status-card">
+        <div class="status-indicator">
+          <div class="status-dot" id="statusDot"></div>
+          <span class="status-text" id="statusText">Ready</span>
+        </div>
+        <p class="status-desc">Copy any text and it will be translated automatically</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p class="footer-text">
+        Made with ❤️ for seamless communication
+      </p>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
