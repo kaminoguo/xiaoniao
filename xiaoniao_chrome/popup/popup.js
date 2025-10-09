@@ -193,18 +193,14 @@ testApiKeyBtn.addEventListener('click', async () => {
   testApiKeyBtn.disabled = true;
 
   try {
-    const valid = await testAPIKey(apiKey, mode);
+    await testAPIKey(apiKey, mode);
 
-    if (valid) {
-      // Save API key
-      await chrome.storage.sync.set({ geminiApiKey: apiKey });
-      alert('✅ API key is valid and saved!');
-    } else {
-      alert('❌ API key is invalid. Please check and try again.');
-    }
+    // If we get here, test succeeded
+    await chrome.storage.sync.set({ geminiApiKey: apiKey });
+    alert('✅ API key is valid and saved!');
   } catch (error) {
     console.error('[Xiaoniao Popup] API key test error:', error);
-    alert(`❌ Error: ${error.message}`);
+    alert(`❌ API key test failed:\n\n${error.message}`);
   } finally {
     testApiKeyBtn.textContent = 'Test';
     testApiKeyBtn.disabled = false;
