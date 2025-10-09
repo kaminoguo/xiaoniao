@@ -1,21 +1,25 @@
 // Content script - Intercepts copy events on all web pages
 // Sends copied text to background for translation
 
-console.log('[Xiaoniao] Content script loaded');
+console.log('[Xiaoniao Content] Script loaded on:', window.location.href);
 
 /**
  * Handle copy event
  */
 document.addEventListener('copy', async (event) => {
   try {
+    console.log('[Xiaoniao Content] ===== COPY EVENT FIRED =====');
+
     // Get selected text
     const selectedText = window.getSelection().toString().trim();
+    console.log('[Xiaoniao Content] Selection length:', selectedText.length);
 
     if (!selectedText || selectedText.length === 0) {
+      console.log('[Xiaoniao Content] No text selected, ignoring');
       return; // Nothing selected, let default copy happen
     }
 
-    console.log('[Xiaoniao] Copy detected:', selectedText.substring(0, 50) + '...');
+    console.log('[Xiaoniao Content] Text copied:', selectedText.substring(0, 100) + (selectedText.length > 100 ? '...' : ''));
 
     // Send to background for translation
     chrome.runtime.sendMessage({
