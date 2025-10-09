@@ -72,16 +72,24 @@ async function writeToClipboard(text) {
  */
 async function handleCopyEvent(text, tabId) {
   try {
+    console.log('[Xiaoniao Background] handleCopyEvent called');
+    console.log('[Xiaoniao Background] Text length:', text.length);
+    console.log('[Xiaoniao Background] Tab ID:', tabId);
+
     // Check if extension is enabled
-    const settings = await chrome.storage.sync.get(['extensionEnabled']);
+    const settings = await chrome.storage.sync.get(['extensionEnabled', 'translationMode', 'geminiApiKey']);
+    console.log('[Xiaoniao Background] Settings:', settings);
+
     if (settings.extensionEnabled === false) {
-      console.log('[Xiaoniao] Extension is disabled');
+      console.log('[Xiaoniao Background] Extension is disabled, aborting');
       return;
     }
 
-    console.log('[Xiaoniao] Starting translation for:', text.substring(0, 50) + '...');
+    console.log('[Xiaoniao Background] Starting translation...');
+    console.log('[Xiaoniao Background] Text preview:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
 
     // Set icon to TRANSLATING (red)
+    console.log('[Xiaoniao Background] Setting icon to TRANSLATING (red)');
     await updateIcon(IconState.TRANSLATING, tabId);
 
     // Clear any existing timeout
@@ -122,16 +130,22 @@ async function handleCopyEvent(text, tabId) {
  * Listen for messages from content scripts
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('[Xiaoniao Background] ===== MESSAGE RECEIVED =====');
+  console.log('[Xiaoniao Background] Message type:', message.type);
+  console.log('[Xiaoniao Background] Sender tab:', sender.tab?.id);
+
   if (message.type === 'COPY_EVENT') {
+    console.log('[Xiaoniao Background] COPY_EVENT received with text:', message.text.substring(0, 100));
     const tabId = sender.tab?.id;
 
     // Handle async
     handleCopyEvent(message.text, tabId)
       .then(() => {
+        console.log('[Xiaoniao Background] handleCopyEvent completed successfully');
         sendResponse({ success: true });
       })
       .catch((error) => {
-        console.error('[Xiaoniao] Error in handleCopyEvent:', error);
+        console.error('[Xiaoniao Background] Error in handleCopyEvent:', error);
         sendResponse({ success: false, error: error.message });
       });
 
