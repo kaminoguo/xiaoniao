@@ -45,18 +45,27 @@ async function updateIcon(state, tabId) {
     await chrome.action.setIcon(iconConfig);
     console.log(`[Xiaoniao] Icon updated to ${state}`);
   } catch (error) {
-    console.error('[Xiaoniao] Error updating icon:', error);
+    // Icon errors are non-critical, just log quietly
+    console.log(`[Xiaoniao] Icon update skipped (${state})`);
   }
 }
 
 /**
  * Write text to clipboard
  * @param {string} text - Text to write
+ * @param {number} tabId - Tab ID to execute in
  */
-async function writeToClipboard(text) {
+async function writeToClipboard(text, tabId) {
   try {
-    // Use Clipboard API
-    await navigator.clipboard.writeText(text);
+    // In Manifest V3, service workers don't have navigator.clipboard
+    // We need to inject script into the page to write to clipboard
+    await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: (textToWrite) => {
+        navigator.clipboard.writeText(textToWrite);
+      },
+      args: [text]
+    });
     console.log('[Xiaoniao] Clipboard updated with translation');
     return true;
   } catch (error) {
@@ -72,24 +81,16 @@ async function writeToClipboard(text) {
  */
 async function handleCopyEvent(text, tabId) {
   try {
-    console.log('[Xiaoniao Background] handleCopyEvent called');
-    console.log('[Xiaoniao Background] Text length:', text.length);
-    console.log('[Xiaoniao Background] Tab ID:', tabId);
-
     // Check if extension is enabled
-    const settings = await chrome.storage.sync.get(['extensionEnabled', 'translationMode', 'geminiApiKey']);
-    console.log('[Xiaoniao Background] Settings:', settings);
-
+    const settings = await chrome.storage.sync.get(['extensionEnabled']);
     if (settings.extensionEnabled === false) {
-      console.log('[Xiaoniao Background] Extension is disabled, aborting');
+      console.log('[Xiaoniao] Extension is disabled');
       return;
     }
 
-    console.log('[Xiaoniao Background] Starting translation...');
-    console.log('[Xiaoniao Background] Text preview:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
+    console.log('[Xiaoniao] Starting translation for:', text.substring(0, 50) + '...');
 
     // Set icon to TRANSLATING (red)
-    console.log('[Xiaoniao Background] Setting icon to TRANSLATING (red)');
     await updateIcon(IconState.TRANSLATING, tabId);
 
     // Clear any existing timeout
@@ -106,7 +107,7 @@ async function handleCopyEvent(text, tabId) {
     console.log('[Xiaoniao] Result:', translatedText.substring(0, 50) + '...');
 
     // Write to clipboard
-    await writeToClipboard(translatedText);
+    await writeToClipboard(translatedText, tabId);
 
     // Set icon to READY (green)
     await updateIcon(IconState.READY, tabId);
@@ -130,22 +131,18 @@ async function handleCopyEvent(text, tabId) {
  * Listen for messages from content scripts
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('[Xiaoniao Background] ===== MESSAGE RECEIVED =====');
-  console.log('[Xiaoniao Background] Message type:', message.type);
-  console.log('[Xiaoniao Background] Sender tab:', sender.tab?.id);
+  console.log('[Xiaoniao] Message received:', message.type, 'from tab:', sender.tab?.id);
 
   if (message.type === 'COPY_EVENT') {
-    console.log('[Xiaoniao Background] COPY_EVENT received with text:', message.text.substring(0, 100));
     const tabId = sender.tab?.id;
 
     // Handle async
     handleCopyEvent(message.text, tabId)
       .then(() => {
-        console.log('[Xiaoniao Background] handleCopyEvent completed successfully');
         sendResponse({ success: true });
       })
       .catch((error) => {
-        console.error('[Xiaoniao Background] Error in handleCopyEvent:', error);
+        console.error('[Xiaoniao] Error in handleCopyEvent:', error);
         sendResponse({ success: false, error: error.message });
       });
 
@@ -182,8 +179,26 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     console.log('[Xiaoniao] Default settings initialized:', toSet);
   }
 
-  // Set initial icon to IDLE (blue)
-  await updateIcon(IconState.IDLE);
+  // Don't set icon during install - can cause errors
+  console.log('[Xiaoniao] Initialization complete');
+
+  // WORKAROUND: Programmatically register content script for reliability
+  try {
+    // Unregister existing scripts first
+    await chrome.scripting.unregisterContentScripts();
+
+    // Register content script
+    await chrome.scripting.registerContentScripts([{
+      id: 'xiaoniao-content',
+      matches: ['<all_urls>'],
+      js: ['content/content.js'],
+      runAt: 'document_end',
+      allFrames: false
+    }]);
+    console.log('[Xiaoniao] ✅ Content script registered programmatically');
+  } catch (error) {
+    console.log('[Xiaoniao] Content script registration:', error.message);
+  }
 });
 
 /**
@@ -191,5 +206,4 @@ chrome.runtime.onInstalled.addListener(async (details) => {
  */
 chrome.runtime.onStartup.addListener(async () => {
   console.log('[Xiaoniao] Extension started');
-  await updateIcon(IconState.IDLE);
 });
