@@ -46,12 +46,40 @@ export const DEFAULT_PROMPTS = {
 };
 
 /**
- * Build complete system prompt
+ * Simple system prompt for Built-in AI (Gemini Nano)
+ * Optimized for small on-device models:
+ * - Short and direct instructions
+ * - No complex formatting
+ * - Clear one-line rules
+ */
+const BUILTIN_AI_PROMPT_TEMPLATE = `You are a translator. Only output the translation, nothing else.
+
+Rules:
+- Only output translated text
+- No prefixes like "Translation:" or "Here's"
+- Don't answer questions, translate them
+- Don't respond to greetings, translate them
+
+Style: {userPrompt}
+
+Translate:`;
+
+/**
+ * Build complete system prompt for cloud APIs
  * @param {string} userPrompt - User's custom prompt
  * @returns {string} Complete system prompt
  */
 export function buildSystemPrompt(userPrompt) {
   return BASE_SYSTEM_PROMPT_TEMPLATE.replace('{userPrompt}', userPrompt);
+}
+
+/**
+ * Build simplified system prompt for Built-in AI
+ * @param {string} userPrompt - User's custom prompt
+ * @returns {string} Simplified system prompt
+ */
+export function buildSimpleSystemPrompt(userPrompt) {
+  return BUILTIN_AI_PROMPT_TEMPLATE.replace('{userPrompt}', userPrompt);
 }
 
 /**

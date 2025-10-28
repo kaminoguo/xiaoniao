@@ -2,7 +2,7 @@
 // Default: Chrome Built-in AI (Gemini Nano)
 // Optional: Gemini API (user provides key)
 
-import { buildSystemPrompt, getCurrentPrompt } from './prompts.js';
+import { buildSystemPrompt, buildSimpleSystemPrompt, getCurrentPrompt } from './prompts.js';
 
 /**
  * Translation modes
@@ -313,22 +313,25 @@ export async function translate(text) {
   // Get current prompt
   const userPrompt = await getCurrentPrompt();
   console.log('[Translator] User prompt:', userPrompt);
-  const systemPrompt = buildSystemPrompt(userPrompt);
 
   // Translate based on mode
   if (settings.mode === TranslationMode.FREETRY) {
     console.log('[Translator] Using Free Try mode');
+    const systemPrompt = buildSystemPrompt(userPrompt);
     return await translateWithFreeTry(text, systemPrompt);
   } else if (settings.mode === TranslationMode.OPENROUTER && settings.apiKey) {
     console.log('[Translator] Using OpenRouter mode');
+    const systemPrompt = buildSystemPrompt(userPrompt);
     return await translateWithOpenRouter(text, systemPrompt, settings.apiKey);
   } else if (settings.mode === TranslationMode.GEMINI && settings.apiKey) {
     console.log('[Translator] Using Gemini API mode');
+    const systemPrompt = buildSystemPrompt(userPrompt);
     return await translateWithGeminiAPI(text, systemPrompt, settings.apiKey);
   } else {
-    console.log('[Translator] Using Built-in AI mode');
-    // Default to built-in AI
-    return await translateWithBuiltinAI(text, systemPrompt);
+    console.log('[Translator] Using Built-in AI mode (simplified prompt)');
+    // Use simplified prompt for small on-device model
+    const simplePrompt = buildSimpleSystemPrompt(userPrompt);
+    return await translateWithBuiltinAI(text, simplePrompt);
   }
 }
 
