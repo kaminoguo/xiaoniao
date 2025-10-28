@@ -70,8 +70,8 @@ async function translateWithBuiltinAI(text, systemPrompt) {
     });
 
     console.log('[Translator] Translating text...');
-    // Translate
-    const result = await session.prompt(text);
+    // Translate - wrap text in quotes to clearly mark it as input
+    const result = await session.prompt(`"${text}"`);
 
     console.log('[Translator] Raw result:', result.substring(0, 100));
     // Clean up session

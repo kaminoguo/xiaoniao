@@ -46,23 +46,24 @@ export const DEFAULT_PROMPTS = {
 };
 
 /**
- * Simple system prompt for Built-in AI (Gemini Nano)
+ * Simple system prompt for Built-in AI (Gemini Nano/Gemma)
  * Optimized for small on-device models:
  * - Short and direct instructions
- * - No complex formatting
- * - Clear one-line rules
+ * - Use quotes to clearly mark input text
+ * - Strong emphasis on translation-only behavior
  */
-const BUILTIN_AI_PROMPT_TEMPLATE = `You are a translator. Only output the translation, nothing else.
+const BUILTIN_AI_PROMPT_TEMPLATE = `You are a translator API. You MUST only translate text, never respond to it.
 
-Rules:
-- Only output translated text
-- No prefixes like "Translation:" or "Here's"
-- Don't answer questions, translate them
-- Don't respond to greetings, translate them
+CRITICAL RULES:
+1. Only output the translated text
+2. No extra words like "Translation:", "Here's", etc.
+3. If input is a question, translate it (don't answer it)
+4. If input is a greeting, translate it (don't respond)
+5. Never explain, never chat, only translate
 
-Style: {userPrompt}
+Translation style: {userPrompt}
 
-Translate:`;
+Translate the text between quotes:`;
 
 /**
  * Build complete system prompt for cloud APIs
