@@ -25,40 +25,75 @@
           </label>
         </div>
       </div>
-      <p class="subtitle">Type translation for real-time chat</p>
+      <p class="subtitle">Type translate for online chatting</p>
     </header>
 
     <!-- Translation Mode -->
     <section class="section">
-      <h2 class="section-title">Translation Mode</h2>
-      <div class="mode-selector">
-        <button class="mode-btn active" data-mode="builtin">
-          <div class="mode-icon">✨</div>
+      <div class="collapsible-header" id="translationEngineHeader">
+        <h2 class="section-title">Translation Engine</h2>
+        <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+        </svg>
+      </div>
+      <div class="mode-selector collapsible-content">
+        <button class="mode-btn active" data-mode="gemini">
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <defs>
+                <linearGradient id="geminiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                  <stop offset="50%" style="stop-color:#ea4335;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#fbbc04;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+              <circle cx="12" cy="12" r="9" fill="url(#geminiGradient)"/>
+            </svg>
+          </div>
           <div class="mode-info">
-            <div class="mode-name">Built-in AI</div>
-            <div class="mode-desc">Free & Private (Gemini Nano)</div>
+            <div class="mode-name">Gemini API</div>
+            <div class="mode-desc">Direct Gemini 2.5 Flash</div>
           </div>
         </button>
         <button class="mode-btn" data-mode="openrouter">
-          <div class="mode-icon">🌐</div>
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+          </div>
           <div class="mode-info">
             <div class="mode-name">OpenRouter</div>
             <div class="mode-desc">Gemini 2.5 Flash via OpenRouter</div>
           </div>
         </button>
-        <button class="mode-btn" data-mode="gemini">
-          <div class="mode-icon">🚀</div>
+        <button class="mode-btn" data-mode="freetry">
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 12 7.4l3.38 4.6L17 10.83 14.92 8H20v6z"/>
+            </svg>
+          </div>
           <div class="mode-info">
-            <div class="mode-name">Gemini API</div>
-            <div class="mode-desc">Direct Gemini 2.5 Flash</div>
+            <div class="mode-name">Xiaoniao's Gift (Free)</div>
+            <div class="mode-desc">⭐ my repo or buy me a ☕ to unlock, no API needed</div>
+          </div>
+        </button>
+        <button class="mode-btn unrecommended" data-mode="builtin">
+          <div class="mode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </div>
+          <div class="mode-info">
+            <div class="mode-name">Built-in AI <span class="badge-unrecommended">Not Recommended</span></div>
+            <div class="mode-desc">Free & Private but less accurate</div>
           </div>
         </button>
       </div>
     </section>
 
     <!-- API Key (show when OpenRouter or Gemini mode) -->
-    <section class="section api-key-section" id="apiKeySection" style="display: none;">
-      <h2 class="section-title" id="apiKeyTitle">API Key</h2>
+    <section class="section api-key-section collapsible-content" id="apiKeySection" style="display: none;">
+      <h2 class="section-title" id="apiKeyTitle">OpenRouter API Key</h2>
       <div class="input-group">
         <input
           type="password"
@@ -70,7 +105,7 @@
       </div>
       <p class="hint" id="apiKeyHint">
         Get your free API key from
-        <a href="https://ai.google.dev" target="_blank" id="apiKeyLink">ai.google.dev</a>
+        <a href="https://openrouter.ai/keys" target="_blank" id="apiKeyLink">openrouter.ai/keys</a>
       </p>
     </section>
 
@@ -104,28 +139,77 @@
           <li>Restart Chrome</li>
         </ol>
         <p style="margin: 0; font-size: 12px; color: #999;">
-          Or switch to OpenRouter/Gemini API mode above.
+          Or switch to OpenRouter/Gemini API mode above (Recommended).
         </p>
       </div>
     </section>
 
-    <!-- Status -->
+    <!-- Statistics Bar -->
     <section class="section">
-      <div class="status-card">
-        <div class="status-indicator">
-          <div class="status-dot" id="statusDot"></div>
-          <span class="status-text" id="statusText">Ready</span>
+      <div class="stats-container">
+        <div class="stat-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+          </svg>
+          <div class="stat-info">
+            <div class="stat-value" id="translationCount">0</div>
+            <div class="stat-label">Translations</div>
+          </div>
         </div>
-        <p class="status-desc">Copy any text and it will be translated automatically</p>
+        <div class="stat-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+          </svg>
+          <div class="stat-info">
+            <div class="stat-value" id="usageDays">0</div>
+            <div class="stat-label">Days</div>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
       <p class="footer-text">
-        Made with ❤️ for seamless communication
+        Made with ❤️ for Chrome Built-in AI Challenge 2025
       </p>
+      <div class="footer-links">
+        <a href="https://github.com/kaminoguo/xiaoniao" target="_blank" class="footer-link" title="GitHub Repository">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+        </a>
+        <a href="https://github.com/kaminoguo/xiaoniao?tab=readme-ov-file#support" target="_blank" class="footer-link" title="Buy me a coffee">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2 21h18v-2H2v2zm2-8h10V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v8zm12.5-8H16v5h.5c1.93 0 3.5-1.57 3.5-3.5S18.43 5 16.5 5z"/>
+          </svg>
+        </a>
+      </div>
     </footer>
+  </div>
+
+  <!-- Modal for editing prompts -->
+  <div id="promptModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Edit Translation Style</h3>
+        <button class="modal-close" id="modalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" id="promptNameInput" class="input" placeholder="e.g., CN_EN">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Instruction</label>
+          <textarea id="promptContentInput" class="textarea" rows="4" placeholder="e.g., Translate to English for chatting online"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalCancel" class="btn btn-secondary">Cancel</button>
+        <button id="modalSave" class="btn btn-primary">Save</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="popup.js"></script>

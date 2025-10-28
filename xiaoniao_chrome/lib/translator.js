@@ -10,7 +10,8 @@ import { buildSystemPrompt, getCurrentPrompt } from './prompts.js';
 export const TranslationMode = {
   BUILTIN: 'builtin',     // Chrome Built-in AI (default)
   GEMINI: 'gemini',       // Gemini 2.5 Flash API
-  OPENROUTER: 'openrouter' // OpenRouter API
+  OPENROUTER: 'openrouter', // OpenRouter API
+  FREETRY: 'freetry'      // Free Try with DeepSeek V3.1
 };
 
 /**
@@ -35,24 +36,44 @@ async function getSettings() {
 async function translateWithBuiltinAI(text, systemPrompt) {
   console.log('[Translator] Using Chrome Built-in AI');
   try {
-    // Check if Chrome Built-in AI is available
-    if (!self.ai || !self.ai.languageModel) {
-      throw new Error('Chrome Built-in AI not available. Please enable it in chrome://flags/#optimization-guide-on-device-model and chrome://flags/#prompt-api-for-gemini-nano');
+    // Check if LanguageModel API is available (Chrome 141+)
+    if (typeof LanguageModel === 'undefined') {
+      throw new Error('Chrome Built-in AI not available. Please enable it in chrome://flags/#prompt-api-for-gemini-nano and restart Chrome');
+    }
+
+    // Check availability
+    console.log('[Translator] Checking LanguageModel availability...');
+    const availability = await LanguageModel.availability();
+    console.log('[Translator] Availability status:', availability);
+
+    if (availability === 'no') {
+      throw new Error('LanguageModel not available. Please enable it in chrome://flags/#prompt-api-for-gemini-nano and restart Chrome');
+    }
+
+    // Status can be "readily" (ready) or "available" (will download on first use)
+    if (availability !== 'readily' && availability !== 'available') {
+      throw new Error(`LanguageModel status: ${availability}`);
     }
 
     console.log('[Translator] Creating language model session...');
-    // Create language model session
-    const session = await self.ai.languageModel.create({
+    // Create language model session (NEW API)
+    // If status is "available", calling create() will trigger download
+    const session = await LanguageModel.create({
       systemPrompt: systemPrompt,
-      temperature: 0.3,
-      topK: 3
+      temperature: 0.0,
+      topK: 1,
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          console.log(`[Translator] Downloading Gemini Nano: ${Math.round(e.loaded * 100)}%`);
+        });
+      }
     });
 
     console.log('[Translator] Translating text...');
     // Translate
     const result = await session.prompt(text);
 
-    console.log('[Translator] Translation result:', result.substring(0, 100));
+    console.log('[Translator] Raw result:', result.substring(0, 100));
     // Clean up session
     session.destroy();
 
@@ -71,12 +92,12 @@ async function translateWithBuiltinAI(text, systemPrompt) {
  * @returns {Promise<string>} Translated text
  */
 async function translateWithGeminiAPI(text, systemPrompt, apiKey) {
-  console.log('[Translator] Using Gemini API');
+  console.log('[Translator] Using Gemini API (2.0 Flash)');
   if (!apiKey) {
     throw new Error('Gemini API key not configured');
   }
 
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent';
 
   try {
     console.log('[Translator] Sending request to Gemini API...');
@@ -200,6 +221,76 @@ async function translateWithOpenRouter(text, systemPrompt, apiKey) {
 }
 
 /**
+ * Translate using Free Try mode (DeepSeek V3.1 via OpenRouter)
+ * @param {string} text - Text to translate
+ * @param {string} systemPrompt - System prompt
+ * @returns {Promise<string>} Translated text
+ */
+async function translateWithFreeTry(text, systemPrompt) {
+  console.log('[Translator] Using Free Try mode (Gemma 2 9B)');
+
+  const url = 'https://openrouter.ai/api/v1/chat/completions';
+  const apiKey = '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';
+
+  try {
+    console.log('[Translator] Sending request to OpenRouter (Gemma 2 9B)...');
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://xiaoniao-chrome-extension',
+        'X-Title': 'Xiaoniao Chrome Extension'
+      },
+      body: JSON.stringify({
+        model: 'google/gemma-2-9b-it:free',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: text
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 2048
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Translator] Free Try error response:', errorText);
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        throw new Error(`Free Try API error: ${response.status} ${response.statusText} - ${errorText.substring(0, 200)}`);
+      }
+      throw new Error(`Free Try API error: ${errorData.error?.message || errorData.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('[Translator] Free Try response received');
+    console.log('[Translator] Full API response:', JSON.stringify(data, null, 2));
+    const translatedText = data.choices?.[0]?.message?.content;
+
+    if (!translatedText) {
+      console.error('[Translator] Invalid Free Try response structure:', data);
+      throw new Error('Invalid response from Free Try');
+    }
+
+    console.log('[Translator] Translation result:', translatedText.substring(0, 100));
+    console.log('[Translator] Full translation text:', translatedText);
+    return translatedText.trim();
+  } catch (error) {
+    console.error('[Translator] Free Try translation error:', error);
+    throw error;
+  }
+}
+
+/**
  * Main translation function
  * @param {string} text - Text to translate
  * @returns {Promise<string>} Translated text
@@ -225,7 +316,10 @@ export async function translate(text) {
   const systemPrompt = buildSystemPrompt(userPrompt);
 
   // Translate based on mode
-  if (settings.mode === TranslationMode.OPENROUTER && settings.apiKey) {
+  if (settings.mode === TranslationMode.FREETRY) {
+    console.log('[Translator] Using Free Try mode');
+    return await translateWithFreeTry(text, systemPrompt);
+  } else if (settings.mode === TranslationMode.OPENROUTER && settings.apiKey) {
     console.log('[Translator] Using OpenRouter mode');
     return await translateWithOpenRouter(text, systemPrompt, settings.apiKey);
   } else if (settings.mode === TranslationMode.GEMINI && settings.apiKey) {
@@ -244,13 +338,16 @@ export async function translate(text) {
  */
 export async function isBuiltinAIAvailable() {
   try {
-    // Check if API exists
-    if (!self.ai || !self.ai.languageModel) {
+    // Check if LanguageModel API exists (Chrome 141+)
+    if (typeof LanguageModel === 'undefined') {
+      console.log('[Translator] LanguageModel API not found');
       return false;
     }
-    // Try to check capabilities
-    const capabilities = await self.ai.languageModel.capabilities();
-    return capabilities.available !== 'no';
+    // Check availability
+    const availability = await LanguageModel.availability();
+    console.log('[Translator] LanguageModel availability:', availability);
+    // Accept both "readily" (ready) and "available" (will download on first use)
+    return availability === 'readily' || availability === 'available';
   } catch (error) {
     console.log('[Translator] Built-in AI check error:', error);
     return false;

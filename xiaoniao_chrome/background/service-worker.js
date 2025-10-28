@@ -75,6 +75,61 @@ async function writeToClipboard(text, tabId) {
 }
 
 /**
+ * Update translation statistics
+ */
+async function updateStatistics() {
+  try {
+    const stats = await chrome.storage.sync.get(['translationCount', 'firstUseDate']);
+
+    // Increment translation count
+    const newCount = (stats.translationCount || 0) + 1;
+
+    // Set first use date if not set
+    const firstUseDate = stats.firstUseDate || Date.now();
+
+    await chrome.storage.sync.set({
+      translationCount: newCount,
+      firstUseDate: firstUseDate
+    });
+
+    console.log(`[Xiaoniao] Statistics updated: ${newCount} translations`);
+  } catch (error) {
+    console.error('[Xiaoniao] Error updating statistics:', error);
+  }
+}
+
+/**
+ * Auto-insert translated text into active element
+ * @param {string} text - Text to insert
+ * @param {number} tabId - Tab ID to insert into
+ */
+async function autoInsertText(text, tabId) {
+  try {
+    console.log('[Xiaoniao] Sending AUTO_INSERT message to tab:', tabId);
+
+    // Send message to content script to insert text
+    const response = await chrome.tabs.sendMessage(tabId, {
+      type: 'AUTO_INSERT',
+      text: text
+    });
+
+    console.log('[Xiaoniao] AUTO_INSERT response:', response);
+
+    if (response && response.success) {
+      console.log('[Xiaoniao] ✅ Text auto-inserted successfully');
+      return true;
+    } else {
+      console.log('[Xiaoniao] ❌ Auto-insert failed, text remains in clipboard');
+      return false;
+    }
+  } catch (error) {
+    console.error('[Xiaoniao] ❌ Error auto-inserting text:', error);
+    console.error('[Xiaoniao] Error details:', error.message);
+    return false;
+  }
+}
+
+/**
  * Handle copy event from content script
  * @param {string} text - Copied text
  * @param {number} tabId - Tab ID where copy occurred
@@ -82,13 +137,20 @@ async function writeToClipboard(text, tabId) {
 async function handleCopyEvent(text, tabId) {
   try {
     // Check if extension is enabled
-    const settings = await chrome.storage.sync.get(['extensionEnabled']);
+    const settings = await chrome.storage.sync.get([
+      'extensionEnabled',
+      'autoPasteEnabled'
+    ]);
+
     if (settings.extensionEnabled === false) {
       console.log('[Xiaoniao] Extension is disabled');
       return;
     }
 
+    const autoPasteEnabled = settings.autoPasteEnabled !== false; // Default: true
+
     console.log('[Xiaoniao] Starting translation for:', text.substring(0, 50) + '...');
+    console.log('[Xiaoniao] Auto-paste enabled:', autoPasteEnabled);
 
     // Set icon to TRANSLATING (red)
     await updateIcon(IconState.TRANSLATING, tabId);
@@ -106,8 +168,19 @@ async function handleCopyEvent(text, tabId) {
     console.log(`[Xiaoniao] Translation completed in ${duration}ms`);
     console.log('[Xiaoniao] Result:', translatedText.substring(0, 50) + '...');
 
-    // Write to clipboard
+    // Update statistics
+    await updateStatistics();
+
+    // Always write to clipboard first (fallback)
     await writeToClipboard(translatedText, tabId);
+
+    // Auto-insert if enabled
+    if (autoPasteEnabled) {
+      console.log('[Xiaoniao] Attempting auto-insert...');
+      await autoInsertText(translatedText, tabId);
+    } else {
+      console.log('[Xiaoniao] Auto-paste disabled, user needs to press Ctrl+V');
+    }
 
     // Set icon to READY (green)
     await updateIcon(IconState.READY, tabId);
@@ -160,8 +233,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   // Set default settings
   const defaults = {
     extensionEnabled: true,
-    translationMode: 'builtin',
-    activePrompt: 'Auto Detect'
+    translationMode: 'gemini',
+    activePrompt: 'CN_EN',
+    autoPasteEnabled: true
   };
 
   // Only set if not already set
@@ -180,25 +254,10 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 
   // Don't set icon during install - can cause errors
-  console.log('[Xiaoniao] Initialization complete');
+  console.log('[Xiaoniao] ✅ Initialization complete');
 
-  // WORKAROUND: Programmatically register content script for reliability
-  try {
-    // Unregister existing scripts first
-    await chrome.scripting.unregisterContentScripts();
-
-    // Register content script
-    await chrome.scripting.registerContentScripts([{
-      id: 'xiaoniao-content',
-      matches: ['<all_urls>'],
-      js: ['content/content.js'],
-      runAt: 'document_end',
-      allFrames: false
-    }]);
-    console.log('[Xiaoniao] ✅ Content script registered programmatically');
-  } catch (error) {
-    console.log('[Xiaoniao] Content script registration:', error.message);
-  }
+  // NOTE: Content scripts are registered via manifest.json
+  // No need for programmatic registration
 });
 
 /**
