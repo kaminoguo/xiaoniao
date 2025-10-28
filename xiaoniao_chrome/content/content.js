@@ -11,9 +11,9 @@ let lastActiveElement = null;
  * Insert text into the currently focused element
  * Supports: input, textarea, contenteditable
  * @param {string} text - Text to insert
- * @returns {boolean} - Success status
+ * @returns {Promise<boolean>} - Success status
  */
-function insertTextIntoActiveElement(text) {
+async function insertTextIntoActiveElement(text) {
   const element = lastActiveElement || document.activeElement;
 
   console.log('[Xiaoniao] 🎯 Attempting to insert text');
@@ -54,39 +54,78 @@ function insertTextIntoActiveElement(text) {
       return true;
     }
 
-    // Handle contenteditable elements (rich text editors)
+    // Handle contenteditable elements (rich text editors like Discord/Slack)
     if (element.isContentEditable) {
-      const selection = window.getSelection();
+      console.log('[Xiaoniao] 📝 Processing contenteditable element');
+      element.focus();
 
-      if (!selection.rangeCount) {
-        // No selection, create one at the end
-        const range = document.createRange();
-        range.selectNodeContents(element);
-        range.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(range);
+      // Try Method 1: beforeinput + input events (preferred for Slate.js)
+      try {
+        console.log('[Xiaoniao] Trying beforeinput event...');
+
+        const beforeInputEvent = new InputEvent('beforeinput', {
+          inputType: 'insertFromPaste',
+          data: text,
+          bubbles: true,
+          cancelable: true
+        });
+
+        const inputEvent = new InputEvent('input', {
+          inputType: 'insertFromPaste',
+          data: text,
+          bubbles: true
+        });
+
+        element.dispatchEvent(beforeInputEvent);
+        element.dispatchEvent(inputEvent);
+
+        // Wait 100ms and check if insertion succeeded
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (element.textContent.includes(text)) {
+          console.log('[Xiaoniao] ✅ beforeinput method succeeded');
+          return true;
+        }
+
+        console.log('[Xiaoniao] beforeinput did not work, trying IME flow...');
+      } catch (e) {
+        console.warn('[Xiaoniao] beforeinput failed:', e);
       }
 
-      const range = selection.getRangeAt(0);
+      // Try Method 2: IME composition events (fallback)
+      try {
+        console.log('[Xiaoniao] Trying IME composition...');
 
-      // Delete current selection
-      range.deleteContents();
+        element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+        element.dispatchEvent(new CompositionEvent('compositionupdate', { data: text, bubbles: true }));
 
-      // Insert new text node
-      const textNode = document.createTextNode(text);
-      range.insertNode(textNode);
+        const beforeInputEvent = new InputEvent('beforeinput', {
+          inputType: 'insertCompositionText',
+          data: text,
+          bubbles: true,
+          cancelable: true
+        });
+        element.dispatchEvent(beforeInputEvent);
 
-      // Move cursor to end of inserted text
-      range.setStartAfter(textNode);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
+        element.dispatchEvent(new CompositionEvent('compositionend', { data: text, bubbles: true }));
 
-      // Trigger input event
-      element.dispatchEvent(new Event('input', { bubbles: true }));
+        // Wait 100ms and check
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-      console.log('[Xiaoniao] Text inserted into contenteditable element');
-      return true;
+        if (element.textContent.includes(text)) {
+          console.log('[Xiaoniao] ✅ IME composition succeeded');
+          return true;
+        }
+
+        console.log('[Xiaoniao] IME composition did not work');
+      } catch (e) {
+        console.warn('[Xiaoniao] IME composition failed:', e);
+      }
+
+      // Both methods failed - notify user to paste manually
+      console.log('[Xiaoniao] ❌ Auto-paste failed for contenteditable');
+      console.log('[Xiaoniao] 💡 Translation is in clipboard - Press Ctrl+V to paste');
+      return false;
     }
 
     console.log('[Xiaoniao] Element is not editable:', element.tagName);
@@ -163,10 +202,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return false;
     }
 
-    const success = insertTextIntoActiveElement(message.text);
-    console.log('[Xiaoniao] Auto-insert result:', success ? '✅ Success' : '❌ Failed');
-    sendResponse({ success });
-    return false; // Synchronous response
+    // Handle async function
+    insertTextIntoActiveElement(message.text).then(success => {
+      console.log('[Xiaoniao] Auto-insert result:', success ? '✅ Success' : '❌ Failed');
+      sendResponse({ success });
+    });
+
+    return true; // Async response
   }
 
   sendResponse({ received: true });
