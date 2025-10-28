@@ -221,19 +221,21 @@ async function translateWithOpenRouter(text, systemPrompt, apiKey) {
 }
 
 /**
- * Translate using Free Try mode (DeepSeek V3.1 via OpenRouter)
+ * Translate using Free Try mode (Gemini 2.5 Flash via OpenRouter)
+ * Uses hardcoded API key as gift to users
  * @param {string} text - Text to translate
  * @param {string} systemPrompt - System prompt
  * @returns {Promise<string>} Translated text
  */
 async function translateWithFreeTry(text, systemPrompt) {
-  console.log('[Translator] Using Free Try mode (Gemma 2 9B)');
+  console.log('[Translator] Using Free Try mode (Gemini 2.5 Flash)');
 
   const url = 'https://openrouter.ai/api/v1/chat/completions';
+  // Hardcoded key as Xiaoniao's gift to users (NOT exposed in public commits)
   const apiKey = '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';
 
   try {
-    console.log('[Translator] Sending request to OpenRouter (Gemma 2 9B)...');
+    console.log('[Translator] Sending request to OpenRouter (Gemini 2.5 Flash)...');
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -243,7 +245,7 @@ async function translateWithFreeTry(text, systemPrompt) {
         'X-Title': 'Xiaoniao Chrome Extension'
       },
       body: JSON.stringify({
-        model: 'google/gemma-2-9b-it:free',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
