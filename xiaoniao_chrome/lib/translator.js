@@ -21,7 +21,7 @@ export const TranslationMode = {
 async function getSettings() {
   const result = await chrome.storage.sync.get(['translationMode', 'geminiApiKey', 'extensionEnabled']);
   return {
-    mode: result.translationMode || TranslationMode.BUILTIN,
+    mode: result.translationMode || TranslationMode.GEMINI, // Default to Gemini API
     apiKey: result.geminiApiKey || '',
     enabled: result.extensionEnabled !== false // default true
   };
