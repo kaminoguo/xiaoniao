@@ -48,6 +48,10 @@
 <details>
 <summary>🌐 Chrome 확장 프로그램</summary>
 
+![Demo 1](chrome/assets/demo1.png)
+![Demo 2](chrome/assets/demo2.png)
+![Demo 3](chrome/assets/demo3.png)
+
 ## 빠른 시작
 
 ### 1. 확장 프로그램 설치

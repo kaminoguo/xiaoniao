@@ -48,6 +48,10 @@
 <details>
 <summary>🌐 Chrome 拡張機能</summary>
 
+![Demo 1](chrome/assets/demo1.png)
+![Demo 2](chrome/assets/demo2.png)
+![Demo 3](chrome/assets/demo3.png)
+
 ## クイックスタート
 
 ### 1. 拡張機能をインストール
