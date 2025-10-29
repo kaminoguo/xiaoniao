@@ -7,7 +7,9 @@
         "-y",
         "exa-mcp-server"
       ],
-      "env": {}
+      "env": {
+        "EXA_API_KEY": "8c942d3a-744c-4666-a1d4-ca9b2842e6e5"
+      }
     },
     "filesystem": {
       "type": "stdio",
