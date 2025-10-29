@@ -6,7 +6,7 @@
 
 ![Demo](windows/assets/demo.gif)
 
-<details open>
+<details>
 <summary>💻 Windows</summary>
 
 ## Quick Start
