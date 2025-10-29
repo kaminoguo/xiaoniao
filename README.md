@@ -79,7 +79,7 @@
 
 ## Download
 
-Chrome Web Store: Coming Soon | [Source Code](https://github.com/kaminoguo/xiaoniao/tree/main/chrome)
+[Download v1.0.1](https://github.com/kaminoguo/xiaoniao/releases/tag/chrome-v1.0.1) | Chrome Web Store: Coming Soon
 
 ## Browser Requirements
 

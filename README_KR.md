@@ -79,7 +79,7 @@
 
 ## 다운로드
 
-Chrome 웹 스토어：곧 출시 | [소스 코드](https://github.com/kaminoguo/xiaoniao/tree/main/chrome)
+[다운로드 v1.0.1](https://github.com/kaminoguo/xiaoniao/releases/tag/chrome-v1.0.1) | Chrome 웹 스토어：곧 출시
 
 ## 브라우저 요구사항
 

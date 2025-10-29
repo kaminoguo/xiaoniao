@@ -79,7 +79,7 @@
 
 ## ダウンロード
 
-Chrome ウェブストア：近日公開 | [ソースコード](https://github.com/kaminoguo/xiaoniao/tree/main/chrome)
+[ダウンロード v1.0.1](https://github.com/kaminoguo/xiaoniao/releases/tag/chrome-v1.0.1) | Chrome ウェブストア：近日公開
 
 ## ブラウザ要件
 

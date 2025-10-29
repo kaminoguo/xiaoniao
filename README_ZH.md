@@ -79,7 +79,7 @@
 
 ## 下载
 
-Chrome 应用商店：即将推出 | [源代码](https://github.com/kaminoguo/xiaoniao/tree/main/chrome)
+[下载 v1.0.1](https://github.com/kaminoguo/xiaoniao/releases/tag/chrome-v1.0.1) | Chrome 应用商店：即将推出
 
 ## 浏览器要求
 
