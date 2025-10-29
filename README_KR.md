@@ -1,12 +1,10 @@
 # xiaoniao
 
-[![GitHub Actions Workflow Status](https://github.com/kaminoguo/xiaoniao/actions/workflows/release.yml/badge.svg)](https://github.com/kaminoguo/xiaoniao/blob/main/.github/workflows/release.yml)
-[![GitHub last commit](https://img.shields.io/github/last-commit/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/commits/main/)
-[![GitHub License](https://img.shields.io/github/license/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/blob/main/LICENSE)
+[![中文](https://img.shields.io/badge/lang-中文-red)](README_ZH.md)
+[![English](https://img.shields.io/badge/lang-English-blue)](README.md)
+[![日本語](https://img.shields.io/badge/lang-日本語-green)](README_JP.md)
 
-![Demo](assets/demo.gif)
-
-[中文](README.md) | [English](README_EN.md) | [日本語](README_JP.md)
+![Demo](windows/assets/demo.gif)
 
 Windows 클립보드 번역 도구
 
@@ -44,27 +42,12 @@ Windows 클립보드 번역 도구
 2. 새 xiaoniao.exe 다운로드
 3. 설정 파일은 자동 저장되어 손실되지 않음
 
-## 빌드
-
-```bash
-# 아이콘 포함
-go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
-cd cmd/xiaoniao && goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
-cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
-```
-
-요구사항: Go 1.20+, Windows
-
 ### 비디오 튜토리얼
 
 - Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
 - YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
-## 라이선스
-
-MIT
-
 ## 후원
 
-- Ko-fi: [ko-fi.com/gogogod](https://ko-fi.com/gogogod)
-- WeChat: [QR 코드](assets/wechat-pay.jpg)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/gogogod)
+[![WeChat Pay](https://img.shields.io/badge/WeChat-Pay-09B83E?logo=wechat)](windows/assets/wechat-pay.jpg)

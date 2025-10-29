@@ -1,12 +1,10 @@
 # xiaoniao
 
-[![GitHub Actions Workflow Status](https://github.com/kaminoguo/xiaoniao/actions/workflows/release.yml/badge.svg)](https://github.com/kaminoguo/xiaoniao/blob/main/.github/workflows/release.yml)
-[![GitHub last commit](https://img.shields.io/github/last-commit/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/commits/main/)
-[![GitHub License](https://img.shields.io/github/license/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/blob/main/LICENSE)
+[![中文](https://img.shields.io/badge/lang-中文-red)](README_ZH.md)
+[![English](https://img.shields.io/badge/lang-English-blue)](README.md)
+[![한국어](https://img.shields.io/badge/lang-한국어-green)](README_KR.md)
 
-![Demo](assets/demo.gif)
-
-[中文](README.md) | [English](README_EN.md) | [한국어](README_KR.md)
+![Demo](windows/assets/demo.gif)
 
 Windows クリップボード翻訳ツール
 
@@ -44,27 +42,12 @@ Windows クリップボード翻訳ツール
 2. 新しい xiaoniao.exe をダウンロード
 3. 設定ファイルは自動保存され、失われません
 
-## ビルド
-
-```bash
-# アイコン付き
-go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
-cd cmd/xiaoniao && goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
-cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
-```
-
-要件：Go 1.20+、Windows
-
 ### ビデオチュートリアル
 
 - Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
 - YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
-## ライセンス
-
-MIT
-
 ## サポート
 
-- Ko-fi: [ko-fi.com/gogogod](https://ko-fi.com/gogogod)
-- WeChat: [QRコード](assets/wechat-pay.jpg)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/gogogod)
+[![WeChat Pay](https://img.shields.io/badge/WeChat-Pay-09B83E?logo=wechat)](windows/assets/wechat-pay.jpg)

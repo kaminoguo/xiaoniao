@@ -1,12 +1,10 @@
 # xiaoniao
 
-[![GitHub Actions Workflow Status](https://github.com/kaminoguo/xiaoniao/actions/workflows/release.yml/badge.svg)](https://github.com/kaminoguo/xiaoniao/blob/main/.github/workflows/release.yml)
-[![GitHub last commit](https://img.shields.io/github/last-commit/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/commits/main/)
-[![GitHub License](https://img.shields.io/github/license/kaminoguo/xiaoniao)](https://github.com/kaminoguo/xiaoniao/blob/main/LICENSE)
+[![English](https://img.shields.io/badge/lang-English-blue)](README.md)
+[![日本語](https://img.shields.io/badge/lang-日本語-red)](README_JP.md)
+[![한국어](https://img.shields.io/badge/lang-한국어-green)](README_KR.md)
 
-![Demo](assets/demo.gif)
-
-[English](README.md) | [日本語](README_JP.md) | [한국어](README_KR.md)
+![Demo](windows/assets/demo.gif)
 
 Windows 剪贴板翻译工具
 
@@ -44,27 +42,12 @@ Windows 剪贴板翻译工具
 2. 下载新版本的 xiaoniao.exe
 3. 配置文件自动保存在电脑，不会丢失
 
-## 构建
-
-```bash
-# 带图标
-go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
-cd cmd/xiaoniao && goversioninfo -manifest=../../xiaoniao.exe.manifest -icon=../../assets/icon.ico ../../versioninfo.json
-cd ../.. && go build -ldflags="-s -w" -o xiaoniao.exe ./cmd/xiaoniao
-```
-
-要求：Go 1.20+, Windows
-
 ### 视频教程
 
 - Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
 - YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
-## License
-
-MIT
-
 ## 支持作者
 
-- Ko-fi: [ko-fi.com/gogogod](https://ko-fi.com/gogogod)
-- 微信赞赏: [查看赞赏码](assets/wechat-pay.jpg)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/gogogod)
+[![微信赞赏](https://img.shields.io/badge/WeChat-Pay-09B83E?logo=wechat)](windows/assets/wechat-pay.jpg)
