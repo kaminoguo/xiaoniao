@@ -6,7 +6,8 @@
 
 ![Demo](windows/assets/demo.gif)
 
-Windows 剪贴板翻译工具
+<details open>
+<summary>💻 Windows</summary>
 
 ## 快速上手
 
@@ -42,10 +43,33 @@ Windows 剪贴板翻译工具
 2. 下载新版本的 xiaoniao.exe
 3. 配置文件自动保存在电脑，不会丢失
 
+</details>
+
+<details>
+<summary>🌐 Chrome 扩展</summary>
+
+敬请期待...
+
+</details>
+
+<details>
+<summary>📱 Android - 🚧 开发中</summary>
+
+敬请期待更新！
+
+</details>
+
+<details>
+<summary>🍎 macOS - 🚧 开发中</summary>
+
+敬请期待更新！
+
+</details>
+
 ### 视频教程
 
-- Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
-- YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## 支持作者
 

@@ -6,7 +6,8 @@
 
 ![Demo](windows/assets/demo.gif)
 
-Windows Clipboard Translation Tool
+<details open>
+<summary>💻 Windows</summary>
 
 ## Quick Start
 
@@ -42,10 +43,33 @@ Windows Clipboard Translation Tool
 2. Download new xiaoniao.exe
 3. Configuration files are saved automatically, won't be lost
 
+</details>
+
+<details>
+<summary>🌐 Chrome Extension</summary>
+
+Coming soon...
+
+</details>
+
+<details>
+<summary>📱 Android - 🚧 Under Development</summary>
+
+Stay tuned for updates!
+
+</details>
+
+<details>
+<summary>🍎 macOS - 🚧 Under Development</summary>
+
+Stay tuned for updates!
+
+</details>
+
 ### Video Tutorials
 
-- Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
-- YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## Support
 

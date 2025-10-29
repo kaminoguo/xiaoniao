@@ -6,7 +6,8 @@
 
 ![Demo](windows/assets/demo.gif)
 
-Windows クリップボード翻訳ツール
+<details open>
+<summary>💻 Windows</summary>
 
 ## クイックスタート
 
@@ -42,10 +43,33 @@ Windows クリップボード翻訳ツール
 2. 新しい xiaoniao.exe をダウンロード
 3. 設定ファイルは自動保存され、失われません
 
+</details>
+
+<details>
+<summary>🌐 Chrome 拡張機能</summary>
+
+近日公開...
+
+</details>
+
+<details>
+<summary>📱 Android - 🚧 開発中</summary>
+
+更新をお待ちください！
+
+</details>
+
+<details>
+<summary>🍎 macOS - 🚧 開発中</summary>
+
+更新をお待ちください！
+
+</details>
+
 ### ビデオチュートリアル
 
-- Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
-- YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## サポート
 

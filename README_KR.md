@@ -6,7 +6,8 @@
 
 ![Demo](windows/assets/demo.gif)
 
-Windows 클립보드 번역 도구
+<details open>
+<summary>💻 Windows</summary>
 
 ## 빠른 시작
 
@@ -42,10 +43,33 @@ Windows 클립보드 번역 도구
 2. 새 xiaoniao.exe 다운로드
 3. 설정 파일은 자동 저장되어 손실되지 않음
 
+</details>
+
+<details>
+<summary>🌐 Chrome 확장 프로그램</summary>
+
+곧 출시 예정...
+
+</details>
+
+<details>
+<summary>📱 Android - 🚧 개발 중</summary>
+
+업데이트를 기다려 주세요!
+
+</details>
+
+<details>
+<summary>🍎 macOS - 🚧 개발 중</summary>
+
+업데이트를 기다려 주세요!
+
+</details>
+
 ### 비디오 튜토리얼
 
-- Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
-- YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## 후원
 
