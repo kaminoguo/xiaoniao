@@ -7,7 +7,7 @@
 ![Demo](windows/assets/demo.gif)
 
 <details>
-<summary>![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white)</summary>
+<summary><img src="https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white" alt="Windows"></summary>
 
 ## Quick Start
 
@@ -46,7 +46,7 @@
 </details>
 
 <details>
-<summary>![Chrome](https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white) Chrome Extension</summary>
+<summary><img src="https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white" alt="Chrome"> Chrome Extension</summary>
 
 ![Demo 1](chrome/assets/demo1.png)
 ![Demo 2](chrome/assets/demo2.png)
@@ -88,14 +88,14 @@ Chrome 127+ (for Built-in AI mode)
 </details>
 
 <details>
-<summary>![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white) - Under Development</summary>
+<summary><img src="https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white" alt="Android"> - Under Development</summary>
 
 Stay tuned for updates!
 
 </details>
 
 <details>
-<summary>![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) - Under Development</summary>
+<summary><img src="https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white" alt="macOS"> - Under Development</summary>
 
 Stay tuned for updates!
 
@@ -103,8 +103,8 @@ Stay tuned for updates!
 
 ### Video Tutorials
 
-- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
-- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## Support
 

@@ -7,7 +7,7 @@
 ![Demo](windows/assets/demo.gif)
 
 <details>
-<summary>![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white)</summary>
+<summary><img src="https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white" alt="Windows"></summary>
 
 ## 快速上手
 
@@ -46,7 +46,7 @@
 </details>
 
 <details>
-<summary>![Chrome](https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white) Chrome 扩展</summary>
+<summary><img src="https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white" alt="Chrome"> Chrome 扩展</summary>
 
 ![Demo 1](chrome/assets/demo1.png)
 ![Demo 2](chrome/assets/demo2.png)
@@ -88,14 +88,14 @@ Chrome 127+ (Built-in AI 模式需要)
 </details>
 
 <details>
-<summary>![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white) - 开发中</summary>
+<summary><img src="https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white" alt="Android"> - 开发中</summary>
 
 敬请期待更新！
 
 </details>
 
 <details>
-<summary>![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) - 开发中</summary>
+<summary><img src="https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white" alt="macOS"> - 开发中</summary>
 
 敬请期待更新！
 
@@ -103,8 +103,8 @@ Chrome 127+ (Built-in AI 模式需要)
 
 ### 视频教程
 
-- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
-- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) Bilibili: [https://www.bilibili.com/video/BV13zpUzhEeK/](https://www.bilibili.com/video/BV13zpUzhEeK/)
+- ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) YouTube: [https://www.youtube.com/watch?v=iPye0tYkBaY](https://www.youtube.com/watch?v=iPye0tYkBaY)
 
 ## 支持作者
 
