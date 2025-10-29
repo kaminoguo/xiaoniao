@@ -7,7 +7,7 @@
 ![Demo](windows/assets/demo.gif)
 
 <details>
-<summary>💻 Windows</summary>
+<summary>![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white)</summary>
 
 ## クイックスタート
 
@@ -46,7 +46,7 @@
 </details>
 
 <details>
-<summary>🌐 Chrome 拡張機能</summary>
+<summary>![Chrome](https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white) Chrome 拡張機能</summary>
 
 ![Demo 1](chrome/assets/demo1.png)
 ![Demo 2](chrome/assets/demo2.png)
@@ -88,14 +88,14 @@ Chrome 127+（Built-in AI モード用）
 </details>
 
 <details>
-<summary>📱 Android - 🚧 開発中</summary>
+<summary>![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white) - 開発中</summary>
 
 更新をお待ちください！
 
 </details>
 
 <details>
-<summary>🍎 macOS - 🚧 開発中</summary>
+<summary>![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) - 開発中</summary>
 
 更新をお待ちください！
 

@@ -7,7 +7,7 @@
 ![Demo](windows/assets/demo.gif)
 
 <details>
-<summary>💻 Windows</summary>
+<summary>![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white)</summary>
 
 ## Quick Start
 
@@ -46,7 +46,7 @@
 </details>
 
 <details>
-<summary>🌐 Chrome Extension</summary>
+<summary>![Chrome](https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white) Chrome Extension</summary>
 
 ![Demo 1](chrome/assets/demo1.png)
 ![Demo 2](chrome/assets/demo2.png)
@@ -88,14 +88,14 @@ Chrome 127+ (for Built-in AI mode)
 </details>
 
 <details>
-<summary>📱 Android - 🚧 Under Development</summary>
+<summary>![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white) - Under Development</summary>
 
 Stay tuned for updates!
 
 </details>
 
 <details>
-<summary>🍎 macOS - 🚧 Under Development</summary>
+<summary>![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) - Under Development</summary>
 
 Stay tuned for updates!
 

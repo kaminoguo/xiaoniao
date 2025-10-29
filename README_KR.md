@@ -7,7 +7,7 @@
 ![Demo](windows/assets/demo.gif)
 
 <details>
-<summary>💻 Windows</summary>
+<summary>![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white)</summary>
 
 ## 빠른 시작
 
@@ -46,7 +46,7 @@
 </details>
 
 <details>
-<summary>🌐 Chrome 확장 프로그램</summary>
+<summary>![Chrome](https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white) Chrome 확장 프로그램</summary>
 
 ![Demo 1](chrome/assets/demo1.png)
 ![Demo 2](chrome/assets/demo2.png)
@@ -88,14 +88,14 @@ Chrome 127+ (Built-in AI 모드용)
 </details>
 
 <details>
-<summary>📱 Android - 🚧 개발 중</summary>
+<summary>![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white) - 개발 중</summary>
 
 업데이트를 기다려 주세요!
 
 </details>
 
 <details>
-<summary>🍎 macOS - 🚧 개발 중</summary>
+<summary>![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) - 개발 중</summary>
 
 업데이트를 기다려 주세요!
 
