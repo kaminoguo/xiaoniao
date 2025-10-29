@@ -48,7 +48,39 @@
 <details>
 <summary>🌐 Chrome Extension</summary>
 
-Coming soon...
+## Quick Start
+
+### 1. Install Extension
+
+- Install from Chrome Web Store (Coming Soon)
+- Or load manually: Open `chrome://extensions`, enable Developer Mode, load `chrome/` folder
+
+### 2. Configure Translation Mode
+
+- Select translation mode from popup
+- Built-in AI: Free, private, on-device (Gemini Nano)
+- Gemini API: Enter your API key for higher accuracy
+- Free Try: Use our gift key (limited quota)
+
+### 3. Set Translation Style (Optional)
+
+- Click "Translation Style" in popup
+- Choose from presets or create custom styles
+- Example: "Translate to casual Japanese with kaomoji"
+
+### 4. Start Using
+
+- Copy any text (Ctrl+C)
+- Extension auto-translates and updates clipboard
+- Paste anywhere (Ctrl+V)
+
+## Download
+
+Chrome Web Store: Coming Soon | [Source Code](https://github.com/kaminoguo/xiaoniao/tree/main/chrome)
+
+## Browser Requirements
+
+Chrome 127+ (for Built-in AI mode)
 
 </details>
 

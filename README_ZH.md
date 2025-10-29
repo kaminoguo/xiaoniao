@@ -48,7 +48,39 @@
 <details>
 <summary>🌐 Chrome 扩展</summary>
 
-敬请期待...
+## 快速上手
+
+### 1. 安装扩展
+
+- 从 Chrome 应用商店安装（即将推出）
+- 或手动加载：打开 `chrome://extensions`，启用开发者模式，加载 `chrome/` 文件夹
+
+### 2. 配置翻译模式
+
+- 在弹窗中选择翻译模式
+- Built-in AI：免费、隐私、本地运行（Gemini Nano）
+- Gemini API：输入你的 API 密钥以获得更高准确度
+- 免费试用：使用我们提供的礼物密钥（限量）
+
+### 3. 设置翻译风格（可选）
+
+- 在弹窗中点击"翻译风格"
+- 从预设中选择或创建自定义风格
+- 示例："翻译成网络聊天日语，使用颜文字"
+
+### 4. 开始使用
+
+- 复制任意文字（Ctrl+C）
+- 扩展自动翻译并更新剪贴板
+- 在任何地方粘贴（Ctrl+V）
+
+## 下载
+
+Chrome 应用商店：即将推出 | [源代码](https://github.com/kaminoguo/xiaoniao/tree/main/chrome)
+
+## 浏览器要求
+
+Chrome 127+ (Built-in AI 模式需要)
 
 </details>
 
