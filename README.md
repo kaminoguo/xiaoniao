@@ -71,8 +71,7 @@
 ### 4. Start Using
 
 - Copy any text (Ctrl+C)
-- Extension auto-translates and updates clipboard
-- Paste anywhere (Ctrl+V)
+- Extension auto-translates and auto-pastes the result
 
 ## Download
 
