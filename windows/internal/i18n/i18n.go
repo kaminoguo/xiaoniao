@@ -126,6 +126,7 @@ type Translations struct {
 	SearchModel     string `json:"search_model"`
 	MainModel       string `json:"main_model"`
 	NoPromptAvailable string `json:"no_prompt_available"`
+	SelectProvider  string `json:"select_provider"`
 	
 	// Usage messages
 	Usage           string `json:"usage"`

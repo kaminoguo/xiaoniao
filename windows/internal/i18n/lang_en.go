@@ -131,7 +131,8 @@ Video Tutorials:
 		SearchModel:     "Search models...",
 		MainModel:       "Model",
 		NoPromptAvailable: "(No prompts available)",
-		
+		SelectProvider: "Select Provider",
+
 		// Usage messages
 		Usage:           "Usage",
 		UnknownCommand:  "Unknown command",

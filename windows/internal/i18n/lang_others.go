@@ -131,7 +131,8 @@ func getChineseTraditional() *Translations {
 		SearchModel:     "搜索模型...",
 		MainModel:       "模型",
 		NoPromptAvailable: "(無可用prompt)",
-		
+		SelectProvider: "選擇服務商",
+
 		// Usage messages
 		Usage:           "用法",
 		UnknownCommand:  "未知命令",
@@ -604,7 +605,8 @@ func getJapanese() *Translations {
 		SearchModel:     "モデルを検索...",
 		MainModel:       "メインモデル",
 		NoPromptAvailable: "(利用可能なプロンプトなし)",
-		
+		SelectProvider: "プロバイダーを選択",
+
 		// Usage messages
 		Usage:           "使用方法",
 		UnknownCommand:  "不明なコマンド",
@@ -1100,7 +1102,8 @@ func getKorean() *Translations {
 		SearchModel:     "모델 검색...",
 		MainModel:       "메인 모델",
 		NoPromptAvailable: "(사용 가능한 프롬프트 없음)",
-		
+		SelectProvider: "공급자 선택",
+
 		// Usage messages
 		Usage:           "사용법",
 		UnknownCommand:  "알 수 없는 명령",
@@ -1596,7 +1599,8 @@ func getSpanish() *Translations {
 		SearchModel:     "Buscar modelo...",
 		MainModel:       "Modelo principal",
 		NoPromptAvailable: "(Sin prompts disponibles)",
-		
+		SelectProvider: "Seleccionar proveedor",
+
 		// Usage messages
 		Usage:           "Uso",
 		UnknownCommand:  "Comando desconocido",
@@ -2144,7 +2148,8 @@ func getFrench() *Translations {
 		SearchModel:     "Rechercher un modèle...",
 		MainModel:       "Modèle principal",
 		NoPromptAvailable: "(Aucun prompt disponible)",
-		
+		SelectProvider: "Sélectionner le fournisseur",
+
 		// Usage messages
 		Usage:           "Utilisation",
 		UnknownCommand:  "Commande inconnue",

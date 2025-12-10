@@ -482,5 +482,8 @@ func getChineseSimplified() *Translations {
 
 		// Missing from main.go
 		ProviderLabel: "提供商: ",
+
+		// API config
+		SelectProvider: "选择服务商",
 	}
 }
